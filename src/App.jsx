@@ -76,15 +76,16 @@ function Logo({ size=40, ring }) {
   );
 }
 
-// ── Wave divider (orange flowing into beige, dramatic organic shape) ──────
-function WaveDivider({ topColor, bottomColor }) {
+// ── Inline wave — lives INSIDE the orange header div, no seam possible ────
+function InlineWave({ bgColor }) {
   return (
-    <div style={{ position:"relative", height:80, overflow:"hidden", flexShrink:0, marginTop:0, zIndex:2, backgroundColor:topColor }}>
-      <svg viewBox="0 0 1440 80" preserveAspectRatio="none" style={{ position:"absolute", bottom:0, left:0, width:"100%", height:"100%" }}>
-        <rect width="1440" height="80" fill={topColor}/>
-        <path d="M0 80 L0 38 C180 8 360 55 540 28 C720 5 900 48 1080 22 C1260 0 1380 32 1440 20 L1440 80 Z" fill={bottomColor}/>
-      </svg>
-    </div>
+    <svg viewBox="0 0 1440 72" preserveAspectRatio="none"
+      style={{ display:"block", width:"100%", height:72, marginTop:24, flexShrink:0 }}>
+      <path
+        d="M0 72 L0 32 C200 68 400 8 600 44 C800 76 1000 12 1200 48 C1320 66 1400 36 1440 28 L1440 72 Z"
+        fill={bgColor}
+      />
+    </svg>
   );
 }
 
@@ -186,7 +187,7 @@ function WelcomeSlides({ onDone }) {
   return (
     <div style={{ background:bodyColor, minHeight:"100vh", fontFamily:"system-ui,sans-serif", display:"flex", flexDirection:"column" }}>
       {/* Orange header */}
-      <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#7A3018 40%,${C.clay} 100%)`, padding:"48px 28px 0", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:0, marginBottom:0, backgroundColor:C.clay }}>
+      <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#7A3018 40%,${C.clay} 100%)`, padding:"48px 28px 0", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:0, marginBottom:0 }}>
         <Logo size={52} ring />
         <Fade id={slide}>
           <div style={{ marginTop:28, marginBottom:0 }}>
@@ -194,13 +195,11 @@ function WelcomeSlides({ onDone }) {
               <Icon name={s.icon} size={30} color="#fff" />
             </div>
             <h2 style={{ color:"#fff", fontSize:24, fontWeight:800, margin:"0 0 12px", lineHeight:1.3, letterSpacing:"-0.4px", maxWidth:280 }}>{s.title}</h2>
-            <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, margin:"0 0 32px", lineHeight:1.65, maxWidth:260 }}>{s.body}</p>
+            <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, margin:"0 0 0", lineHeight:1.65, maxWidth:260 }}>{s.body}</p>
           </div>
         </Fade>
+        <InlineWave bgColor={bodyColor} />
       </div>
-
-      {/* Wave divider — orange into beige */}
-      <WaveDivider topColor={C.clay} bottomColor={bodyColor} />
 
       {/* Beige body */}
       <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"flex-end", padding:"0 28px 36px" }}>
@@ -243,12 +242,10 @@ function Onboarding({ onComplete }) {
             <Icon name={q.icon} size={32} color="#fff" />
           </div>
           <h2 style={{ color:"#fff", fontSize:22, fontWeight:800, margin:"0 0 8px", lineHeight:1.3, letterSpacing:"-0.4px", maxWidth:280 }}>{q.title}</h2>
-          <p style={{ color:"rgba(255,255,255,0.65)", fontSize:13, margin:"0 0 32px", lineHeight:1.5 }}>{q.sub}</p>
+          <p style={{ color:"rgba(255,255,255,0.65)", fontSize:13, margin:"0 0 0", lineHeight:1.5 }}>{q.sub}</p>
         </Fade>
+        <InlineWave bgColor={C.bg} />
       </div>
-
-      {/* Wave divider */}
-      <WaveDivider topColor={C.clay} bottomColor={C.bg} />
 
       {/* Beige body — input + buttons */}
       <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"space-between", padding:"24px 28px 36px" }}>
@@ -548,9 +545,9 @@ export default function Nourishly() {
       <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#7A3018 45%,${C.clay} 100%)`, padding:"48px 24px 0", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:0, marginBottom:0, backgroundColor:C.clay }}>
         <Logo size={60} ring/>
         <h1 style={{ color:"#fff", fontSize:26, fontWeight:900, margin:"16px 0 6px", letterSpacing:"-0.5px" }}>Nourishly</h1>
-        <p style={{ color:"rgba(255,255,255,0.6)", fontSize:13, margin:"0 0 32px" }}>Family meals, made easy</p>
+        <p style={{ color:"rgba(255,255,255,0.6)", fontSize:13, margin:"0 0 0" }}>Family meals, made easy</p>
+        <InlineWave bgColor={C.bg} />
       </div>
-      <WaveDivider topColor={C.clay} bottomColor={C.bg}/>
       <div style={{ maxWidth:420, margin:"0 auto", padding:"0 20px 48px" }}>
         {form.familySize&&(
           <div style={{ background:C.clayLight, borderRadius:12, padding:"10px 14px", marginBottom:18, display:"flex", alignItems:"center", gap:8 }}>
