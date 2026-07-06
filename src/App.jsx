@@ -82,7 +82,7 @@ function InlineWave({ bgColor }) {
     <svg viewBox="0 0 1440 72" preserveAspectRatio="none"
       style={{ display:"block", width:"100%", height:72, marginTop:24, flexShrink:0 }}>
       <path
-        d="M0 72 L0 32 C200 68 400 8 600 44 C800 76 1000 12 1200 48 C1320 66 1400 36 1440 28 L1440 72 Z"
+        d="M0 0 C160 48 320 8 480 40 C680 80 880 4 1080 44 C1240 76 1360 32 1440 0 L1440 72 L0 72 Z"
         fill={bgColor}
       />
     </svg>
@@ -488,7 +488,7 @@ export default function Nourishly() {
     if(token&&userId){ try{ await(await sb.from("profiles",token)).update({ family_size:parseInt(f.familySize), allergies:f.allergies, cook_time:f.cookTime },`id=eq.${userId}`); }catch{} }
     const prompt=`You are a friendly expert meal planning assistant. Generate a Monday to Sunday dinner plan for ${userName}'s family of ${f.familySize}. Allergies: ${f.allergies||"none"}. Cook time: ${f.cookTime}. Return ONLY valid JSON, no markdown:\n{"days":[{"day":"Monday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Tuesday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Wednesday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Thursday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Friday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Saturday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Sunday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]}]}`;
     try{
-      const res=await fetch("https://api.anthropic.com/v1/messages",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:4000, messages:[{ role:"user", content:prompt }] }) });
+      const res=await fetch("/api/generate-meal-plan",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:4000, messages:[{ role:"user", content:prompt }] }) });
       if(!res.ok) throw new Error(`HTTP ${res.status}`);
       const data=await res.json();
       const text=(data?.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("");
@@ -514,7 +514,7 @@ export default function Nourishly() {
     setSwappingMeal(meal?.day);
     try{
       const prompt=`Suggest ONE alternative dinner meal (not ${meal?.name}) for a family of ${form.familySize||4} with ${form.allergies||"no"} allergies that takes about ${form.cookTime||"30 minutes"} to cook. Return ONLY JSON: {"day":"${meal?.day}","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]}`;
-      const res=await fetch("https://api.anthropic.com/v1/messages",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:600, messages:[{ role:"user", content:prompt }] }) });
+      const res=await fetch("/api/generate-meal-plan",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:600, messages:[{ role:"user", content:prompt }] }) });
       const data=await res.json();
       const text=(data?.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("");
       const match=text.match(/\{[\s\S]*\}/);
@@ -731,6 +731,3 @@ export default function Nourishly() {
           </button>
         ))}
       </div>
-    </div>
-  );
-}
