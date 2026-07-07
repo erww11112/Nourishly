@@ -142,7 +142,7 @@ function useMealImage(name) {
   const [failed, setFailed] = useState(false);
   useEffect(() => {
     if (!name||url||failed||imgCache[name]) return;
-    fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(MEAL_QUERY(name))}&per_page=1&orientation=landscape`,{headers:{Authorization:"FPalvRHODlwPpVAMgaGcGhYQkyGPGcovXNQwKxOlznUiHZgDjKkmBhZg"}})
+    fetch(`/api/get-meal-photo?query=${encodeURIComponent(MEAL_QUERY(name))}`)
       .then(r=>r.json()).then(d=>{ const p=d?.photos?.[0]?.src?.large||d?.photos?.[0]?.src?.medium; if(p){imgCache[name]=p;setUrl(p);}else setFailed(true);}).catch(()=>setFailed(true));
   },[name]);
   return { url:imgCache[name]||url, failed };
