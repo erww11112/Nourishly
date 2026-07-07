@@ -731,3 +731,6 @@ export default function Nourishly() {
           </button>
         ))}
       </div>
+    </div>
+  );
+}
