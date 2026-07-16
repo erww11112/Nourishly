@@ -144,7 +144,7 @@ const MEAL_IMAGES = {
   ],
   chicken: [
     "https://images.unsplash.com/photo-1598103442097-8b74394b95c1?w=800&q=80",
-    "https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=800&q=80",
+    "https://images.unsplash.com/photo-1598103442097-8b74394b95c1?w=800&q=80",
   ],
   salad: [
     "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80",
@@ -160,7 +160,7 @@ const MEAL_IMAGES = {
   ],
   taco: [
     "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&q=80",
-    "https://images.unsplash.com/photo-1552332386-f8dd00dc2f85?w=800&q=80",
+    "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&q=80",
   ],
   burger: [
     "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80",
