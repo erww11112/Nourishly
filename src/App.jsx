@@ -136,19 +136,117 @@ const NUTRITION = (n="") => {
   return { cal:480, protein:28, carbs:45, fat:18 };
 };
 
-const imgCache = {};
+// ── Static curated meal images — no API, no fetch, cannot fail ────────────
+const MEAL_IMAGES = {
+  pasta: [
+    "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=800&q=80",
+    "https://images.unsplash.com/photo-1622973536968-3ead9e780960?w=800&q=80",
+  ],
+  chicken: [
+    "https://images.unsplash.com/photo-1598103442097-8b74394b95c1?w=800&q=80",
+    "https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=800&q=80",
+  ],
+  salad: [
+    "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80",
+    "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800&q=80",
+  ],
+  salmon: [
+    "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800&q=80",
+    "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&q=80",
+  ],
+  curry: [
+    "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80",
+    "https://images.unsplash.com/photo-1604579278540-ba7c1b297250?w=800&q=80",
+  ],
+  taco: [
+    "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&q=80",
+    "https://images.unsplash.com/photo-1552332386-f8dd00dc2f85?w=800&q=80",
+  ],
+  burger: [
+    "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80",
+    "https://images.unsplash.com/photo-1550547660-d9450f859349?w=800&q=80",
+  ],
+  soup: [
+    "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800&q=80",
+    "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=800&q=80",
+  ],
+  rice: [
+    "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=800&q=80",
+    "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=800&q=80",
+  ],
+  noodles: [
+    "https://images.unsplash.com/photo-1569050467447-ce54b3bbc37d?w=800&q=80",
+    "https://images.unsplash.com/photo-1591814468924-caf88d1232e1?w=800&q=80",
+  ],
+  steak: [
+    "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&q=80",
+    "https://images.unsplash.com/photo-1600891964092-4316c288032e?w=800&q=80",
+  ],
+  pizza: [
+    "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800&q=80",
+    "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800&q=80",
+  ],
+  fish: [
+    "https://images.unsplash.com/photo-1580476262798-bddd9f4b7369?w=800&q=80",
+    "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&q=80",
+  ],
+  lamb: [
+    "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=800&q=80",
+    "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80",
+  ],
+  pork: [
+    "https://images.unsplash.com/photo-1432139509613-5c4255815697?w=800&q=80",
+    "https://images.unsplash.com/photo-1544025162-d76694265947?w=800&q=80",
+  ],
+  sandwich: [
+    "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=800&q=80",
+    "https://images.unsplash.com/photo-1553909489-cd47e0907980?w=800&q=80",
+  ],
+  eggs: [
+    "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800&q=80",
+    "https://images.unsplash.com/photo-1607103058027-4c5c8e2b5c92?w=800&q=80",
+  ],
+  default: [
+    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80",
+  ],
+};
+
+function getMealCategory(n="") {
+  const s = n.toLowerCase();
+  if (s.includes("pasta")||s.includes("spaghetti")) return "pasta";
+  if (s.includes("salmon")) return "salmon";
+  if (s.includes("chicken")) return "chicken";
+  if (s.includes("salad")) return "salad";
+  if (s.includes("soup")||s.includes("stew")) return "soup";
+  if (s.includes("cod")||s.includes("fish")) return "fish";
+  if (s.includes("rice")||s.includes("risotto")) return "rice";
+  if (s.includes("burger")) return "burger";
+  if (s.includes("pizza")) return "pizza";
+  if (s.includes("lamb")) return "lamb";
+  if (s.includes("pork")) return "pork";
+  if (s.includes("sandwich")||s.includes("wrap")||s.includes("club")) return "sandwich";
+  if (s.includes("egg")||s.includes("omelette")) return "eggs";
+  if (s.includes("steak")||s.includes("beef")) return "steak";
+  if (s.includes("taco")||s.includes("burrito")) return "taco";
+  if (s.includes("curry")||s.includes("masala")) return "curry";
+  if (s.includes("noodle")||s.includes("ramen")) return "noodles";
+  return "default";
+}
+
+// Picks a stable variant per meal name so the same meal always shows the same photo,
+// but different meals in the same category get different photos from each other.
+function hashString(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) { hash = (hash << 5) - hash + str.charCodeAt(i); hash |= 0; }
+  return Math.abs(hash);
+}
+
 function useMealImage(name) {
-  const [url, setUrl] = useState(null);
-  const [failed, setFailed] = useState(false);
-  useEffect(() => {
-    if (!name) return;
-    if (imgCache[name]) { setUrl(imgCache[name]); setFailed(false); return; }
-    setUrl(null);
-    setFailed(false);
-    fetch(`/api/get-meal-photo?query=${encodeURIComponent(MEAL_QUERY(name))}`)
-      .then(r=>r.json()).then(d=>{ const p=d?.photos?.[0]?.src?.large||d?.photos?.[0]?.src?.medium; if(p){imgCache[name]=p;setUrl(p);}else setFailed(true);}).catch(()=>setFailed(true));
-  },[name]);
-  return { url, failed };
+  if (!name) return { url: MEAL_IMAGES.default[0], failed: false };
+  const category = getMealCategory(name);
+  const variants = MEAL_IMAGES[category] || MEAL_IMAGES.default;
+  const index = hashString(name) % variants.length;
+  return { url: variants[index], failed: false };
 }
 
 // ── Fade transition wrapper ────────────────────────────────────────────────
