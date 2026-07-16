@@ -138,14 +138,17 @@ const NUTRITION = (n="") => {
 
 const imgCache = {};
 function useMealImage(name) {
-  const [url, setUrl] = useState(imgCache[name]||null);
+  const [url, setUrl] = useState(null);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
-    if (!name||url||failed||imgCache[name]) return;
+    if (!name) return;
+    if (imgCache[name]) { setUrl(imgCache[name]); setFailed(false); return; }
+    setUrl(null);
+    setFailed(false);
     fetch(`/api/get-meal-photo?query=${encodeURIComponent(MEAL_QUERY(name))}`)
       .then(r=>r.json()).then(d=>{ const p=d?.photos?.[0]?.src?.large||d?.photos?.[0]?.src?.medium; if(p){imgCache[name]=p;setUrl(p);}else setFailed(true);}).catch(()=>setFailed(true));
   },[name]);
-  return { url:imgCache[name]||url, failed };
+  return { url, failed };
 }
 
 // ── Fade transition wrapper ────────────────────────────────────────────────
