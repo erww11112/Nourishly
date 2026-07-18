@@ -92,19 +92,26 @@ function InlineWave({ bgColor }) {
 // ── Meal helpers ───────────────────────────────────────────────────────────
 const MEAL_QUERY = (n="") => {
   const s = n.toLowerCase();
-  if (s.includes("pasta")||s.includes("spaghetti")) return "pasta dish food";
+  if (s.includes("lasagna")||s.includes("lasagne")) return "lasagna pasta dinner";
+  if (s.includes("pasta")||s.includes("spaghetti")||s.includes("penne")||s.includes("fettuccine")||s.includes("carbonara")||s.includes("bolognese")||s.includes("macaroni")||s.includes("ravioli")||s.includes("gnocchi")) return "pasta dish food";
   if (s.includes("salmon")) return "salmon fillet plate";
-  if (s.includes("chicken")) return "grilled chicken dinner";
+  if (s.includes("chicken")||s.includes("poultry")) return "grilled chicken dinner";
   if (s.includes("salad")) return "fresh salad bowl";
-  if (s.includes("soup")||s.includes("stew")) return "soup bowl warm food";
-  if (s.includes("fish")||s.includes("cod")) return "fish dinner plate";
-  if (s.includes("rice")||s.includes("risotto")) return "rice dish dinner";
+  if (s.includes("soup")||s.includes("stew")||s.includes("chowder")||s.includes("broth")) return "soup bowl warm food";
+  if (s.includes("cod")||s.includes("fish")||s.includes("halibut")||s.includes("tilapia")||s.includes("trout")||s.includes("tuna")) return "fish dinner plate";
+  if (s.includes("rice")||s.includes("risotto")||s.includes("paella")||s.includes("pilaf")) return "rice dish dinner";
   if (s.includes("burger")) return "gourmet burger meal";
   if (s.includes("pizza")) return "pizza food";
-  if (s.includes("steak")||s.includes("beef")) return "steak dinner plate";
-  if (s.includes("taco")||s.includes("burrito")) return "tacos mexican food";
-  if (s.includes("curry")||s.includes("masala")) return "curry dinner bowl";
-  if (s.includes("noodle")||s.includes("ramen")) return "noodles asian food";
+  if (s.includes("lamb")) return "lamb dinner plate";
+  if (s.includes("pork")||s.includes("bacon")||s.includes("ham")||s.includes("sausage")) return "pork dinner plate";
+  if (s.includes("sandwich")||s.includes("wrap")||s.includes("club")||s.includes("panini")||s.includes("sub ")) return "sandwich gourmet food";
+  if (s.includes("egg")||s.includes("omelette")||s.includes("frittata")||s.includes("quiche")) return "eggs breakfast plate";
+  if (s.includes("steak")||s.includes("beef")||s.includes("meatball")||s.includes("brisket")||s.includes("mince")) return "steak dinner plate";
+  if (s.includes("taco")||s.includes("burrito")||s.includes("quesadilla")||s.includes("fajita")||s.includes("enchilada")) return "tacos mexican food";
+  if (s.includes("curry")||s.includes("masala")||s.includes("tikka")||s.includes("korma")) return "curry dinner bowl";
+  if (s.includes("noodle")||s.includes("ramen")||s.includes("pad thai")||s.includes("chow mein")||s.includes("lo mein")||s.includes("stir fry")||s.includes("stir-fry")) return "noodles asian food";
+  if (s.includes("casserole")||s.includes("bake")||s.includes("gratin")) return "casserole dinner dish";
+  if (s.includes("vegetable")||s.includes("veggie")||s.includes("tofu")||s.includes("vegan")||s.includes("vegetarian")) return "vegetable dinner plate";
   return n + " food dinner";
 };
 
@@ -136,67 +143,19 @@ const NUTRITION = (n="") => {
   return { cal:480, protein:28, carbs:45, fat:18 };
 };
 
-// ── Static curated meal images — no API, no fetch, cannot fail ────────────
-const MEAL_IMAGES = {
-  pasta:    ["https://source.unsplash.com/800x600/?pasta,food", "https://source.unsplash.com/800x600/?spaghetti,dinner"],
-  chicken:  ["https://source.unsplash.com/800x600/?chicken,dinner", "https://source.unsplash.com/800x600/?roast-chicken,food"],
-  salad:    ["https://source.unsplash.com/800x600/?salad,fresh", "https://source.unsplash.com/800x600/?salad,bowl"],
-  salmon:   ["https://source.unsplash.com/800x600/?salmon,dinner", "https://source.unsplash.com/800x600/?salmon,fillet"],
-  curry:    ["https://source.unsplash.com/800x600/?curry,food", "https://source.unsplash.com/800x600/?curry,bowl"],
-  taco:     ["https://source.unsplash.com/800x600/?tacos,food", "https://source.unsplash.com/800x600/?mexican-food,tacos"],
-  burger:   ["https://source.unsplash.com/800x600/?burger,food", "https://source.unsplash.com/800x600/?burger,gourmet"],
-  soup:     ["https://source.unsplash.com/800x600/?soup,bowl", "https://source.unsplash.com/800x600/?soup,warm"],
-  rice:     ["https://source.unsplash.com/800x600/?rice,dish", "https://source.unsplash.com/800x600/?fried-rice,food"],
-  noodles:  ["https://source.unsplash.com/800x600/?noodles,food", "https://source.unsplash.com/800x600/?ramen,bowl"],
-  steak:    ["https://source.unsplash.com/800x600/?steak,dinner", "https://source.unsplash.com/800x600/?steak,plate"],
-  pizza:    ["https://source.unsplash.com/800x600/?pizza,food", "https://source.unsplash.com/800x600/?pizza,slice"],
-  fish:     ["https://source.unsplash.com/800x600/?fish,dinner", "https://source.unsplash.com/800x600/?seafood,plate"],
-  lamb:     ["https://source.unsplash.com/800x600/?lamb,dinner", "https://source.unsplash.com/800x600/?lamb,roast"],
-  pork:     ["https://source.unsplash.com/800x600/?pork,dinner", "https://source.unsplash.com/800x600/?pork-chop,food"],
-  sandwich: ["https://source.unsplash.com/800x600/?sandwich,food", "https://source.unsplash.com/800x600/?sandwich,gourmet"],
-  eggs:     ["https://source.unsplash.com/800x600/?eggs,breakfast", "https://source.unsplash.com/800x600/?omelette,food"],
-  default:  ["https://source.unsplash.com/800x600/?dinner,homecooked"],
-};
-
-function getMealCategory(n="") {
-  const s = n.toLowerCase();
-  if (s.includes("lasagna")||s.includes("lasagne")) return "pasta";
-  if (s.includes("pasta")||s.includes("spaghetti")||s.includes("penne")||s.includes("fettuccine")||s.includes("carbonara")||s.includes("bolognese")||s.includes("macaroni")||s.includes("ravioli")||s.includes("gnocchi")) return "pasta";
-  if (s.includes("salmon")) return "salmon";
-  if (s.includes("chicken")||s.includes("poultry")) return "chicken";
-  if (s.includes("salad")) return "salad";
-  if (s.includes("soup")||s.includes("stew")||s.includes("chowder")||s.includes("broth")) return "soup";
-  if (s.includes("cod")||s.includes("fish")||s.includes("halibut")||s.includes("tilapia")||s.includes("trout")||s.includes("tuna")) return "fish";
-  if (s.includes("rice")||s.includes("risotto")||s.includes("paella")||s.includes("pilaf")) return "rice";
-  if (s.includes("burger")) return "burger";
-  if (s.includes("pizza")) return "pizza";
-  if (s.includes("lamb")) return "lamb";
-  if (s.includes("pork")||s.includes("bacon")||s.includes("ham")||s.includes("sausage")) return "pork";
-  if (s.includes("sandwich")||s.includes("wrap")||s.includes("club")||s.includes("panini")||s.includes("sub ")) return "sandwich";
-  if (s.includes("egg")||s.includes("omelette")||s.includes("frittata")||s.includes("quiche")) return "eggs";
-  if (s.includes("steak")||s.includes("beef")||s.includes("meatball")||s.includes("brisket")||s.includes("mince")) return "steak";
-  if (s.includes("taco")||s.includes("burrito")||s.includes("quesadilla")||s.includes("fajita")||s.includes("enchilada")) return "taco";
-  if (s.includes("curry")||s.includes("masala")||s.includes("tikka")||s.includes("korma")) return "curry";
-  if (s.includes("noodle")||s.includes("ramen")||s.includes("pad thai")||s.includes("chow mein")||s.includes("lo mein")||s.includes("stir fry")||s.includes("stir-fry")) return "noodles";
-  if (s.includes("casserole")||s.includes("bake")||s.includes("gratin")) return "pasta";
-  if (s.includes("vegetable")||s.includes("veggie")||s.includes("tofu")||s.includes("vegan")||s.includes("vegetarian")) return "salad";
-  return "default";
-}
-
-// Picks a stable variant per meal name so the same meal always shows the same photo,
-// but different meals in the same category get different photos from each other.
-function hashString(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) { hash = (hash << 5) - hash + str.charCodeAt(i); hash |= 0; }
-  return Math.abs(hash);
-}
-
+const imgCache = {};
 function useMealImage(name) {
-  if (!name) return { url: MEAL_IMAGES.default[0], failed: false };
-  const category = getMealCategory(name);
-  const variants = MEAL_IMAGES[category] || MEAL_IMAGES.default;
-  const index = hashString(name) % variants.length;
-  return { url: variants[index], failed: false };
+  const [url, setUrl] = useState(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    if (!name) return;
+    if (imgCache[name]) { setUrl(imgCache[name]); setFailed(false); return; }
+    setUrl(null);
+    setFailed(false);
+    fetch(`/api/get-meal-photo?query=${encodeURIComponent(MEAL_QUERY(name))}`)
+      .then(r=>r.json()).then(d=>{ const p=d?.photos?.[0]?.src?.large||d?.photos?.[0]?.src?.medium; if(p){imgCache[name]=p;setUrl(p);}else setFailed(true);}).catch(()=>setFailed(true));
+  },[name]);
+  return { url, failed };
 }
 
 // ── Fade transition wrapper ────────────────────────────────────────────────
