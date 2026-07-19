@@ -589,7 +589,7 @@ export default function Nourishly() {
       }
       if(!parsed.days?.length) throw new Error("No days found");
       setMealPlan(parsed); setTriedMeals([]);
-      if(token&&userId){ try{ const weekOf=new Date().toISOString().split("T")[0]; const saved=await(await sb.from("meal_plans",token)).insert({ user_id:userId, days:parsed.days, week_of:weekOf }); if(Array.isArray(saved)&&saved[0]) setSavedPlans(prev=>[saved[0],...prev.slice(0,9)]); }catch{} }
+      if(token&&userId){ try{ const weekOf=new Date().toISOString().split("T")[0]; const saved=await(await sb.from("meal_plans",token)).insert({ user_id:userId, days:parsed.days, week_of:weekOf }); console.log("SAVE PLAN RESULT:", saved); if(Array.isArray(saved)&&saved[0]) setSavedPlans(prev=>[saved[0],...prev.slice(0,9)]); else { console.error("Plan save failed, response was:", saved); setError("Plan generated but couldn't be saved: " + JSON.stringify(saved)); } }catch(e){ console.error("Plan save threw error:", e); setError("Plan generated but couldn't be saved: " + e.message); } }
       setTab("plan");
     }catch(e){ setError(`Something went wrong: ${e.message}`); }
     finally{ setLoading(false); }
