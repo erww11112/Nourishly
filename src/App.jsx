@@ -20,8 +20,8 @@ const C = {
 // ── Supabase REST ──────────────────────────────────────────────────────────
 const sbH = (t) => ({ "Content-Type":"application/json","apikey":SUPABASE_ANON_KEY,"Authorization":`Bearer ${t||SUPABASE_ANON_KEY}`,"Prefer":"return=representation" });
 const sb = {
-  signUp: async (e,p) => (await fetch(`${SUPABASE_URL}/auth/v1/signup`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},body:JSON.stringify({email:e,password:p})})).json(),
-  signIn: async (e,p) => (await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},body:JSON.stringify({email:e,password:p})})).json(),
+  signUp: async (e,p) => { const r = await fetch(`${SUPABASE_URL}/auth/v1/signup`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},body:JSON.stringify({email:e,password:p})}); const d = await r.json(); return { ...d, __ok: r.ok, __status: r.status }; },
+  signIn: async (e,p) => { const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},body:JSON.stringify({email:e,password:p})}); const d = await r.json(); return { ...d, __ok: r.ok, __status: r.status }; },
   from: async (table,t) => ({
     select: async (f="") => (await fetch(`${SUPABASE_URL}/rest/v1/${table}?${f}&order=created_at.desc`,{headers:sbH(t)})).json(),
     insert: async (d) => (await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:"POST",headers:sbH(t),body:JSON.stringify(d)})).json(),
@@ -546,8 +546,8 @@ export default function Nourishly() {
       let data;
       if(authMode==="signup"){
         data=await sb.signUp(authForm.email,authForm.password);
-        if(data.error) throw new Error(data.error.message||"Sign up failed");
-        if(data.access_token){
+        if(!data.__ok||data.error||data.error_description) throw new Error(data.error_description||data.error?.message||data.msg||"Sign up failed");
+        if(data.access_token&&data.user?.id){
           saveSession(data);
           await(await sb.from("profiles",data.access_token)).upsert({ id:data.user.id, name:authForm.name, email:authForm.email, subscription_status:"free", generations_used_this_month:0, streak_weeks:0, family_size:form.familySize?parseInt(form.familySize):null, allergies:form.allergies, cook_time:form.cookTime });
           setProfile({ name:authForm.name, email:authForm.email, streak_weeks:0 });
@@ -556,7 +556,8 @@ export default function Nourishly() {
         } else { setError("Account created — check your email to confirm, then sign in."); setAuthMode("login"); }
       } else {
         data=await sb.signIn(authForm.email,authForm.password);
-        if(data.error) throw new Error(data.error.message||"Sign in failed");
+        if(!data.__ok||data.error||data.error_description) throw new Error(data.error_description||data.error?.message||data.msg||"Invalid email or password.");
+        if(!data.access_token||!data.user?.id) throw new Error("Invalid email or password.");
         saveSession(data); setScreen("app"); loadProfile(data.access_token,data.user.id);
       }
     }catch(e){ setError(e.message||"Something went wrong."); }
