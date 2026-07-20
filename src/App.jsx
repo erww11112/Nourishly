@@ -532,7 +532,7 @@ export default function Nourishly() {
       const p=await(await sb.from("profiles",token)).select(`id=eq.${userId}&limit=1`);
       if(Array.isArray(p)&&p[0]){ setProfile(p[0]); if(p[0].family_size) setForm({ familySize:p[0].family_size, allergies:p[0].allergies||"", cookTime:p[0].cook_time||"" }); }
       const pl=await(await sb.from("meal_plans",token)).select(`user_id=eq.${userId}&limit=10`);
-      if(Array.isArray(pl)) setSavedPlans(pl);
+      if(Array.isArray(pl)){ setSavedPlans(pl); if(pl.length>0 && !mealPlan){ setMealPlan({days:pl[0].days}); setTriedMeals([]); } }
     }catch{}
   };
 
