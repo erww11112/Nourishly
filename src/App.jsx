@@ -22,6 +22,7 @@ const sbH = (t) => ({ "Content-Type":"application/json","apikey":SUPABASE_ANON_K
 const sb = {
   signUp: async (e,p) => { const r = await fetch(`${SUPABASE_URL}/auth/v1/signup`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},body:JSON.stringify({email:e,password:p})}); const d = await r.json(); return { ...d, __ok: r.ok, __status: r.status }; },
   signIn: async (e,p) => { const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},body:JSON.stringify({email:e,password:p})}); const d = await r.json(); return { ...d, __ok: r.ok, __status: r.status }; },
+  refresh: async (refreshToken) => { const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},body:JSON.stringify({refresh_token:refreshToken})}); const d = await r.json(); return { ...d, __ok: r.ok, __status: r.status }; },
   from: async (table,t) => ({
     select: async (f="") => (await fetch(`${SUPABASE_URL}/rest/v1/${table}?${f}&order=created_at.desc`,{headers:sbH(t)})).json(),
     insert: async (d) => (await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:"POST",headers:sbH(t),body:JSON.stringify(d)})).json(),
@@ -29,6 +30,24 @@ const sb = {
     upsert: async (d) => (await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:"POST",headers:{...sbH(t),"Prefer":"resolution=merge-duplicates,return=representation"},body:JSON.stringify(d)})).json(),
   }),
 };
+
+// Wraps any sb call: if the token is expired (JWT expired / 401), silently refreshes
+// the session using the refresh_token and retries the same call once with the new token.
+// This is what keeps a user logged in across long sessions without manual re-login.
+async function withAutoRefresh(session, saveSessionFn, callFn) {
+  const token = session?.access_token;
+  let result = await callFn(token);
+  const expired = result?.message === "JWT expired" || result?.code === "PGRST303" || result?.code === 401;
+  if (expired && session?.refresh_token) {
+    const refreshed = await sb.refresh(session.refresh_token);
+    if (refreshed.__ok && refreshed.access_token) {
+      const newSession = { ...session, ...refreshed };
+      saveSessionFn(newSession);
+      result = await callFn(refreshed.access_token);
+    }
+  }
+  return result;
+}
 
 // ── Icons ──────────────────────────────────────────────────────────────────
 function Icon({ name, size=22, active=false, color }) {
@@ -519,7 +538,7 @@ export default function Nourishly() {
 
   useEffect(()=>{
     const t=setTimeout(()=>{
-      if(session?.access_token){ setScreen("app"); loadProfile(session.access_token,session.user.id); }
+      if(session?.access_token){ setScreen("app"); loadProfile(session,session.user.id); }
       else setScreen("slides");
     },1100);
     return ()=>clearTimeout(t);
@@ -527,11 +546,11 @@ export default function Nourishly() {
 
   const saveSession=s=>{ setSession(s); try{ localStorage.setItem("nourishly_session",JSON.stringify(s)); }catch{} };
 
-  const loadProfile=async(token,userId)=>{
+  const loadProfile=async(sess,userId)=>{
     try{
-      const p=await(await sb.from("profiles",token)).select(`id=eq.${userId}&limit=1`);
+      const p=await withAutoRefresh(sess, saveSession, async(t)=>(await sb.from("profiles",t)).select(`id=eq.${userId}&limit=1`));
       if(Array.isArray(p)&&p[0]){ setProfile(p[0]); if(p[0].family_size) setForm({ familySize:p[0].family_size, allergies:p[0].allergies||"", cookTime:p[0].cook_time||"" }); }
-      const pl=await(await sb.from("meal_plans",token)).select(`user_id=eq.${userId}&limit=10`);
+      const pl=await withAutoRefresh(sess, saveSession, async(t)=>(await sb.from("meal_plans",t)).select(`user_id=eq.${userId}&limit=10`));
       if(Array.isArray(pl)){ setSavedPlans(pl); if(pl.length>0 && !mealPlan){ setMealPlan({days:pl[0].days}); setTriedMeals([]); } }
     }catch{}
   };
@@ -558,7 +577,7 @@ export default function Nourishly() {
         data=await sb.signIn(authForm.email,authForm.password);
         if(!data.__ok||data.error||data.error_description) throw new Error(data.error_description||data.error?.message||data.msg||"Invalid email or password.");
         if(!data.access_token||!data.user?.id) throw new Error("Invalid email or password.");
-        saveSession(data); setScreen("app"); loadProfile(data.access_token,data.user.id);
+        saveSession(data); setScreen("app"); loadProfile(data,data.user.id);
       }
     }catch(e){ setError(e.message||"Something went wrong."); }
     finally{ setAuthLoading(false); }
@@ -589,7 +608,7 @@ export default function Nourishly() {
       }
       if(!parsed.days?.length) throw new Error("No days found");
       setMealPlan(parsed); setTriedMeals([]);
-      if(token&&userId){ try{ const weekOf=new Date().toISOString().split("T")[0]; const saved=await(await sb.from("meal_plans",token)).insert({ user_id:userId, days:parsed.days, week_of:weekOf }); console.log("SAVE PLAN RESULT:", saved); if(Array.isArray(saved)&&saved[0]) setSavedPlans(prev=>[saved[0],...prev.slice(0,9)]); else { console.error("Plan save failed, response was:", saved); setError("Plan generated but couldn't be saved: " + JSON.stringify(saved)); } }catch(e){ console.error("Plan save threw error:", e); setError("Plan generated but couldn't be saved: " + e.message); } }
+      if(token&&userId){ try{ const weekOf=new Date().toISOString().split("T")[0]; const saved=await withAutoRefresh(session, saveSession, async(t)=>(await sb.from("meal_plans",t)).insert({ user_id:userId, days:parsed.days, week_of:weekOf })); if(Array.isArray(saved)&&saved[0]) setSavedPlans(prev=>[saved[0],...prev.slice(0,9)]); else { setError("Plan generated but couldn't be saved. Please try logging in again."); } }catch(e){ setError("Plan generated but couldn't be saved: " + e.message); } }
       setTab("plan");
     }catch(e){ setError(`Something went wrong: ${e.message}`); }
     finally{ setLoading(false); }
