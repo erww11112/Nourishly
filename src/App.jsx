@@ -586,6 +586,9 @@ export default function Nourishly() {
   const handleGenerate=async(overrideForm)=>{
     const f=overrideForm||form;
     if(!f.familySize||!f.cookTime){ setError("Please fill in family size and cook time."); return; }
+    const isPaid = profile?.subscription_status === "active";
+    const usedThisMonth = profile?.generations_used_this_month || 0;
+    if(!isPaid && usedThisMonth >= 2){ setError("You've used your 2 free plans this month. Upgrade to Nourishly Plus for unlimited plans."); return; }
     setError(""); setLoading(true);
     const token=session?.access_token; const userId=session?.user?.id;
     const userName=profile?.name||session?.user?.email?.split("@")[0]||"your family";
@@ -608,7 +611,7 @@ export default function Nourishly() {
       }
       if(!parsed.days?.length) throw new Error("No days found");
       setMealPlan(parsed); setTriedMeals([]);
-      if(token&&userId){ try{ const weekOf=new Date().toISOString().split("T")[0]; const saved=await withAutoRefresh(session, saveSession, async(t)=>(await sb.from("meal_plans",t)).insert({ user_id:userId, days:parsed.days, week_of:weekOf })); if(Array.isArray(saved)&&saved[0]) setSavedPlans(prev=>[saved[0],...prev.slice(0,9)]); else { setError("Plan generated but couldn't be saved. Please try logging in again."); } }catch(e){ setError("Plan generated but couldn't be saved: " + e.message); } }
+      if(token&&userId){ try{ const weekOf=new Date().toISOString().split("T")[0]; const saved=await withAutoRefresh(session, saveSession, async(t)=>(await sb.from("meal_plans",t)).insert({ user_id:userId, days:parsed.days, week_of:weekOf })); if(Array.isArray(saved)&&saved[0]){ setSavedPlans(prev=>[saved[0],...prev.slice(0,9)]); const newCount=(profile?.generations_used_this_month||0)+1; await withAutoRefresh(session, saveSession, async(t)=>(await sb.from("profiles",t)).update({ generations_used_this_month:newCount },`id=eq.${userId}`)); setProfile(prev=>prev?{...prev, generations_used_this_month:newCount}:prev); } else { setError("Plan generated but couldn't be saved. Please try logging in again."); } }catch(e){ setError("Plan generated but couldn't be saved: " + e.message); } }
       setTab("plan");
     }catch(e){ setError(`Something went wrong: ${e.message}`); }
     finally{ setLoading(false); }
@@ -633,6 +636,26 @@ export default function Nourishly() {
   };
 
   const handleLogout=()=>{ saveSession(null); setProfile(null); setMealPlan(null); setSavedPlans([]); setTriedMeals([]); setTab("home"); setScreen("slides"); };
+
+  const [upgrading, setUpgrading] = useState(false);
+  const handleUpgrade = async () => {
+    if (!session?.user?.id || !session?.user?.email) return;
+    setUpgrading(true);
+    try {
+      const res = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: session.user.id, userEmail: session.user.email }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else setError(data.error || "Couldn't start checkout. Please try again.");
+    } catch (e) {
+      setError("Couldn't start checkout: " + e.message);
+    } finally {
+      setUpgrading(false);
+    }
+  };
 
   const totalN=mealPlan?.days?.reduce((a,m)=>{ const n=NUTRITION(m.name); return { cal:a.cal+n.cal, protein:a.protein+n.protein, carbs:a.carbs+n.carbs, fat:a.fat+n.fat }; },{ cal:0,protein:0,carbs:0,fat:0 });
 
@@ -702,6 +725,25 @@ export default function Nourishly() {
         {/* HOME */}
         {tab==="home"&&(
           <div>
+            {profile?.subscription_status === "active" ? (
+              <div style={{ background:C.clay, borderRadius:16, padding:"14px 18px", marginBottom:16, display:"flex", alignItems:"center", gap:10 }}>
+                <Icon name="checkCircle" size={18} active color="#fff"/>
+                <p style={{ color:"#fff", fontSize:13, fontWeight:700, margin:0 }}>Nourishly Plus — unlimited plans unlocked</p>
+              </div>
+            ) : (
+              <div style={{ background:C.card, border:`1.5px solid ${C.border}`, borderRadius:16, padding:"14px 18px", marginBottom:16 }}>
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
+                  <p style={{ fontSize:13, fontWeight:700, color:C.walnut, margin:0 }}>Free plan</p>
+                  <p style={{ fontSize:12, color:C.muted, margin:0 }}>{profile?.generations_used_this_month||0}/2 plans used this month</p>
+                </div>
+                <div style={{ background:C.bg, borderRadius:4, height:6, overflow:"hidden", marginBottom:12 }}>
+                  <div style={{ height:"100%", width:`${Math.min(100,((profile?.generations_used_this_month||0)/2)*100)}%`, background:C.clay, borderRadius:4, transition:"width 0.3s" }}/>
+                </div>
+                <button onClick={handleUpgrade} disabled={upgrading} style={{ width:"100%", padding:"11px 0", background:C.clay, color:"#fff", border:"none", borderRadius:10, fontSize:13, fontWeight:800, cursor:upgrading?"not-allowed":"pointer", fontFamily:"inherit" }}>
+                  {upgrading ? "Redirecting to checkout..." : "Upgrade to Nourishly Plus — €7.99/mo"}
+                </button>
+              </div>
+            )}
             {savedPlans.length>0&&(
               <div style={{ display:"flex", gap:10, marginBottom:16 }}>
                 <StatCard icon="bookmark" value={savedPlans.length} label="Plans" accent/>
