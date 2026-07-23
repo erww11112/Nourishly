@@ -399,7 +399,7 @@ function NChip({ label, value, color }) {
 }
 
 // ── Meal card ──────────────────────────────────────────────────────────────
-function MealCard({ meal, onSwap, onMarkTried, triedMeals=[] }) {
+function MealCard({ meal, onSwap, onMarkTried, triedMeals=[], isPaid=false }) {
   const [open, setOpen] = useState(false);
   const { url, failed } = useMealImage(meal?.name);
   const n = NUTRITION(meal?.name);
@@ -439,9 +439,18 @@ function MealCard({ meal, onSwap, onMarkTried, triedMeals=[] }) {
           {meal?.description&&<p style={{ fontSize:14, color:C.muted, margin:"0 0 16px", lineHeight:1.65, fontStyle:"italic" }}>"{meal.description}"</p>}
           <div style={{ display:"flex", gap:8, marginBottom:20 }}>
             <NChip label="Cal" value={n.cal} color={C.clay}/>
-            <NChip label="Protein" value={`${n.protein}g`} color={C.sage}/>
-            <NChip label="Carbs" value={`${n.carbs}g`} color={C.clayMid}/>
-            <NChip label="Fat" value={`${n.fat}g`} color={C.muted}/>
+            {isPaid ? (
+              <>
+                <NChip label="Protein" value={`${n.protein}g`} color={C.sage}/>
+                <NChip label="Carbs" value={`${n.carbs}g`} color={C.clayMid}/>
+                <NChip label="Fat" value={`${n.fat}g`} color={C.muted}/>
+              </>
+            ) : (
+              <div style={{ flex:3, background:C.clayLight, borderRadius:12, padding:"10px 12px", display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}>
+                <Icon name="checkCircle" size={13} color={C.clay}/>
+                <span style={{ fontSize:11, color:C.clay, fontWeight:700 }}>Full nutrition on Plus</span>
+              </div>
+            )}
           </div>
           <p style={{ fontSize:11, fontWeight:800, color:C.clay, margin:"0 0 14px", textTransform:"uppercase", letterSpacing:"0.1em" }}>How to make it</p>
           {meal?.steps?.map((step,i)=>(
@@ -809,7 +818,7 @@ export default function Nourishly() {
               {mealPlan.days?.map(meal=>(
                 <div key={meal.day} style={{ position:"relative" }}>
                   {swappingMeal===meal.day&&<div style={{ position:"absolute", inset:0, background:"rgba(232,221,208,0.88)", borderRadius:20, display:"flex", alignItems:"center", justifyContent:"center", zIndex:10 }}><p style={{ color:C.clay, fontWeight:700, fontSize:14 }}>Finding alternative...</p></div>}
-                  <MealCard meal={meal} onSwap={handleSwap} onMarkTried={handleMarkTried} triedMeals={triedMeals}/>
+                  <MealCard meal={meal} onSwap={handleSwap} onMarkTried={handleMarkTried} triedMeals={triedMeals} isPaid={profile?.subscription_status==="active"}/>
                 </div>
               ))}
               <button onClick={()=>{ setMealPlan(null); setTab("home"); }} style={{ width:"100%", padding:"13px 0", marginTop:8, background:"none", color:C.clay, border:`2px solid ${C.clay}`, borderRadius:12, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit" }}>Generate a new plan</button>
@@ -826,7 +835,16 @@ export default function Nourishly() {
 
         {/* SHOPPING */}
         {tab==="shopping"&&(
-          mealPlan?<ShoppingList days={mealPlan.days}/>:(
+          profile?.subscription_status!=="active" ? (
+            <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:"48px 24px", textAlign:"center" }}>
+              <div style={{ width:64, height:64, borderRadius:18, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 18px" }}><Icon name="cart" size={28} color={C.clay}/></div>
+              <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>Shopping lists are a Plus feature</p>
+              <p style={{ fontSize:14, color:C.muted, margin:"0 0 20px" }}>Upgrade to Nourishly Plus for an automatic, organised shopping list every week.</p>
+              <button onClick={handleUpgrade} disabled={upgrading} style={{ padding:"12px 28px", background:C.clay, color:"#fff", border:"none", borderRadius:11, fontSize:14, fontWeight:800, cursor:upgrading?"not-allowed":"pointer", fontFamily:"inherit" }}>
+                {upgrading ? "Redirecting..." : "Upgrade — €7.99/mo"}
+              </button>
+            </div>
+          ) : mealPlan?<ShoppingList days={mealPlan.days}/>:(
             <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:"48px 24px", textAlign:"center" }}>
               <div style={{ width:64, height:64, borderRadius:18, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 18px" }}><Icon name="cart" size={28} color={C.clay}/></div>
               <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>No shopping list yet</p>
