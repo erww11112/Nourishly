@@ -25,9 +25,9 @@ const sb = {
   refresh: async (refreshToken) => { const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},body:JSON.stringify({refresh_token:refreshToken})}); const d = await r.json(); return { ...d, __ok: r.ok, __status: r.status }; },
   from: async (table,t) => ({
     select: async (f="") => (await fetch(`${SUPABASE_URL}/rest/v1/${table}?${f}&order=created_at.desc`,{headers:sbH(t)})).json(),
-    insert: async (d) => (await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:"POST",headers:sbH(t),body:JSON.stringify(d)})).json(),
-    update: async (d,f) => (await fetch(`${SUPABASE_URL}/rest/v1/${table}?${f}`,{method:"PATCH",headers:sbH(t),body:JSON.stringify(d)})).json(),
-    upsert: async (d) => (await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:"POST",headers:{...sbH(t),"Prefer":"resolution=merge-duplicates,return=representation"},body:JSON.stringify(d)})).json(),
+    insert: async (d) => { const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:"POST",headers:sbH(t),body:JSON.stringify(d)}); const body=await r.json(); body.__ok=r.ok; body.__status=r.status; return body; },
+    update: async (d,f) => { const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}?${f}`,{method:"PATCH",headers:sbH(t),body:JSON.stringify(d)}); const body=await r.json(); body.__ok=r.ok; body.__status=r.status; return body; },
+    upsert: async (d) => { const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:"POST",headers:{...sbH(t),"Prefer":"resolution=merge-duplicates,return=representation"},body:JSON.stringify(d)}); const body=await r.json(); body.__ok=r.ok; body.__status=r.status; return body; },
   }),
 };
 
@@ -558,6 +558,7 @@ export default function Nourishly() {
   const loadProfile=async(sess,userId)=>{
     try{
       const p=await withAutoRefresh(sess, saveSession, async(t)=>(await sb.from("profiles",t)).select(`id=eq.${userId}&limit=1`));
+      console.log("[nourishly] loadProfile fetched", { userId, isArray:Array.isArray(p), row:Array.isArray(p)?p[0]:p, subscription_status:Array.isArray(p)&&p[0]?p[0].subscription_status:undefined });
       if(Array.isArray(p)&&p[0]){ setProfile(p[0]); if(p[0].family_size) setForm({ familySize:p[0].family_size, allergies:p[0].allergies||"", cookTime:p[0].cook_time||"" }); }
       const pl=await withAutoRefresh(sess, saveSession, async(t)=>(await sb.from("meal_plans",t)).select(`user_id=eq.${userId}&limit=10`));
       if(Array.isArray(pl)){ setSavedPlans(pl); if(pl.length>0 && !mealPlan){ setMealPlan({days:pl[0].days}); setTriedMeals([]); } }
@@ -577,10 +578,11 @@ export default function Nourishly() {
         if(!data.__ok||data.error||data.error_description) throw new Error(data.error_description||data.error?.message||data.msg||"Sign up failed");
         if(data.access_token&&data.user?.id){
           saveSession(data);
-          await(await sb.from("profiles",data.access_token)).upsert({ id:data.user.id, name:authForm.name, email:authForm.email, subscription_status:"free", generations_used_this_month:0, streak_weeks:0, family_size:form.familySize?parseInt(form.familySize):null, allergies:form.allergies, cook_time:form.cookTime });
+          const profileResult=await(await sb.from("profiles",data.access_token)).upsert({ id:data.user.id, name:authForm.name, email:authForm.email, subscription_status:"free", generations_used_this_month:0, streak_weeks:0, family_size:form.familySize?parseInt(form.familySize):null, allergies:form.allergies, cook_time:form.cookTime });
+          if(!profileResult.__ok) throw new Error(profileResult.message||"Couldn't create your profile. Please try again or contact support.");
           setProfile({ name:authForm.name, email:authForm.email, streak_weeks:0 });
           setScreen("app");
-          if(form.familySize&&form.cookTime) handleGenerate(form);
+          if(form.familySize&&form.cookTime) handleGenerate(form, data);
         } else { setError("Account created — check your email to confirm, then sign in."); setAuthMode("login"); }
       } else {
         data=await sb.signIn(authForm.email,authForm.password);
@@ -592,16 +594,18 @@ export default function Nourishly() {
     finally{ setAuthLoading(false); }
   };
 
-  const handleGenerate=async(overrideForm)=>{
+  const handleGenerate=async(overrideForm, overrideSession)=>{
     const f=overrideForm||form;
     if(!f.familySize||!f.cookTime){ setError("Please fill in family size and cook time."); return; }
     const isPaid = profile?.subscription_status === "active";
     const usedThisMonth = profile?.generations_used_this_month || 0;
     if(!isPaid && usedThisMonth >= 2){ setError("You've used your 2 free plans this month. Upgrade to Nourishly Plus for unlimited plans."); return; }
     setError(""); setLoading(true);
-    const token=session?.access_token; const userId=session?.user?.id;
-    const userName=profile?.name||session?.user?.email?.split("@")[0]||"your family";
-    if(token&&userId){ try{ await(await sb.from("profiles",token)).update({ family_size:parseInt(f.familySize), allergies:f.allergies, cook_time:f.cookTime },`id=eq.${userId}`); }catch{} }
+    const sess=overrideSession||session;
+    const token=sess?.access_token; const userId=sess?.user?.id;
+    const userName=profile?.name||sess?.user?.email?.split("@")[0]||"your family";
+    console.log("[nourishly] handleGenerate start", { hasToken:!!token, userId, usedOverrideSession:!!overrideSession });
+    if(token&&userId){ try{ const r=await(await sb.from("profiles",token)).update({ family_size:parseInt(f.familySize), allergies:f.allergies, cook_time:f.cookTime },`id=eq.${userId}`); if(!r.__ok) console.error("[nourishly] failed to update profile family_size/allergies/cook_time", r); }catch(e){ console.error("[nourishly] error updating profile family_size/allergies/cook_time", e); } }
     const prompt=`You are a friendly expert meal planning assistant. Generate a Monday to Sunday dinner plan for ${userName}'s family of ${f.familySize}. Allergies: ${f.allergies||"none"}. Cook time: ${f.cookTime}. Return ONLY valid JSON, no markdown:\n{"days":[{"day":"Monday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Tuesday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Wednesday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Thursday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Friday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Saturday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Sunday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]}]}`;
     try{
       const res=await fetch("/api/generate-meal-plan",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:4000, messages:[{ role:"user", content:prompt }] }) });
@@ -620,7 +624,7 @@ export default function Nourishly() {
       }
       if(!parsed.days?.length) throw new Error("No days found");
       setMealPlan(parsed); setTriedMeals([]);
-      if(token&&userId){ try{ const weekOf=new Date().toISOString().split("T")[0]; const saved=await withAutoRefresh(session, saveSession, async(t)=>(await sb.from("meal_plans",t)).insert({ user_id:userId, days:parsed.days, week_of:weekOf })); if(Array.isArray(saved)&&saved[0]){ setSavedPlans(prev=>[saved[0],...prev.slice(0,9)]); const newCount=(profile?.generations_used_this_month||0)+1; await withAutoRefresh(session, saveSession, async(t)=>(await sb.from("profiles",t)).update({ generations_used_this_month:newCount },`id=eq.${userId}`)); setProfile(prev=>prev?{...prev, generations_used_this_month:newCount}:prev); } else { setError("Plan generated but couldn't be saved. Please try logging in again."); } }catch(e){ setError("Plan generated but couldn't be saved: " + e.message); } }
+      if(token&&userId){ try{ const weekOf=new Date().toISOString().split("T")[0]; const saved=await withAutoRefresh(sess, saveSession, async(t)=>(await sb.from("meal_plans",t)).insert({ user_id:userId, days:parsed.days, week_of:weekOf })); if(Array.isArray(saved)&&saved[0]){ setSavedPlans(prev=>[saved[0],...prev.slice(0,9)]); const newCount=(profile?.generations_used_this_month||0)+1; console.log("[nourishly] about to update generations_used_this_month", { userId, currentProfileCount:profile?.generations_used_this_month, newCount }); const updResult=await withAutoRefresh(sess, saveSession, async(t)=>(await sb.from("profiles",t)).update({ generations_used_this_month:newCount },`id=eq.${userId}`)); console.log("[nourishly] profiles update response", updResult); if(Array.isArray(updResult)&&updResult[0]){ setProfile(prev=>prev?{...prev, generations_used_this_month:newCount}:prev); } else { setError("Plan saved, but your usage count couldn't be updated — it may show the wrong number until this is fixed."); } } else { setError("Plan generated but couldn't be saved. Please try logging in again."); } }catch(e){ setError("Plan generated but couldn't be saved: " + e.message); } } else { console.log("[nourishly] skipped save — missing token or userId", { hasToken:!!token, userId }); }
       setTab("plan");
     }catch(e){ setError(`Something went wrong: ${e.message}`); }
     finally{ setLoading(false); }
@@ -810,9 +814,18 @@ export default function Nourishly() {
                 </div>
                 <div style={{ display:"flex", gap:8 }}>
                   <NChip label="Cal" value={totalN?.cal} color={C.clay}/>
-                  <NChip label="Protein" value={`${totalN?.protein}g`} color={C.sage}/>
-                  <NChip label="Carbs" value={`${totalN?.carbs}g`} color={C.clayMid}/>
-                  <NChip label="Fat" value={`${totalN?.fat}g`} color={C.muted}/>
+                  {profile?.subscription_status==="active" ? (
+                    <>
+                      <NChip label="Protein" value={`${totalN?.protein}g`} color={C.sage}/>
+                      <NChip label="Carbs" value={`${totalN?.carbs}g`} color={C.clayMid}/>
+                      <NChip label="Fat" value={`${totalN?.fat}g`} color={C.muted}/>
+                    </>
+                  ) : (
+                    <div style={{ flex:3, background:C.clayLight, borderRadius:12, padding:"10px 12px", display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}>
+                      <Icon name="checkCircle" size={13} color={C.clay}/>
+                      <span style={{ fontSize:11, color:C.clay, fontWeight:700 }}>Full nutrition on Plus</span>
+                    </div>
+                  )}
                 </div>
               </div>
               {mealPlan.days?.map(meal=>(
