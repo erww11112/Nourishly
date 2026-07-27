@@ -23,6 +23,7 @@ const sb = {
   signUp: async (e,p) => { const r = await fetch(`${SUPABASE_URL}/auth/v1/signup`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},body:JSON.stringify({email:e,password:p})}); const d = await r.json(); return { ...d, __ok: r.ok, __status: r.status }; },
   signIn: async (e,p) => { const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},body:JSON.stringify({email:e,password:p})}); const d = await r.json(); return { ...d, __ok: r.ok, __status: r.status }; },
   refresh: async (refreshToken) => { const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},body:JSON.stringify({refresh_token:refreshToken})}); const d = await r.json(); return { ...d, __ok: r.ok, __status: r.status }; },
+  updateUser: async (token,body) => { const r = await fetch(`${SUPABASE_URL}/auth/v1/user`,{method:"PUT",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY,"Authorization":`Bearer ${token}`},body:JSON.stringify(body)}); const d = await r.json(); return { ...d, __ok: r.ok, __status: r.status }; },
   from: async (table,t) => ({
     select: async (f="") => (await fetch(`${SUPABASE_URL}/rest/v1/${table}?${f}&order=created_at.desc`,{headers:sbH(t)})).json(),
     insert: async (d) => { const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:"POST",headers:sbH(t),body:JSON.stringify(d)}); const body=await r.json(); body.__ok=r.ok; body.__status=r.status; return body; },
@@ -691,6 +692,57 @@ export default function Nourishly() {
     }
   };
 
+  // ── Profile: edit preferences (family size / allergies / cook time) ──────
+  // Persists straight to `profiles` — does NOT trigger a new plan generation.
+  const [savingPrefs, setSavingPrefs] = useState(false);
+  const [prefsSaved, setPrefsSaved] = useState(false);
+  const handleSavePreferences = async () => {
+    const token = session?.access_token; const userId = session?.user?.id;
+    if (!token || !userId) return;
+    setSavingPrefs(true); setPrefsSaved(false); setError("");
+    try {
+      const updates = { family_size: form.familySize ? parseInt(form.familySize) : null, allergies: form.allergies, cook_time: form.cookTime };
+      const result = await withAutoRefresh(session, saveSession, async (t) => (await sb.from("profiles", t)).update(updates, `id=eq.${userId}`));
+      if (!result.__ok) throw new Error(result.message || "Couldn't save your preferences. Please try again.");
+      setProfile(prev => prev ? { ...prev, ...updates } : prev);
+      setPrefsSaved(true);
+    } catch (e) {
+      setError(e.message || "Couldn't save your preferences.");
+    } finally {
+      setSavingPrefs(false);
+    }
+  };
+
+  // ── Profile: change password ───────────────────────────────────────────────
+  // Re-verifies the current password via sign-in before calling Supabase's
+  // user-update endpoint, checking __ok on both calls rather than assuming success.
+  const [pwForm, setPwForm] = useState({ current:"", next:"", confirm:"" });
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwMessage, setPwMessage] = useState("");
+  const [pwError, setPwError] = useState("");
+  const handleChangePassword = async () => {
+    setPwError(""); setPwMessage("");
+    if (!pwForm.current || !pwForm.next || !pwForm.confirm) { setPwError("Please fill in all fields."); return; }
+    if (pwForm.next.length < 6) { setPwError("New password must be at least 6 characters."); return; }
+    if (pwForm.next !== pwForm.confirm) { setPwError("New passwords don't match."); return; }
+    const email = profile?.email || session?.user?.email;
+    if (!email) { setPwError("Couldn't find your account email."); return; }
+    setPwLoading(true);
+    try {
+      const verify = await sb.signIn(email, pwForm.current);
+      if (!verify.__ok || verify.error || verify.error_description) throw new Error("Current password is incorrect.");
+      const token = verify.access_token || session?.access_token;
+      const result = await sb.updateUser(token, { password: pwForm.next });
+      if (!result.__ok || result.error || result.error_description) throw new Error(result.msg || result.error_description || result.error?.message || "Couldn't update your password.");
+      setPwMessage("Password updated successfully.");
+      setPwForm({ current:"", next:"", confirm:"" });
+    } catch (e) {
+      setPwError(e.message || "Couldn't update your password.");
+    } finally {
+      setPwLoading(false);
+    }
+  };
+
   const totalN=mealPlan?.days?.reduce((a,m)=>{ const n=NUTRITION(m.name); return { cal:a.cal+n.cal, protein:a.protein+n.protein, carbs:a.carbs+n.carbs, fat:a.fat+n.fat }; },{ cal:0,protein:0,carbs:0,fat:0 });
 
   const inp={ width:"100%", boxSizing:"border-box", padding:"12px 14px", borderRadius:11, border:`1.5px solid ${C.border}`, fontSize:14, color:C.walnut, background:C.bg, outline:"none", fontFamily:"inherit" };
@@ -903,6 +955,8 @@ export default function Nourishly() {
         {/* PROFILE */}
         {tab==="profile"&&(
           <div>
+
+            {/* ── Account info (read-only, from profile/session state) ── */}
             <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:"20px", marginBottom:16, display:"flex", alignItems:"center", gap:14 }}>
               <div style={{ width:52, height:52, borderRadius:14, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}><Icon name="user" size={26} color={C.clay}/></div>
               <div>
@@ -910,6 +964,8 @@ export default function Nourishly() {
                 <p style={{ fontSize:13, color:C.muted, margin:0 }}>{profile?.email||session?.user?.email||""}</p>
               </div>
             </div>
+
+            {/* ── Subscription status (moved from Home) ── */}
             {profile?.subscription_status === "active" ? (
               <div style={{ background:C.clay, borderRadius:16, padding:"14px 18px", marginBottom:16 }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
@@ -934,6 +990,47 @@ export default function Nourishly() {
                 </button>
               </div>
             )}
+
+            {/* ── Edit preferences: family size / allergies / cook time ──
+                 Saves straight to `profiles`; does NOT generate a new plan. */}
+            <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:"20px", marginBottom:16 }}>
+              <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 16px" }}>Preferences</p>
+              {[{label:"Family size",name:"familySize",placeholder:"e.g. 4",type:"number"},{label:"Allergies or restrictions",name:"allergies",placeholder:"e.g. no nuts — or leave blank",type:"text"},{label:"Weeknight cook time",name:"cookTime",placeholder:"e.g. 30 minutes",type:"text"}].map(field=>(
+                <div key={field.name} style={{ marginBottom:14 }}>
+                  <label style={lbl}>{field.label}</label>
+                  <input type={field.type} placeholder={field.placeholder} value={form[field.name]} onChange={e=>{ setForm(f=>({...f,[field.name]:e.target.value})); setPrefsSaved(false); }} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/>
+                </div>
+              ))}
+              <button onClick={handleSavePreferences} disabled={savingPrefs} style={{ width:"100%", padding:"12px 0", background:savingPrefs?C.muted:C.clay, color:"#fff", border:"none", borderRadius:10, fontSize:13, fontWeight:800, cursor:savingPrefs?"not-allowed":"pointer", fontFamily:"inherit" }}>
+                {savingPrefs ? "Saving..." : prefsSaved ? "Saved ✓" : "Save preferences"}
+              </button>
+            </div>
+
+            {/* ── Change password ──
+                 Verifies the current password via sign-in, then calls Supabase's
+                 auth/v1/user endpoint — both checked with the __ok pattern. */}
+            <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:"20px", marginBottom:16 }}>
+              <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 16px" }}>Change password</p>
+              <div style={{ marginBottom:14 }}>
+                <label style={lbl}>Current password</label>
+                <input type="password" placeholder="••••••••" value={pwForm.current} onChange={e=>setPwForm(f=>({...f,current:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/>
+              </div>
+              <div style={{ marginBottom:14 }}>
+                <label style={lbl}>New password</label>
+                <input type="password" placeholder="••••••••" value={pwForm.next} onChange={e=>setPwForm(f=>({...f,next:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/>
+              </div>
+              <div style={{ marginBottom:14 }}>
+                <label style={lbl}>Confirm new password</label>
+                <input type="password" placeholder="••••••••" value={pwForm.confirm} onChange={e=>setPwForm(f=>({...f,confirm:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/>
+              </div>
+              {pwError&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:10, padding:"10px 14px", marginBottom:14, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{pwError}</p></div>}
+              {pwMessage&&<div style={{ background:C.sageLight, borderRadius:10, padding:"10px 14px", marginBottom:14, display:"flex", gap:8 }}><Icon name="checkCircle" size={15} active color={C.sage}/><p style={{ color:C.sage, fontSize:13, margin:0 }}>{pwMessage}</p></div>}
+              <button onClick={handleChangePassword} disabled={pwLoading} style={{ width:"100%", padding:"12px 0", background:pwLoading?C.muted:C.clay, color:"#fff", border:"none", borderRadius:10, fontSize:13, fontWeight:800, cursor:pwLoading?"not-allowed":"pointer", fontFamily:"inherit" }}>
+                {pwLoading ? "Updating..." : "Update password"}
+              </button>
+            </div>
+
+            {/* ── Logout ── */}
             <button onClick={handleLogout} style={{ width:"100%", padding:"13px 0", background:"none", color:C.walnut, border:`1.5px solid ${C.border}`, borderRadius:12, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
               <Icon name="logout" size={16} color={C.walnut}/>Log out
             </button>
