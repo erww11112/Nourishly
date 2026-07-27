@@ -59,6 +59,7 @@ function Icon({ name, size=22, active=false, color }) {
     case "cart": return <svg {...p}><circle cx="9" cy="20" r="1.4" fill={s}/><circle cx="17" cy="20" r="1.4" fill={s}/><path d="M3 4h2l2.2 11.2a1.6 1.6 0 001.6 1.3h7.4a1.6 1.6 0 001.6-1.3L20 8H6"/></svg>;
     case "bookmark": return <svg {...p}><path d="M6 4h12a1 1 0 011 1v15l-7-4-7 4V5a1 1 0 011-1z" fill={active?s:"none"}/></svg>;
     case "users": return <svg {...p}><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c0-3 2.7-5.4 6-5.4s6 2.4 6 5.4"/><path d="M14.5 15c2.6.3 4.5 2.3 4.5 5"/></svg>;
+    case "user": return <svg {...p}><circle cx="12" cy="8" r="4" fill={active?C.clayLight:"none"}/><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>;
     case "leaf": return <svg {...p}><path d="M5 19c8-1 13-6 14-14-8 1-13 6-14 14z"/><path d="M5 19c2-4 5-7 9-9"/></svg>;
     case "clock": return <svg {...p}><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>;
     case "flame": return <svg {...p}><path d="M12 3c1 3-2 4-2 7a4 4 0 008 0c0-1.5-1-2.5-1-2.5.5 3-1.5 4-2.5 4a2.5 2.5 0 01-2.5-2.5c0-2 2-3 0-6z" fill={active?s:"none"}/></svg>;
@@ -694,7 +695,7 @@ export default function Nourishly() {
 
   const inp={ width:"100%", boxSizing:"border-box", padding:"12px 14px", borderRadius:11, border:`1.5px solid ${C.border}`, fontSize:14, color:C.walnut, background:C.bg, outline:"none", fontFamily:"inherit" };
   const lbl={ display:"block", fontWeight:700, fontSize:11, color:C.walnut, marginBottom:6, textTransform:"uppercase", letterSpacing:"0.07em" };
-  const tabs=[{ id:"home",label:"Home",icon:"home" },{ id:"plan",label:"This week",icon:"calendar" },{ id:"shopping",label:"Shopping",icon:"cart" },{ id:"saved",label:"Saved",icon:"bookmark" }];
+  const tabs=[{ id:"home",label:"Home",icon:"home" },{ id:"plan",label:"This week",icon:"calendar" },{ id:"shopping",label:"Shopping",icon:"cart" },{ id:"saved",label:"Saved",icon:"bookmark" },{ id:"profile",label:"Profile",icon:"user" }];
 
   if(screen==="splash") return <Splash/>;
   if(screen==="slides") return <WelcomeSlides onDone={()=>setScreen("onboarding")}/>;
@@ -758,30 +759,6 @@ export default function Nourishly() {
         {/* HOME */}
         {tab==="home"&&(
           <div>
-            {profile?.subscription_status === "active" ? (
-              <div style={{ background:C.clay, borderRadius:16, padding:"14px 18px", marginBottom:16 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
-                  <Icon name="checkCircle" size={18} active color="#fff"/>
-                  <p style={{ color:"#fff", fontSize:13, fontWeight:700, margin:0 }}>Nourishly Plus — unlimited plans unlocked</p>
-                </div>
-                <button onClick={handleManageSubscription} disabled={managingSubscription} style={{ width:"100%", padding:"9px 0", background:"rgba(255,255,255,0.15)", color:"#fff", border:"1px solid rgba(255,255,255,0.3)", borderRadius:10, fontSize:12, fontWeight:700, cursor:managingSubscription?"not-allowed":"pointer", fontFamily:"inherit" }}>
-                  {managingSubscription ? "Redirecting..." : "Manage subscription"}
-                </button>
-              </div>
-            ) : (
-              <div style={{ background:C.card, border:`1.5px solid ${C.border}`, borderRadius:16, padding:"14px 18px", marginBottom:16 }}>
-                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
-                  <p style={{ fontSize:13, fontWeight:700, color:C.walnut, margin:0 }}>Free plan</p>
-                  <p style={{ fontSize:12, color:C.muted, margin:0 }}>{profile?.generations_used_this_month||0}/2 plans used this month</p>
-                </div>
-                <div style={{ background:C.bg, borderRadius:4, height:6, overflow:"hidden", marginBottom:12 }}>
-                  <div style={{ height:"100%", width:`${Math.min(100,((profile?.generations_used_this_month||0)/2)*100)}%`, background:C.clay, borderRadius:4, transition:"width 0.3s" }}/>
-                </div>
-                <button onClick={handleUpgrade} disabled={upgrading} style={{ width:"100%", padding:"11px 0", background:C.clay, color:"#fff", border:"none", borderRadius:10, fontSize:13, fontWeight:800, cursor:upgrading?"not-allowed":"pointer", fontFamily:"inherit" }}>
-                  {upgrading ? "Redirecting to checkout..." : "Upgrade to Nourishly Plus — €7.99/mo"}
-                </button>
-              </div>
-            )}
             {savedPlans.length>0&&(
               <div style={{ display:"flex", gap:10, marginBottom:16 }}>
                 <StatCard icon="bookmark" value={savedPlans.length} label="Plans" accent/>
@@ -921,6 +898,46 @@ export default function Nourishly() {
               <button onClick={()=>setTab("home")} style={{ padding:"12px 28px", background:C.clay, color:"#fff", border:"none", borderRadius:11, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit" }}>Create first plan</button>
             </div>
           )
+        )}
+
+        {/* PROFILE */}
+        {tab==="profile"&&(
+          <div>
+            <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:"20px", marginBottom:16, display:"flex", alignItems:"center", gap:14 }}>
+              <div style={{ width:52, height:52, borderRadius:14, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}><Icon name="user" size={26} color={C.clay}/></div>
+              <div>
+                <p style={{ fontWeight:800, fontSize:16, color:C.walnut, margin:"0 0 3px" }}>{profile?.name||"Your account"}</p>
+                <p style={{ fontSize:13, color:C.muted, margin:0 }}>{profile?.email||session?.user?.email||""}</p>
+              </div>
+            </div>
+            {profile?.subscription_status === "active" ? (
+              <div style={{ background:C.clay, borderRadius:16, padding:"14px 18px", marginBottom:16 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
+                  <Icon name="checkCircle" size={18} active color="#fff"/>
+                  <p style={{ color:"#fff", fontSize:13, fontWeight:700, margin:0 }}>Nourishly Plus — unlimited plans unlocked</p>
+                </div>
+                <button onClick={handleManageSubscription} disabled={managingSubscription} style={{ width:"100%", padding:"9px 0", background:"rgba(255,255,255,0.15)", color:"#fff", border:"1px solid rgba(255,255,255,0.3)", borderRadius:10, fontSize:12, fontWeight:700, cursor:managingSubscription?"not-allowed":"pointer", fontFamily:"inherit" }}>
+                  {managingSubscription ? "Redirecting..." : "Manage subscription"}
+                </button>
+              </div>
+            ) : (
+              <div style={{ background:C.card, border:`1.5px solid ${C.border}`, borderRadius:16, padding:"14px 18px", marginBottom:16 }}>
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
+                  <p style={{ fontSize:13, fontWeight:700, color:C.walnut, margin:0 }}>Free plan</p>
+                  <p style={{ fontSize:12, color:C.muted, margin:0 }}>{profile?.generations_used_this_month||0}/2 plans used this month</p>
+                </div>
+                <div style={{ background:C.bg, borderRadius:4, height:6, overflow:"hidden", marginBottom:12 }}>
+                  <div style={{ height:"100%", width:`${Math.min(100,((profile?.generations_used_this_month||0)/2)*100)}%`, background:C.clay, borderRadius:4, transition:"width 0.3s" }}/>
+                </div>
+                <button onClick={handleUpgrade} disabled={upgrading} style={{ width:"100%", padding:"11px 0", background:C.clay, color:"#fff", border:"none", borderRadius:10, fontSize:13, fontWeight:800, cursor:upgrading?"not-allowed":"pointer", fontFamily:"inherit" }}>
+                  {upgrading ? "Redirecting to checkout..." : "Upgrade to Nourishly Plus — €7.99/mo"}
+                </button>
+              </div>
+            )}
+            <button onClick={handleLogout} style={{ width:"100%", padding:"13px 0", background:"none", color:C.walnut, border:`1.5px solid ${C.border}`, borderRadius:12, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+              <Icon name="logout" size={16} color={C.walnut}/>Log out
+            </button>
+          </div>
         )}
       </div>
 
