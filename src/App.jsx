@@ -650,6 +650,26 @@ export default function Nourishly() {
 
   const handleLogout=()=>{ saveSession(null); setProfile(null); setMealPlan(null); setSavedPlans([]); setTriedMeals([]); setTab("home"); setScreen("slides"); };
 
+  const [managingSubscription, setManagingSubscription] = useState(false);
+  const handleManageSubscription = async () => {
+    if (!profile?.stripe_customer_id) return;
+    setManagingSubscription(true);
+    try {
+      const res = await fetch('/api/create-portal-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stripeCustomerId: profile.stripe_customer_id }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else setError(data.error || "Couldn't open the subscription portal. Please try again.");
+    } catch (e) {
+      setError("Couldn't open the subscription portal: " + e.message);
+    } finally {
+      setManagingSubscription(false);
+    }
+  };
+
   const [upgrading, setUpgrading] = useState(false);
   const handleUpgrade = async () => {
     if (!session?.user?.id || !session?.user?.email) return;
@@ -739,9 +759,14 @@ export default function Nourishly() {
         {tab==="home"&&(
           <div>
             {profile?.subscription_status === "active" ? (
-              <div style={{ background:C.clay, borderRadius:16, padding:"14px 18px", marginBottom:16, display:"flex", alignItems:"center", gap:10 }}>
-                <Icon name="checkCircle" size={18} active color="#fff"/>
-                <p style={{ color:"#fff", fontSize:13, fontWeight:700, margin:0 }}>Nourishly Plus — unlimited plans unlocked</p>
+              <div style={{ background:C.clay, borderRadius:16, padding:"14px 18px", marginBottom:16 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
+                  <Icon name="checkCircle" size={18} active color="#fff"/>
+                  <p style={{ color:"#fff", fontSize:13, fontWeight:700, margin:0 }}>Nourishly Plus — unlimited plans unlocked</p>
+                </div>
+                <button onClick={handleManageSubscription} disabled={managingSubscription} style={{ width:"100%", padding:"9px 0", background:"rgba(255,255,255,0.15)", color:"#fff", border:"1px solid rgba(255,255,255,0.3)", borderRadius:10, fontSize:12, fontWeight:700, cursor:managingSubscription?"not-allowed":"pointer", fontFamily:"inherit" }}>
+                  {managingSubscription ? "Redirecting..." : "Manage subscription"}
+                </button>
               </div>
             ) : (
               <div style={{ background:C.card, border:`1.5px solid ${C.border}`, borderRadius:16, padding:"14px 18px", marginBottom:16 }}>
