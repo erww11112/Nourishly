@@ -1,3 +1,10 @@
+/* ── Typography ───────────────────────────────────────────────────────────── */
+html, body, #root {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
 /* ── Global interaction polish ───────────────────────────────────────────── */
 * {
   -webkit-tap-highlight-color: transparent;

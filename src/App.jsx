@@ -27,6 +27,10 @@ const SHADOW = {
   raised: "0 14px 40px rgba(44,24,16,0.16)",
   button: "0 6px 20px rgba(204,112,68,0.35)",
 };
+const FONT = "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif";
+// Subtle top-highlight sheen layered over a solid button color — same base
+// color as before, just a soft gloss instead of completely flat.
+const btnBg = (base=C.clay) => `linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 60%), ${base}`;
 
 // ── Supabase REST ──────────────────────────────────────────────────────────
 const sbH = (t) => ({ "Content-Type":"application/json","apikey":SUPABASE_ANON_KEY,"Authorization":`Bearer ${t||SUPABASE_ANON_KEY}`,"Prefer":"return=representation" });
@@ -64,7 +68,7 @@ async function withAutoRefresh(session, saveSessionFn, callFn) {
 // ── Icons ──────────────────────────────────────────────────────────────────
 function Icon({ name, size=22, active=false, color }) {
   const s = color||(active?C.clay:C.muted);
-  const p = { width:size, height:size, viewBox:"0 0 24 24", fill:"none", stroke:s, strokeWidth:1.8, strokeLinecap:"round", strokeLinejoin:"round" };
+  const p = { width:size, height:size, viewBox:"0 0 24 24", fill:"none", stroke:s, strokeWidth:2, strokeLinecap:"round", strokeLinejoin:"round" };
   switch(name) {
     case "home": return <svg {...p}><path d="M3 11.5L12 4l9 7.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V11.5z" fill={active?s:"none"}/><path d="M9 21v-6h6v6" stroke={active?C.bg:s}/></svg>;
     case "calendar": return <svg {...p}><rect x="3.5" y="5" width="17" height="16" rx="2.5" fill={active?C.clayLight:"none"}/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><rect x="7" y="13" width="4" height="4" rx="0.5" fill={active?s:"none"}/></svg>;
@@ -230,14 +234,14 @@ function hashString(str) {
 
 function MealIcon({ name="", size=18, color="#fff" }) {
   const n = name.toLowerCase();
-  const p = { width:size, height:size, viewBox:"0 0 24 24", fill:"none", stroke:color, strokeWidth:1.8, strokeLinecap:"round", strokeLinejoin:"round" };
+  const p = { width:size, height:size, viewBox:"0 0 24 24", fill:"none", stroke:color, strokeWidth:2, strokeLinecap:"round", strokeLinejoin:"round" };
   if (n.includes("salad")) return <svg {...p}><path d="M3 12a9 9 0 0018 0"/><path d="M3 12h18M12 12V6"/></svg>;
   if (n.includes("soup")||n.includes("stew")) return <svg {...p}><path d="M4 11h16l-1 6a2 2 0 01-2 2H7a2 2 0 01-2-2l-1-6z"/><path d="M9 11V8M15 11V8"/></svg>;
   if (n.includes("fish")||n.includes("salmon")) return <svg {...p}><path d="M3 12c3-4 9-6 13-3M16 9c3 0 5 1.5 5 3s-2 3-5 3c-4 3-10 1-13-3"/><circle cx="6.5" cy="11" r="0.7" fill={color}/></svg>;
   if (n.includes("pizza")) return <svg {...p}><path d="M12 3l9 16H3L12 3z"/><circle cx="11" cy="11" r="0.7" fill={color}/><circle cx="13.5" cy="14" r="0.7" fill={color}/></svg>;
   if (n.includes("taco")||n.includes("burrito")) return <svg {...p}><path d="M3 16c2-7 16-7 18 0"/><path d="M5 16h14"/></svg>;
   if (n.includes("burger")) return <svg {...p}><path d="M4 10h16M4 14h16M6 6h12a2 2 0 012 2H4a2 2 0 012-2zM5 18h14a2 2 0 002 2H3a2 2 0 002-2z"/></svg>;
-  return <svg {...p}><circle cx="12" cy="12" r="8"/><path d="M8 12h8M12 8v8" strokeWidth="1.4" opacity="0.6"/></svg>;
+  return <svg {...p}><circle cx="12" cy="12" r="8"/><path d="M8 12h8M12 8v8" strokeWidth="2" opacity="0.6"/></svg>;
 }
 
 const NUTRITION = (n="") => {
@@ -278,7 +282,7 @@ function Fade({ id, children }) {
 // ── Splash ─────────────────────────────────────────────────────────────────
 function Splash() {
   return (
-    <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#5C2E1A 45%,${C.clay} 100%)`, minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", fontFamily:"system-ui,sans-serif" }}>
+    <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#5C2E1A 45%,${C.clay} 100%)`, minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", fontFamily:FONT }}>
       <div style={{ animation:"splashPulse 1.6s ease-in-out infinite" }}>
         <Logo size={88} ring />
       </div>
@@ -301,7 +305,7 @@ function WelcomeSlides({ onDone }) {
   const bodyColor = C.bg;
 
   return (
-    <div style={{ background:bodyColor, minHeight:"100vh", fontFamily:"system-ui,sans-serif", display:"flex", flexDirection:"column" }}>
+    <div style={{ background:bodyColor, minHeight:"100vh", fontFamily:FONT, display:"flex", flexDirection:"column" }}>
       {/* Orange header */}
       <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#7A3018 40%,${C.clay} 100%)`, padding:"48px 28px 0", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:0, marginBottom:0 }}>
         <Logo size={52} ring />
@@ -322,7 +326,7 @@ function WelcomeSlides({ onDone }) {
         <div style={{ display:"flex", gap:7, justifyContent:"center", marginBottom:22 }}>
           {slides.map((_,i)=><div key={i} style={{ width:i===slide?24:7, height:7, borderRadius:4, background:i===slide?C.clay:C.border, transition:"all 0.25s" }}/>)}
         </div>
-        <button onClick={()=>slide<slides.length-1?setSlide(s=>s+1):onDone()} className="btn-press" style={{ width:"100%", padding:"16px 0", background:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+        <button onClick={()=>slide<slides.length-1?setSlide(s=>s+1):onDone()} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
           {slide<slides.length-1?"Continue":"Let's begin"}
           <Icon name="chevronRight" size={18} color="#fff" />
         </button>
@@ -346,7 +350,7 @@ function Onboarding({ onComplete }) {
   const back = () => setStep(s=>Math.max(0,s-1));
 
   return (
-    <div style={{ background:C.bg, minHeight:"100vh", fontFamily:"system-ui,sans-serif", display:"flex", flexDirection:"column" }}>
+    <div style={{ background:C.bg, minHeight:"100vh", fontFamily:FONT, display:"flex", flexDirection:"column" }}>
       {/* Orange header */}
       <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#7A3018 40%,${C.clay} 100%)`, padding:"36px 28px 0", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:0, marginBottom:0, backgroundColor:C.clay }}>
         {/* Progress dots */}
@@ -378,7 +382,7 @@ function Onboarding({ onComplete }) {
         </Fade>
 
         <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-          <button onClick={next} className="btn-press" style={{ width:"100%", padding:"16px 0", background:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+          <button onClick={next} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
             {step===questions.length-1?"Almost there":"Continue"}
             <Icon name="chevronRight" size={18} color="#fff" />
           </button>
@@ -769,7 +773,7 @@ export default function Nourishly() {
   if(screen==="onboarding") return <Onboarding onComplete={handleOnboardingComplete}/>;
 
   if(screen==="auth"||screen==="welcome") return (
-    <div style={{ background:C.bg, minHeight:"100vh", fontFamily:"system-ui,-apple-system,sans-serif" }}>
+    <div style={{ background:C.bg, minHeight:"100vh", fontFamily:FONT }}>
       <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#7A3018 45%,${C.clay} 100%)`, padding:"48px 24px 0", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:0, marginBottom:0, backgroundColor:C.clay }}>
         <Logo size={60} ring/>
         <h1 style={{ color:"#fff", fontSize:26, fontWeight:900, margin:"16px 0 6px", letterSpacing:"-0.5px" }}>Nourishly</h1>
@@ -793,7 +797,7 @@ export default function Nourishly() {
           <div style={{ marginBottom:16 }}><label style={lbl}>Email</label><input type="email" placeholder="you@email.com" value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
           <div style={{ marginBottom:24 }}><label style={lbl}>Password</label><input type="password" placeholder="••••••••" value={authForm.password} onChange={e=>setAuthForm(f=>({...f,password:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
           {error&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:R.md, padding:"10px 14px", marginBottom:18, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{error}</p></div>}
-          <button onClick={handleAuth} disabled={authLoading} className="btn-press" style={{ width:"100%", padding:"15px 0", background:authLoading?C.muted:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:authLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:authLoading?"none":SHADOW.button }}>
+          <button onClick={handleAuth} disabled={authLoading} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(authLoading?C.muted:C.clay), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:authLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:authLoading?"none":SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center" }}>
             {authLoading?"Please wait...":authMode==="signup"?"Start planning":"Welcome back"}
           </button>
           <p style={{ textAlign:"center", color:C.muted, fontSize:12, margin:"14px 0 0" }}>Your data stays private · No credit card needed</p>
@@ -804,7 +808,7 @@ export default function Nourishly() {
 
   // ── Main app ──
   return (
-    <div style={{ background:C.bg, minHeight:"100vh", fontFamily:"system-ui,-apple-system,sans-serif" }}>
+    <div style={{ background:C.bg, minHeight:"100vh", fontFamily:FONT }}>
       <div style={{ background:C.clay, padding:"18px 20px 0" }}>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", paddingBottom:18 }}>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
@@ -849,7 +853,7 @@ export default function Nourishly() {
                 </div>
               ))}
               {error&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:R.md, padding:"10px 14px", marginBottom:16, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{error}</p></div>}
-              <button onClick={()=>handleGenerate()} disabled={loading} className="btn-press" style={{ width:"100%", padding:"16px 0", background:loading?C.muted:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:loading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:loading?"none":SHADOW.button, transition:"background 0.2s ease, box-shadow 0.2s ease", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+              <button onClick={()=>handleGenerate()} disabled={loading} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(loading?C.muted:C.clay), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:loading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:loading?"none":SHADOW.button, transition:"background 0.2s ease, box-shadow 0.2s ease", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
                 {loading?<><Icon name="refresh" size={16} color="#fff"/>Building your plan...</>:<>Build my meal plan<Icon name="chevronRight" size={16} color="#fff"/></>}
               </button>
             </div>
@@ -911,7 +915,7 @@ export default function Nourishly() {
               <div style={{ width:64, height:64, borderRadius:R.lg, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}><Icon name="calendar" size={28} color={C.clay}/></div>
               <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>No meal plan yet</p>
               <p style={{ fontSize:14, color:C.muted, margin:"0 0 22px" }}>Head to Home and build your first week of dinners.</p>
-              <button onClick={()=>setTab("home")} className="btn-press" style={{ padding:"13px 28px", background:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>Go to Home</button>
+              <button onClick={()=>setTab("home")} className="btn-press" style={{ padding:"13px 28px", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>Go to Home</button>
             </div>
           )
         )}
@@ -923,7 +927,7 @@ export default function Nourishly() {
               <div style={{ width:64, height:64, borderRadius:R.lg, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}><Icon name="cart" size={28} color={C.clay}/></div>
               <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>Shopping lists are a Plus feature</p>
               <p style={{ fontSize:14, color:C.muted, margin:"0 0 22px" }}>Upgrade to Nourishly Plus for an automatic, organised shopping list every week.</p>
-              <button onClick={handleUpgrade} disabled={upgrading} className="btn-press" style={{ padding:"13px 28px", background:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:upgrading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>
+              <button onClick={handleUpgrade} disabled={upgrading} className="btn-press" style={{ padding:"13px 28px", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:upgrading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>
                 {upgrading ? "Redirecting..." : "Upgrade — €7.99/mo"}
               </button>
             </div>
@@ -932,7 +936,7 @@ export default function Nourishly() {
               <div style={{ width:64, height:64, borderRadius:R.lg, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}><Icon name="cart" size={28} color={C.clay}/></div>
               <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>No shopping list yet</p>
               <p style={{ fontSize:14, color:C.muted, margin:"0 0 22px" }}>Generate a meal plan and your list appears here.</p>
-              <button onClick={()=>setTab("home")} className="btn-press" style={{ padding:"13px 28px", background:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>Build a plan</button>
+              <button onClick={()=>setTab("home")} className="btn-press" style={{ padding:"13px 28px", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>Build a plan</button>
             </div>
           )
         )}
@@ -963,7 +967,7 @@ export default function Nourishly() {
               <div style={{ width:64, height:64, borderRadius:R.lg, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}><Icon name="bookmark" size={28} color={C.clay}/></div>
               <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>No saved plans yet</p>
               <p style={{ fontSize:14, color:C.muted, margin:"0 0 22px" }}>Your plans save automatically every time you generate one.</p>
-              <button onClick={()=>setTab("home")} className="btn-press" style={{ padding:"13px 28px", background:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>Create first plan</button>
+              <button onClick={()=>setTab("home")} className="btn-press" style={{ padding:"13px 28px", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>Create first plan</button>
             </div>
           )
         )}
@@ -1001,7 +1005,7 @@ export default function Nourishly() {
                 <div style={{ background:C.bg, borderRadius:4, height:6, overflow:"hidden", marginBottom:14 }}>
                   <div style={{ height:"100%", width:`${Math.min(100,((profile?.generations_used_this_month||0)/2)*100)}%`, background:C.clay, borderRadius:4, transition:"width 0.3s" }}/>
                 </div>
-                <button onClick={handleUpgrade} disabled={upgrading} className="btn-press" style={{ width:"100%", padding:"12px 0", background:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:13, fontWeight:800, cursor:upgrading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>
+                <button onClick={handleUpgrade} disabled={upgrading} className="btn-press" style={{ width:"100%", padding:"13px 0", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:13, fontWeight:800, cursor:upgrading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>
                   {upgrading ? "Redirecting to checkout..." : "Upgrade to Nourishly Plus — €7.99/mo"}
                 </button>
               </div>
@@ -1017,7 +1021,7 @@ export default function Nourishly() {
                   <input type={field.type} placeholder={field.placeholder} value={form[field.name]} onChange={e=>{ setForm(f=>({...f,[field.name]:e.target.value})); setPrefsSaved(false); }} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/>
                 </div>
               ))}
-              <button onClick={handleSavePreferences} disabled={savingPrefs} className="btn-press" style={{ width:"100%", padding:"13px 0", background:savingPrefs?C.muted:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:13, fontWeight:800, cursor:savingPrefs?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:savingPrefs?"none":SHADOW.button }}>
+              <button onClick={handleSavePreferences} disabled={savingPrefs} className="btn-press" style={{ width:"100%", padding:"13px 0", background:btnBg(savingPrefs?C.muted:C.clay), color:"#fff", border:"none", borderRadius:R.md, fontSize:13, fontWeight:800, cursor:savingPrefs?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:savingPrefs?"none":SHADOW.button }}>
                 {savingPrefs ? "Saving..." : prefsSaved ? "Saved ✓" : "Save preferences"}
               </button>
             </div>
@@ -1041,7 +1045,7 @@ export default function Nourishly() {
               </div>
               {pwError&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:R.md, padding:"10px 14px", marginBottom:16, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{pwError}</p></div>}
               {pwMessage&&<div style={{ background:C.sageLight, borderRadius:R.md, padding:"10px 14px", marginBottom:16, display:"flex", gap:8 }}><Icon name="checkCircle" size={15} active color={C.sage}/><p style={{ color:C.sage, fontSize:13, margin:0 }}>{pwMessage}</p></div>}
-              <button onClick={handleChangePassword} disabled={pwLoading} className="btn-press" style={{ width:"100%", padding:"13px 0", background:pwLoading?C.muted:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:13, fontWeight:800, cursor:pwLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:pwLoading?"none":SHADOW.button }}>
+              <button onClick={handleChangePassword} disabled={pwLoading} className="btn-press" style={{ width:"100%", padding:"13px 0", background:btnBg(pwLoading?C.muted:C.clay), color:"#fff", border:"none", borderRadius:R.md, fontSize:13, fontWeight:800, cursor:pwLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:pwLoading?"none":SHADOW.button }}>
                 {pwLoading ? "Updating..." : "Update password"}
               </button>
             </div>
@@ -1060,7 +1064,7 @@ export default function Nourishly() {
         {tabs.map(t=>(
           <button key={t.id} onClick={()=>setTab(t.id)} className="btn-press" style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4, background:"none", border:"none", cursor:"pointer", padding:"2px 0", fontFamily:"inherit" }}>
             <span style={{ display:"inline-flex", transition:"transform 0.2s cubic-bezier(0.4,0,0.2,1)", transform:tab===t.id?"scale(1.08) translateY(-1px)":"scale(1)" }}>
-              <Icon name={t.icon} size={21} active={tab===t.id} color={tab===t.id?"#fff":"rgba(255,255,255,0.65)"}/>
+              <Icon name={t.icon} size={24} active={tab===t.id} color={tab===t.id?"#fff":"rgba(255,255,255,0.65)"}/>
             </span>
             <span style={{ fontSize:10, fontWeight:tab===t.id?800:500, color:tab===t.id?"#fff":"rgba(255,255,255,0.65)", transition:"color 0.2s ease, font-weight 0.2s ease" }}>{t.label}</span>
           </button>
