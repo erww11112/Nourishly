@@ -17,6 +17,17 @@ const C = {
   white: "#EFE6D8",
 };
 
+// ── Design tokens: one deliberate scale for radius / shadow, used everywhere ─
+// R.sm = icon badges & chips · R.md = buttons & inputs · R.lg = list/section
+// cards · R.xl = hero/primary cards. Keeps every corner in the app on-scale
+// instead of accidental one-off values.
+const R = { sm: 12, md: 14, lg: 18, xl: 24 };
+const SHADOW = {
+  card: "0 4px 20px rgba(44,24,16,0.07)",
+  raised: "0 14px 40px rgba(44,24,16,0.16)",
+  button: "0 6px 20px rgba(204,112,68,0.35)",
+};
+
 // ── Supabase REST ──────────────────────────────────────────────────────────
 const sbH = (t) => ({ "Content-Type":"application/json","apikey":SUPABASE_ANON_KEY,"Authorization":`Bearer ${t||SUPABASE_ANON_KEY}`,"Prefer":"return=representation" });
 const sb = {
@@ -311,7 +322,7 @@ function WelcomeSlides({ onDone }) {
         <div style={{ display:"flex", gap:7, justifyContent:"center", marginBottom:22 }}>
           {slides.map((_,i)=><div key={i} style={{ width:i===slide?24:7, height:7, borderRadius:4, background:i===slide?C.clay:C.border, transition:"all 0.25s" }}/>)}
         </div>
-        <button onClick={()=>slide<slides.length-1?setSlide(s=>s+1):onDone()} style={{ width:"100%", padding:"16px 0", background:C.clay, color:"#fff", border:"none", borderRadius:14, fontSize:15, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:"0 6px 24px rgba(204,112,68,0.35)", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+        <button onClick={()=>slide<slides.length-1?setSlide(s=>s+1):onDone()} className="btn-press" style={{ width:"100%", padding:"16px 0", background:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
           {slide<slides.length-1?"Continue":"Let's begin"}
           <Icon name="chevronRight" size={18} color="#fff" />
         </button>
@@ -366,12 +377,12 @@ function Onboarding({ onComplete }) {
           />
         </Fade>
 
-        <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-          <button onClick={next} style={{ width:"100%", padding:"16px 0", background:C.clay, color:"#fff", border:"none", borderRadius:14, fontSize:15, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:"0 6px 24px rgba(204,112,68,0.32)", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+        <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
+          <button onClick={next} className="btn-press" style={{ width:"100%", padding:"16px 0", background:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
             {step===questions.length-1?"Almost there":"Continue"}
             <Icon name="chevronRight" size={18} color="#fff" />
           </button>
-          {step>0&&<button onClick={back} style={{ width:"100%", padding:"12px 0", background:"none", color:C.muted, border:`1.5px solid ${C.border}`, borderRadius:14, fontSize:14, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>Back</button>}
+          {step>0&&<button onClick={back} className="btn-press" style={{ width:"100%", padding:"12px 0", background:"none", color:C.muted, border:`1.5px solid ${C.border}`, borderRadius:R.md, fontSize:14, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>Back</button>}
         </div>
       </div>
     </div>
@@ -381,8 +392,8 @@ function Onboarding({ onComplete }) {
 // ── Stat card ──────────────────────────────────────────────────────────────
 function StatCard({ icon, value, label, accent }) {
   return (
-    <div style={{ flex:1, background:C.card, borderRadius:16, border:`1px solid ${C.border}`, padding:"14px 10px", textAlign:"center" }}>
-      <div style={{ width:32, height:32, borderRadius:10, background:accent?C.clayLight:C.sageLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 8px" }}>
+    <div style={{ flex:1, background:C.card, borderRadius:R.lg, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"16px 10px", textAlign:"center" }}>
+      <div style={{ width:32, height:32, borderRadius:R.sm, background:accent?C.clayLight:C.sageLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 10px" }}>
         <Icon name={icon} size={16} color={accent?C.clay:C.sage} />
       </div>
       <p style={{ fontWeight:900, fontSize:18, color:C.walnut, margin:"0 0 2px" }}>{value}</p>
@@ -393,7 +404,7 @@ function StatCard({ icon, value, label, accent }) {
 
 function NChip({ label, value, color }) {
   return (
-    <div style={{ flex:1, background:C.bg, borderRadius:12, padding:"10px 6px", textAlign:"center", border:`1px solid ${C.border}` }}>
+    <div style={{ flex:1, background:C.bg, borderRadius:R.sm, padding:"11px 8px", textAlign:"center", border:`1px solid ${C.border}` }}>
       <p style={{ fontSize:15, fontWeight:800, color:color||C.walnut, margin:"0 0 2px" }}>{value}</p>
       <p style={{ fontSize:10, color:C.muted, margin:0, textTransform:"uppercase", letterSpacing:"0.06em" }}>{label}</p>
     </div>
@@ -408,25 +419,25 @@ function MealCard({ meal, onSwap, onMarkTried, triedMeals=[], isPaid=false }) {
   const tried = triedMeals.includes(meal?.day);
 
   return (
-    <div style={{ borderRadius:20, overflow:"hidden", marginBottom:14, background:C.card, border:`1px solid ${C.border}`, boxShadow:open?"0 12px 40px rgba(44,24,16,0.14)":"0 2px 8px rgba(44,24,16,0.06)", transition:"box-shadow 0.25s" }}>
-      <div style={{ position:"relative", height:open?220:145, overflow:"hidden", cursor:"pointer" }} onClick={()=>setOpen(o=>!o)}>
+    <div style={{ borderRadius:R.xl, overflow:"hidden", marginBottom:18, background:C.card, border:`1px solid ${C.border}`, boxShadow:open?SHADOW.raised:SHADOW.card, transition:"box-shadow 0.3s ease" }}>
+      <div style={{ position:"relative", height:open?220:145, overflow:"hidden", cursor:"pointer", transition:"height 0.35s cubic-bezier(0.4,0,0.2,1)" }} onClick={()=>setOpen(o=>!o)}>
         {url&&!failed
           ?<img src={url} alt={meal?.name} style={{ width:"100%", height:"100%", objectFit:"cover", display:"block" }}/>
           :<div style={{ width:"100%", height:"100%", background:`linear-gradient(135deg,${C.clayLight},${C.sageLight})` }}/>
         }
         <div style={{ position:"absolute", inset:0, background:"linear-gradient(to top,rgba(44,24,16,0.84) 0%,rgba(44,24,16,0.18) 55%,transparent 100%)" }}/>
         {/* Icon badge always visible over photo */}
-        <div style={{ position:"absolute", top:12, left:12, width:34, height:34, borderRadius:11, background:"rgba(255,255,255,0.2)", backdropFilter:"blur(6px)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+        <div style={{ position:"absolute", top:12, left:12, width:34, height:34, borderRadius:R.sm, background:"rgba(255,255,255,0.2)", backdropFilter:"blur(6px)", display:"flex", alignItems:"center", justifyContent:"center" }}>
           <MealIcon name={meal?.name} size={17} color="#fff" />
         </div>
         <div style={{ position:"absolute", top:10, right:12, display:"flex", gap:6 }}>
-          {tried&&<div style={{ background:C.sage, borderRadius:8, width:30, height:30, display:"flex", alignItems:"center", justifyContent:"center" }}><Icon name="check" size={14} color="#fff"/></div>}
-          <button onClick={e=>{e.stopPropagation();onSwap&&onSwap(meal);}} style={{ background:"rgba(255,255,255,0.2)", backdropFilter:"blur(6px)", border:"none", borderRadius:8, width:30, height:30, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer" }}>
+          {tried&&<div className="check-pop" style={{ background:C.sage, borderRadius:R.sm, width:30, height:30, display:"flex", alignItems:"center", justifyContent:"center" }}><Icon name="check" size={14} color="#fff"/></div>}
+          <button onClick={e=>{e.stopPropagation();onSwap&&onSwap(meal);}} className="btn-press" style={{ background:"rgba(255,255,255,0.2)", backdropFilter:"blur(6px)", border:"none", borderRadius:R.sm, width:30, height:30, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer" }}>
             <Icon name="refresh" size={15} color="#fff"/>
           </button>
         </div>
-        <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"14px 16px" }}>
-          <div style={{ display:"inline-block", background:"rgba(255,255,255,0.14)", borderRadius:6, padding:"2px 8px", marginBottom:5 }}>
+        <div style={{ position:"absolute", bottom:0, left:0, right:0, padding:"16px 18px" }}>
+          <div style={{ display:"inline-block", background:"rgba(255,255,255,0.14)", borderRadius:6, padding:"2px 8px", marginBottom:6 }}>
             <span style={{ color:"#fff", fontSize:10, fontWeight:800, textTransform:"uppercase", letterSpacing:"0.08em" }}>{meal?.day}</span>
           </div>
           <p style={{ color:"#fff", fontWeight:800, fontSize:17, margin:"0 0 4px", lineHeight:1.2 }}>{meal?.name}</p>
@@ -436,34 +447,38 @@ function MealCard({ meal, onSwap, onMarkTried, triedMeals=[], isPaid=false }) {
           </div>
         </div>
       </div>
-      {open&&(
-        <div style={{ padding:"18px 18px 20px" }}>
-          {meal?.description&&<p style={{ fontSize:14, color:C.muted, margin:"0 0 16px", lineHeight:1.65, fontStyle:"italic" }}>"{meal.description}"</p>}
-          <div style={{ display:"flex", gap:8, marginBottom:20 }}>
-            <NChip label="Cal" value={n.cal} color={C.clay}/>
-            {isPaid ? (
-              <>
-                <NChip label="Protein" value={`${n.protein}g`} color={C.sage}/>
-                <NChip label="Carbs" value={`${n.carbs}g`} color={C.clayMid}/>
-                <NChip label="Fat" value={`${n.fat}g`} color={C.muted}/>
-              </>
-            ) : (
-              <div style={{ flex:3, background:C.clayLight, borderRadius:12, padding:"10px 12px", display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}>
-                <Icon name="checkCircle" size={13} color={C.clay}/>
-                <span style={{ fontSize:11, color:C.clay, fontWeight:700 }}>Full nutrition on Plus</span>
-              </div>
-            )}
-          </div>
-          <p style={{ fontSize:11, fontWeight:800, color:C.clay, margin:"0 0 14px", textTransform:"uppercase", letterSpacing:"0.1em" }}>How to make it</p>
-          {meal?.steps?.map((step,i)=>(
-            <div key={i} style={{ display:"flex", gap:12, marginBottom:13, alignItems:"flex-start" }}>
-              <div style={{ width:26, height:26, borderRadius:"50%", background:i===0?C.clay:C.clayLight, color:i===0?"#fff":C.clay, fontSize:12, fontWeight:800, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, marginTop:1 }}>{i+1}</div>
-              <p style={{ fontSize:14, color:C.walnut, margin:0, lineHeight:1.65 }}>{step}</p>
+      {/* Expand/collapse: grid-rows trick animates height smoothly without
+          knowing the content's actual height in advance; opacity fades in sync. */}
+      <div style={{ display:"grid", gridTemplateRows:open?"1fr":"0fr", transition:"grid-template-rows 0.35s cubic-bezier(0.4,0,0.2,1)" }}>
+        <div style={{ overflow:"hidden" }}>
+          <div style={{ padding:"20px 20px 24px", opacity:open?1:0, transition:`opacity 0.3s ease ${open?"0.1s":"0s"}` }}>
+            {meal?.description&&<p style={{ fontSize:14, color:C.muted, margin:"0 0 18px", lineHeight:1.65, fontStyle:"italic" }}>"{meal.description}"</p>}
+            <div style={{ display:"flex", gap:8, marginBottom:22 }}>
+              <NChip label="Cal" value={n.cal} color={C.clay}/>
+              {isPaid ? (
+                <>
+                  <NChip label="Protein" value={`${n.protein}g`} color={C.sage}/>
+                  <NChip label="Carbs" value={`${n.carbs}g`} color={C.clayMid}/>
+                  <NChip label="Fat" value={`${n.fat}g`} color={C.muted}/>
+                </>
+              ) : (
+                <div style={{ flex:3, background:C.clayLight, borderRadius:R.sm, padding:"10px 12px", display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}>
+                  <Icon name="checkCircle" size={13} color={C.clay}/>
+                  <span style={{ fontSize:11, color:C.clay, fontWeight:700 }}>Full nutrition on Plus</span>
+                </div>
+              )}
             </div>
-          ))}
-          {!tried&&<button onClick={()=>onMarkTried&&onMarkTried(meal?.day)} style={{ width:"100%", padding:"11px 0", marginTop:8, background:C.sageLight, color:C.sage, border:`1.5px solid #B8CDB4`, borderRadius:10, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}><Icon name="checkCircle" size={16} color={C.sage}/>Mark as cooked</button>}
+            <p style={{ fontSize:11, fontWeight:800, color:C.clay, margin:"0 0 16px", textTransform:"uppercase", letterSpacing:"0.1em" }}>How to make it</p>
+            {meal?.steps?.map((step,i)=>(
+              <div key={i} style={{ display:"flex", gap:12, marginBottom:14, alignItems:"flex-start" }}>
+                <div style={{ width:26, height:26, borderRadius:"50%", background:i===0?C.clay:C.clayLight, color:i===0?"#fff":C.clay, fontSize:12, fontWeight:800, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, marginTop:1 }}>{i+1}</div>
+                <p style={{ fontSize:14, color:C.walnut, margin:0, lineHeight:1.65 }}>{step}</p>
+              </div>
+            ))}
+            {!tried&&<button onClick={()=>onMarkTried&&onMarkTried(meal?.day)} className="btn-press" style={{ width:"100%", padding:"12px 0", marginTop:10, background:C.sageLight, color:C.sage, border:`1.5px solid #B8CDB4`, borderRadius:R.md, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}><Icon name="checkCircle" size={16} color={C.sage}/>Mark as cooked</button>}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -494,8 +509,8 @@ function ShoppingList({ days }) {
 
   return (
     <div>
-      <div style={{ background:C.card, borderRadius:16, border:`1px solid ${C.border}`, padding:"16px 18px", marginBottom:16 }}>
-        <div style={{ display:"flex", justifyContent:"space-between", marginBottom:10 }}>
+      <div style={{ background:C.card, borderRadius:R.lg, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"18px 20px", marginBottom:20 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", marginBottom:12 }}>
           <p style={{ fontWeight:700, fontSize:14, color:C.walnut, margin:0 }}>Shopping progress</p>
           <span style={{ fontSize:13, color:C.clay, fontWeight:700 }}>{done}/{total}</span>
         </div>
@@ -504,16 +519,16 @@ function ShoppingList({ days }) {
         </div>
       </div>
       {Object.entries(cats).filter(([,c])=>c.items.length>0).map(([cat,c])=>(
-        <div key={cat} style={{ background:C.card, borderRadius:16, border:`1px solid ${C.border}`, padding:"14px 18px", marginBottom:12 }}>
-          <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:12 }}>
+        <div key={cat} style={{ background:C.card, borderRadius:R.lg, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"16px 20px", marginBottom:14 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
             <Icon name={c.icon} size={15} color={C.clay}/>
             <p style={{ fontSize:13, fontWeight:800, color:C.walnut, margin:0 }}>{cat}</p>
           </div>
           {c.items.map((item,i)=>{
             const key=cat+item;
             return (
-              <div key={i} onClick={()=>toggle(key)} style={{ display:"flex", alignItems:"center", gap:12, padding:"8px 0", borderTop:i>0?`1px solid ${C.border}`:"none", cursor:"pointer" }}>
-                <div style={{ width:22, height:22, borderRadius:6, border:`2px solid ${checked[key]?C.clay:C.border}`, background:checked[key]?C.clay:"transparent", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.15s" }}>
+              <div key={i} onClick={()=>toggle(key)} style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 2px", borderTop:i>0?`1px solid ${C.border}`:"none", cursor:"pointer" }}>
+                <div style={{ width:22, height:22, borderRadius:7, border:`2px solid ${checked[key]?C.clay:C.border}`, background:checked[key]?C.clay:"transparent", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transition:"all 0.15s" }}>
                   {checked[key]&&<Icon name="check" size={12} color="#fff"/>}
                 </div>
                 <p style={{ fontSize:14, color:checked[key]?C.muted:C.walnut, margin:0, textDecoration:checked[key]?"line-through":"none", transition:"all 0.15s" }}>{item}</p>
@@ -522,7 +537,7 @@ function ShoppingList({ days }) {
           })}
         </div>
       ))}
-      <div style={{ background:C.sageLight, border:`1px solid #B8CDB4`, borderRadius:12, padding:"12px 16px", display:"flex", gap:10 }}>
+      <div style={{ background:C.sageLight, border:`1px solid #B8CDB4`, borderRadius:R.md, padding:"14px 18px", display:"flex", gap:10 }}>
         <Icon name="alert" size={15} color={C.sage}/>
         <p style={{ fontSize:12, color:C.sage, margin:0, lineHeight:1.5 }}><strong>Check your cupboards first</strong><br/>Salt, pepper, olive oil, garlic — you likely already have these.</p>
       </div>
@@ -745,7 +760,7 @@ export default function Nourishly() {
 
   const totalN=mealPlan?.days?.reduce((a,m)=>{ const n=NUTRITION(m.name); return { cal:a.cal+n.cal, protein:a.protein+n.protein, carbs:a.carbs+n.carbs, fat:a.fat+n.fat }; },{ cal:0,protein:0,carbs:0,fat:0 });
 
-  const inp={ width:"100%", boxSizing:"border-box", padding:"12px 14px", borderRadius:11, border:`1.5px solid ${C.border}`, fontSize:14, color:C.walnut, background:C.bg, outline:"none", fontFamily:"inherit" };
+  const inp={ width:"100%", boxSizing:"border-box", padding:"13px 15px", borderRadius:R.md, border:`1.5px solid ${C.border}`, fontSize:14, color:C.walnut, background:C.bg, outline:"none", fontFamily:"inherit", transition:"border-color 0.15s ease" };
   const lbl={ display:"block", fontWeight:700, fontSize:11, color:C.walnut, marginBottom:6, textTransform:"uppercase", letterSpacing:"0.07em" };
   const tabs=[{ id:"home",label:"Home",icon:"home" },{ id:"plan",label:"This week",icon:"calendar" },{ id:"shopping",label:"Shopping",icon:"cart" },{ id:"saved",label:"Saved",icon:"bookmark" },{ id:"profile",label:"Profile",icon:"user" }];
 
@@ -763,22 +778,22 @@ export default function Nourishly() {
       </div>
       <div style={{ maxWidth:420, margin:"0 auto", padding:"0 20px 48px" }}>
         {form.familySize&&(
-          <div style={{ background:C.clayLight, borderRadius:12, padding:"10px 14px", marginBottom:18, display:"flex", alignItems:"center", gap:8 }}>
+          <div style={{ background:C.clayLight, borderRadius:R.md, padding:"12px 16px", marginBottom:20, display:"flex", alignItems:"center", gap:8 }}>
             <Icon name="checkCircle" size={16} active color={C.clay}/>
             <p style={{ fontSize:12, color:C.clay, margin:0, fontWeight:600 }}>Your preferences are saved — just create your account</p>
           </div>
         )}
-        <div style={{ background:C.card, borderRadius:24, padding:"24px 20px", border:`1px solid ${C.border}`, boxShadow:"0 12px 48px rgba(44,24,16,0.12)" }}>
-          <div style={{ display:"flex", background:C.bg, borderRadius:12, padding:4, marginBottom:22 }}>
+        <div style={{ background:C.card, borderRadius:R.xl, padding:"28px 22px", border:`1px solid ${C.border}`, boxShadow:SHADOW.raised }}>
+          <div style={{ display:"flex", background:C.bg, borderRadius:R.md, padding:4, marginBottom:24 }}>
             {[["signup","Create account"],["login","Sign in"]].map(([mode,label])=>(
-              <button key={mode} onClick={()=>{ setAuthMode(mode); setError(""); }} style={{ flex:1, padding:"9px 0", borderRadius:9, border:"none", cursor:"pointer", fontWeight:700, fontSize:13, fontFamily:"inherit", background:authMode===mode?C.card:"transparent", color:authMode===mode?C.walnut:C.muted, boxShadow:authMode===mode?"0 2px 8px rgba(44,24,16,0.1)":"none", transition:"all 0.15s" }}>{label}</button>
+              <button key={mode} onClick={()=>{ setAuthMode(mode); setError(""); }} className="btn-press" style={{ flex:1, padding:"9px 0", borderRadius:R.sm, border:"none", cursor:"pointer", fontWeight:700, fontSize:13, fontFamily:"inherit", background:authMode===mode?C.card:"transparent", color:authMode===mode?C.walnut:C.muted, boxShadow:authMode===mode?"0 2px 8px rgba(44,24,16,0.1)":"none", transition:"all 0.15s" }}>{label}</button>
             ))}
           </div>
-          {authMode==="signup"&&<div style={{ marginBottom:14 }}><label style={lbl}>Your name</label><input type="text" placeholder="e.g. Maria" value={authForm.name} onChange={e=>setAuthForm(f=>({...f,name:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>}
-          <div style={{ marginBottom:14 }}><label style={lbl}>Email</label><input type="email" placeholder="you@email.com" value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
-          <div style={{ marginBottom:22 }}><label style={lbl}>Password</label><input type="password" placeholder="••••••••" value={authForm.password} onChange={e=>setAuthForm(f=>({...f,password:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
-          {error&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:10, padding:"10px 14px", marginBottom:16, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{error}</p></div>}
-          <button onClick={handleAuth} disabled={authLoading} style={{ width:"100%", padding:"14px 0", background:authLoading?C.muted:C.clay, color:"#fff", border:"none", borderRadius:12, fontSize:15, fontWeight:800, cursor:authLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:"0 4px 16px rgba(204,112,68,0.38)" }}>
+          {authMode==="signup"&&<div style={{ marginBottom:16 }}><label style={lbl}>Your name</label><input type="text" placeholder="e.g. Maria" value={authForm.name} onChange={e=>setAuthForm(f=>({...f,name:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>}
+          <div style={{ marginBottom:16 }}><label style={lbl}>Email</label><input type="email" placeholder="you@email.com" value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
+          <div style={{ marginBottom:24 }}><label style={lbl}>Password</label><input type="password" placeholder="••••••••" value={authForm.password} onChange={e=>setAuthForm(f=>({...f,password:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
+          {error&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:R.md, padding:"10px 14px", marginBottom:18, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{error}</p></div>}
+          <button onClick={handleAuth} disabled={authLoading} className="btn-press" style={{ width:"100%", padding:"15px 0", background:authLoading?C.muted:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:authLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:authLoading?"none":SHADOW.button }}>
             {authLoading?"Please wait...":authMode==="signup"?"Start planning":"Welcome back"}
           </button>
           <p style={{ textAlign:"center", color:C.muted, fontSize:12, margin:"14px 0 0" }}>Your data stays private · No credit card needed</p>
@@ -800,50 +815,51 @@ export default function Nourishly() {
             </div>
           </div>
           <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-            {profile?.streak_weeks>0&&<div style={{ background:"rgba(255,255,255,0.12)", borderRadius:8, padding:"5px 10px", display:"flex", alignItems:"center", gap:5 }}><Icon name="flame" size={13} color="#FFB088"/><span style={{ color:"#fff", fontSize:11, fontWeight:700 }}>{profile.streak_weeks}w</span></div>}
-            <button onClick={handleLogout} style={{ background:"rgba(255,255,255,0.1)", border:"1px solid rgba(255,255,255,0.15)", borderRadius:8, width:32, height:32, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}><Icon name="logout" size={15} color="rgba(255,255,255,0.7)"/></button>
+            {profile?.streak_weeks>0&&<div style={{ background:"rgba(255,255,255,0.12)", borderRadius:R.sm, padding:"5px 10px", display:"flex", alignItems:"center", gap:5 }}><Icon name="flame" size={13} color="#FFB088"/><span style={{ color:"#fff", fontSize:11, fontWeight:700 }}>{profile.streak_weeks}w</span></div>}
+            <button onClick={handleLogout} className="btn-press" style={{ background:"rgba(255,255,255,0.1)", border:"1px solid rgba(255,255,255,0.15)", borderRadius:R.sm, width:32, height:32, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}><Icon name="logout" size={15} color="rgba(255,255,255,0.7)"/></button>
           </div>
         </div>
       </div>
 
-      <div style={{ maxWidth:560, margin:"0 auto", padding:"16px 16px 90px", boxSizing:"border-box" }}>
+      <div style={{ maxWidth:560, margin:"0 auto", padding:"18px 16px 96px", boxSizing:"border-box" }}>
+        <Fade id={tab}>
 
         {/* HOME */}
         {tab==="home"&&(
           <div>
             {savedPlans.length>0&&(
-              <div style={{ display:"flex", gap:10, marginBottom:16 }}>
+              <div style={{ display:"flex", gap:12, marginBottom:20 }}>
                 <StatCard icon="bookmark" value={savedPlans.length} label="Plans" accent/>
                 <StatCard icon="calendar" value={savedPlans.length*7} label="Meals"/>
                 <StatCard icon="users" value={form.familySize||"–"} label="Family"/>
               </div>
             )}
-            <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:"22px 20px", marginBottom:16 }}>
-              <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:18 }}>
-                <div style={{ width:40, height:40, borderRadius:12, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center" }}><Icon name="calendar" size={20} color={C.clay}/></div>
+            <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"26px 22px", marginBottom:20 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:22 }}>
+                <div style={{ width:40, height:40, borderRadius:R.sm, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center" }}><Icon name="calendar" size={20} color={C.clay}/></div>
                 <div>
                   <p style={{ fontWeight:900, fontSize:18, color:C.walnut, margin:0, letterSpacing:"-0.3px" }}>Plan this week</p>
                   <p style={{ fontSize:12, color:C.muted, margin:0 }}>A fresh week of dinners, sorted</p>
                 </div>
               </div>
               {[{label:"Family size",name:"familySize",placeholder:"e.g. 4",type:"number"},{label:"Allergies or restrictions",name:"allergies",placeholder:"e.g. no nuts — or leave blank",type:"text"},{label:"Weeknight cook time",name:"cookTime",placeholder:"e.g. 30 minutes",type:"text"}].map(field=>(
-                <div key={field.name} style={{ marginBottom:14 }}>
+                <div key={field.name} style={{ marginBottom:16 }}>
                   <label style={lbl}>{field.label}</label>
                   <input type={field.type} placeholder={field.placeholder} value={form[field.name]} onChange={e=>setForm(f=>({...f,[field.name]:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/>
                 </div>
               ))}
-              {error&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:10, padding:"10px 14px", marginBottom:14, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{error}</p></div>}
-              <button onClick={()=>handleGenerate()} disabled={loading} style={{ width:"100%", padding:"14px 0", background:loading?C.muted:C.clay, color:"#fff", border:"none", borderRadius:12, fontSize:15, fontWeight:800, cursor:loading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:loading?"none":"0 4px 16px rgba(204,112,68,0.38)", transition:"all 0.2s", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+              {error&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:R.md, padding:"10px 14px", marginBottom:16, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{error}</p></div>}
+              <button onClick={()=>handleGenerate()} disabled={loading} className="btn-press" style={{ width:"100%", padding:"16px 0", background:loading?C.muted:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:loading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:loading?"none":SHADOW.button, transition:"background 0.2s ease, box-shadow 0.2s ease", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
                 {loading?<><Icon name="refresh" size={16} color="#fff"/>Building your plan...</>:<>Build my meal plan<Icon name="chevronRight" size={16} color="#fff"/></>}
               </button>
             </div>
             {savedPlans.length>0&&(
               <div>
-                <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 10px" }}>Recent plans</p>
+                <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 12px" }}>Recent plans</p>
                 {savedPlans.slice(0,3).map((plan,i)=>(
-                  <div key={i} onClick={()=>{ setMealPlan({days:plan.days}); setTriedMeals([]); setTab("plan"); }} style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, padding:"14px 16px", marginBottom:10, display:"flex", alignItems:"center", justifyContent:"space-between", cursor:"pointer" }}>
+                  <div key={i} onClick={()=>{ setMealPlan({days:plan.days}); setTriedMeals([]); setTab("plan"); }} className="btn-press" style={{ background:C.card, borderRadius:R.lg, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"16px 18px", marginBottom:12, display:"flex", alignItems:"center", justifyContent:"space-between", cursor:"pointer" }}>
                     <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-                      <div style={{ width:38, height:38, borderRadius:10, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center" }}><Icon name="calendar" size={17} color={C.clay}/></div>
+                      <div style={{ width:38, height:38, borderRadius:R.sm, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center" }}><Icon name="calendar" size={17} color={C.clay}/></div>
                       <div>
                         <p style={{ fontWeight:700, fontSize:14, color:C.walnut, margin:"0 0 2px" }}>{profile?.name||"Your"}'s plan</p>
                         <p style={{ fontSize:12, color:C.muted, margin:0 }}>{new Date(plan.created_at).toLocaleDateString("en-GB",{ day:"numeric", month:"short", year:"numeric" })}</p>
@@ -861,8 +877,8 @@ export default function Nourishly() {
         {tab==="plan"&&(
           mealPlan?(
             <div>
-              <div style={{ background:C.card, borderRadius:16, border:`1px solid ${C.border}`, padding:"16px 18px", marginBottom:16 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:12 }}>
+              <div style={{ background:C.card, borderRadius:R.lg, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"18px 20px", marginBottom:20 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
                   <Icon name="chart" size={14} color={C.muted}/>
                   <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:0 }}>Weekly nutrition totals</p>
                 </div>
@@ -875,7 +891,7 @@ export default function Nourishly() {
                       <NChip label="Fat" value={`${totalN?.fat}g`} color={C.muted}/>
                     </>
                   ) : (
-                    <div style={{ flex:3, background:C.clayLight, borderRadius:12, padding:"10px 12px", display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}>
+                    <div style={{ flex:3, background:C.clayLight, borderRadius:R.sm, padding:"10px 12px", display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}>
                       <Icon name="checkCircle" size={13} color={C.clay}/>
                       <span style={{ fontSize:11, color:C.clay, fontWeight:700 }}>Full nutrition on Plus</span>
                     </div>
@@ -884,18 +900,18 @@ export default function Nourishly() {
               </div>
               {mealPlan.days?.map(meal=>(
                 <div key={meal.day} style={{ position:"relative" }}>
-                  {swappingMeal===meal.day&&<div style={{ position:"absolute", inset:0, background:"rgba(232,221,208,0.88)", borderRadius:20, display:"flex", alignItems:"center", justifyContent:"center", zIndex:10 }}><p style={{ color:C.clay, fontWeight:700, fontSize:14 }}>Finding alternative...</p></div>}
+                  {swappingMeal===meal.day&&<div style={{ position:"absolute", inset:0, background:"rgba(232,221,208,0.88)", borderRadius:R.xl, display:"flex", alignItems:"center", justifyContent:"center", zIndex:10 }}><p style={{ color:C.clay, fontWeight:700, fontSize:14 }}>Finding alternative...</p></div>}
                   <MealCard meal={meal} onSwap={handleSwap} onMarkTried={handleMarkTried} triedMeals={triedMeals} isPaid={profile?.subscription_status==="active"}/>
                 </div>
               ))}
-              <button onClick={()=>{ setMealPlan(null); setTab("home"); }} style={{ width:"100%", padding:"13px 0", marginTop:8, background:"none", color:C.clay, border:`2px solid ${C.clay}`, borderRadius:12, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit" }}>Generate a new plan</button>
+              <button onClick={()=>{ setMealPlan(null); setTab("home"); }} className="btn-press" style={{ width:"100%", padding:"14px 0", marginTop:10, background:"none", color:C.clay, border:`2px solid ${C.clay}`, borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit" }}>Generate a new plan</button>
             </div>
           ):(
-            <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:"48px 24px", textAlign:"center" }}>
-              <div style={{ width:64, height:64, borderRadius:18, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 18px" }}><Icon name="calendar" size={28} color={C.clay}/></div>
+            <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"56px 28px", textAlign:"center" }}>
+              <div style={{ width:64, height:64, borderRadius:R.lg, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}><Icon name="calendar" size={28} color={C.clay}/></div>
               <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>No meal plan yet</p>
-              <p style={{ fontSize:14, color:C.muted, margin:"0 0 20px" }}>Head to Home and build your first week of dinners.</p>
-              <button onClick={()=>setTab("home")} style={{ padding:"12px 28px", background:C.clay, color:"#fff", border:"none", borderRadius:11, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit" }}>Go to Home</button>
+              <p style={{ fontSize:14, color:C.muted, margin:"0 0 22px" }}>Head to Home and build your first week of dinners.</p>
+              <button onClick={()=>setTab("home")} className="btn-press" style={{ padding:"13px 28px", background:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>Go to Home</button>
             </div>
           )
         )}
@@ -903,20 +919,20 @@ export default function Nourishly() {
         {/* SHOPPING */}
         {tab==="shopping"&&(
           profile?.subscription_status!=="active" ? (
-            <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:"48px 24px", textAlign:"center" }}>
-              <div style={{ width:64, height:64, borderRadius:18, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 18px" }}><Icon name="cart" size={28} color={C.clay}/></div>
+            <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"56px 28px", textAlign:"center" }}>
+              <div style={{ width:64, height:64, borderRadius:R.lg, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}><Icon name="cart" size={28} color={C.clay}/></div>
               <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>Shopping lists are a Plus feature</p>
-              <p style={{ fontSize:14, color:C.muted, margin:"0 0 20px" }}>Upgrade to Nourishly Plus for an automatic, organised shopping list every week.</p>
-              <button onClick={handleUpgrade} disabled={upgrading} style={{ padding:"12px 28px", background:C.clay, color:"#fff", border:"none", borderRadius:11, fontSize:14, fontWeight:800, cursor:upgrading?"not-allowed":"pointer", fontFamily:"inherit" }}>
+              <p style={{ fontSize:14, color:C.muted, margin:"0 0 22px" }}>Upgrade to Nourishly Plus for an automatic, organised shopping list every week.</p>
+              <button onClick={handleUpgrade} disabled={upgrading} className="btn-press" style={{ padding:"13px 28px", background:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:upgrading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>
                 {upgrading ? "Redirecting..." : "Upgrade — €7.99/mo"}
               </button>
             </div>
           ) : mealPlan?<ShoppingList days={mealPlan.days}/>:(
-            <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:"48px 24px", textAlign:"center" }}>
-              <div style={{ width:64, height:64, borderRadius:18, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 18px" }}><Icon name="cart" size={28} color={C.clay}/></div>
+            <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"56px 28px", textAlign:"center" }}>
+              <div style={{ width:64, height:64, borderRadius:R.lg, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}><Icon name="cart" size={28} color={C.clay}/></div>
               <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>No shopping list yet</p>
-              <p style={{ fontSize:14, color:C.muted, margin:"0 0 20px" }}>Generate a meal plan and your list appears here.</p>
-              <button onClick={()=>setTab("home")} style={{ padding:"12px 28px", background:C.clay, color:"#fff", border:"none", borderRadius:11, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit" }}>Build a plan</button>
+              <p style={{ fontSize:14, color:C.muted, margin:"0 0 22px" }}>Generate a meal plan and your list appears here.</p>
+              <button onClick={()=>setTab("home")} className="btn-press" style={{ padding:"13px 28px", background:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>Build a plan</button>
             </div>
           )
         )}
@@ -927,13 +943,13 @@ export default function Nourishly() {
             <div>
               <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 12px" }}>{savedPlans.length} saved {savedPlans.length===1?"plan":"plans"}</p>
               {savedPlans.map((plan,i)=>(
-                <div key={i} style={{ background:C.card, borderRadius:16, border:`1px solid ${C.border}`, padding:"16px 18px", marginBottom:12 }}>
-                  <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:10 }}>
+                <div key={i} style={{ background:C.card, borderRadius:R.lg, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"18px 20px", marginBottom:14 }}>
+                  <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:12 }}>
                     <div>
                       <p style={{ fontWeight:800, fontSize:15, color:C.walnut, margin:"0 0 3px" }}>{profile?.name||"Your"}'s meal plan</p>
                       <p style={{ fontSize:12, color:C.muted, margin:0 }}>{new Date(plan.created_at).toLocaleDateString("en-GB",{ day:"numeric", month:"short", year:"numeric" })}</p>
                     </div>
-                    <button onClick={()=>{ setMealPlan({days:plan.days}); setTriedMeals([]); setTab("plan"); }} style={{ background:C.clayLight, color:C.clay, border:"none", borderRadius:9, padding:"7px 14px", fontSize:12, fontWeight:800, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:4 }}>View<Icon name="chevronRight" size={13} color={C.clay}/></button>
+                    <button onClick={()=>{ setMealPlan({days:plan.days}); setTriedMeals([]); setTab("plan"); }} className="btn-press" style={{ background:C.clayLight, color:C.clay, border:"none", borderRadius:R.sm, padding:"8px 14px", fontSize:12, fontWeight:800, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:4 }}>View<Icon name="chevronRight" size={13} color={C.clay}/></button>
                   </div>
                   <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
                     {plan.days?.slice(0,5).map((d,j)=><span key={j} style={{ background:C.bg, color:C.muted, fontSize:11, padding:"3px 9px", borderRadius:20, border:`1px solid ${C.border}` }}>{d.name}</span>)}
@@ -943,11 +959,11 @@ export default function Nourishly() {
               ))}
             </div>
           ):(
-            <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:"48px 24px", textAlign:"center" }}>
-              <div style={{ width:64, height:64, borderRadius:18, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 18px" }}><Icon name="bookmark" size={28} color={C.clay}/></div>
+            <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"56px 28px", textAlign:"center" }}>
+              <div style={{ width:64, height:64, borderRadius:R.lg, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}><Icon name="bookmark" size={28} color={C.clay}/></div>
               <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>No saved plans yet</p>
-              <p style={{ fontSize:14, color:C.muted, margin:"0 0 20px" }}>Your plans save automatically every time you generate one.</p>
-              <button onClick={()=>setTab("home")} style={{ padding:"12px 28px", background:C.clay, color:"#fff", border:"none", borderRadius:11, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit" }}>Create first plan</button>
+              <p style={{ fontSize:14, color:C.muted, margin:"0 0 22px" }}>Your plans save automatically every time you generate one.</p>
+              <button onClick={()=>setTab("home")} className="btn-press" style={{ padding:"13px 28px", background:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>Create first plan</button>
             </div>
           )
         )}
@@ -957,8 +973,8 @@ export default function Nourishly() {
           <div>
 
             {/* ── Account info (read-only, from profile/session state) ── */}
-            <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:"20px", marginBottom:16, display:"flex", alignItems:"center", gap:14 }}>
-              <div style={{ width:52, height:52, borderRadius:14, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}><Icon name="user" size={26} color={C.clay}/></div>
+            <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"22px", marginBottom:20, display:"flex", alignItems:"center", gap:16 }}>
+              <div style={{ width:52, height:52, borderRadius:R.md, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}><Icon name="user" size={26} color={C.clay}/></div>
               <div>
                 <p style={{ fontWeight:800, fontSize:16, color:C.walnut, margin:"0 0 3px" }}>{profile?.name||"Your account"}</p>
                 <p style={{ fontSize:13, color:C.muted, margin:0 }}>{profile?.email||session?.user?.email||""}</p>
@@ -967,25 +983,25 @@ export default function Nourishly() {
 
             {/* ── Subscription status (moved from Home) ── */}
             {profile?.subscription_status === "active" ? (
-              <div style={{ background:C.clay, borderRadius:16, padding:"14px 18px", marginBottom:16 }}>
-                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:10 }}>
+              <div style={{ background:C.clay, borderRadius:R.lg, boxShadow:SHADOW.card, padding:"16px 20px", marginBottom:20 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
                   <Icon name="checkCircle" size={18} active color="#fff"/>
                   <p style={{ color:"#fff", fontSize:13, fontWeight:700, margin:0 }}>Nourishly Plus — unlimited plans unlocked</p>
                 </div>
-                <button onClick={handleManageSubscription} disabled={managingSubscription} style={{ width:"100%", padding:"9px 0", background:"rgba(255,255,255,0.15)", color:"#fff", border:"1px solid rgba(255,255,255,0.3)", borderRadius:10, fontSize:12, fontWeight:700, cursor:managingSubscription?"not-allowed":"pointer", fontFamily:"inherit" }}>
+                <button onClick={handleManageSubscription} disabled={managingSubscription} className="btn-press" style={{ width:"100%", padding:"10px 0", background:"rgba(255,255,255,0.15)", color:"#fff", border:"1px solid rgba(255,255,255,0.3)", borderRadius:R.md, fontSize:12, fontWeight:700, cursor:managingSubscription?"not-allowed":"pointer", fontFamily:"inherit" }}>
                   {managingSubscription ? "Redirecting..." : "Manage subscription"}
                 </button>
               </div>
             ) : (
-              <div style={{ background:C.card, border:`1.5px solid ${C.border}`, borderRadius:16, padding:"14px 18px", marginBottom:16 }}>
-                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:8 }}>
+              <div style={{ background:C.card, border:`1.5px solid ${C.border}`, borderRadius:R.lg, boxShadow:SHADOW.card, padding:"16px 20px", marginBottom:20 }}>
+                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
                   <p style={{ fontSize:13, fontWeight:700, color:C.walnut, margin:0 }}>Free plan</p>
                   <p style={{ fontSize:12, color:C.muted, margin:0 }}>{profile?.generations_used_this_month||0}/2 plans used this month</p>
                 </div>
-                <div style={{ background:C.bg, borderRadius:4, height:6, overflow:"hidden", marginBottom:12 }}>
+                <div style={{ background:C.bg, borderRadius:4, height:6, overflow:"hidden", marginBottom:14 }}>
                   <div style={{ height:"100%", width:`${Math.min(100,((profile?.generations_used_this_month||0)/2)*100)}%`, background:C.clay, borderRadius:4, transition:"width 0.3s" }}/>
                 </div>
-                <button onClick={handleUpgrade} disabled={upgrading} style={{ width:"100%", padding:"11px 0", background:C.clay, color:"#fff", border:"none", borderRadius:10, fontSize:13, fontWeight:800, cursor:upgrading?"not-allowed":"pointer", fontFamily:"inherit" }}>
+                <button onClick={handleUpgrade} disabled={upgrading} className="btn-press" style={{ width:"100%", padding:"12px 0", background:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:13, fontWeight:800, cursor:upgrading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>
                   {upgrading ? "Redirecting to checkout..." : "Upgrade to Nourishly Plus — €7.99/mo"}
                 </button>
               </div>
@@ -993,15 +1009,15 @@ export default function Nourishly() {
 
             {/* ── Edit preferences: family size / allergies / cook time ──
                  Saves straight to `profiles`; does NOT generate a new plan. */}
-            <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:"20px", marginBottom:16 }}>
-              <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 16px" }}>Preferences</p>
+            <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"22px", marginBottom:20 }}>
+              <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 18px" }}>Preferences</p>
               {[{label:"Family size",name:"familySize",placeholder:"e.g. 4",type:"number"},{label:"Allergies or restrictions",name:"allergies",placeholder:"e.g. no nuts — or leave blank",type:"text"},{label:"Weeknight cook time",name:"cookTime",placeholder:"e.g. 30 minutes",type:"text"}].map(field=>(
-                <div key={field.name} style={{ marginBottom:14 }}>
+                <div key={field.name} style={{ marginBottom:16 }}>
                   <label style={lbl}>{field.label}</label>
                   <input type={field.type} placeholder={field.placeholder} value={form[field.name]} onChange={e=>{ setForm(f=>({...f,[field.name]:e.target.value})); setPrefsSaved(false); }} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/>
                 </div>
               ))}
-              <button onClick={handleSavePreferences} disabled={savingPrefs} style={{ width:"100%", padding:"12px 0", background:savingPrefs?C.muted:C.clay, color:"#fff", border:"none", borderRadius:10, fontSize:13, fontWeight:800, cursor:savingPrefs?"not-allowed":"pointer", fontFamily:"inherit" }}>
+              <button onClick={handleSavePreferences} disabled={savingPrefs} className="btn-press" style={{ width:"100%", padding:"13px 0", background:savingPrefs?C.muted:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:13, fontWeight:800, cursor:savingPrefs?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:savingPrefs?"none":SHADOW.button }}>
                 {savingPrefs ? "Saving..." : prefsSaved ? "Saved ✓" : "Save preferences"}
               </button>
             </div>
@@ -1009,41 +1025,44 @@ export default function Nourishly() {
             {/* ── Change password ──
                  Verifies the current password via sign-in, then calls Supabase's
                  auth/v1/user endpoint — both checked with the __ok pattern. */}
-            <div style={{ background:C.card, borderRadius:20, border:`1px solid ${C.border}`, padding:"20px", marginBottom:16 }}>
-              <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 16px" }}>Change password</p>
-              <div style={{ marginBottom:14 }}>
+            <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"22px", marginBottom:20 }}>
+              <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 18px" }}>Change password</p>
+              <div style={{ marginBottom:16 }}>
                 <label style={lbl}>Current password</label>
                 <input type="password" placeholder="••••••••" value={pwForm.current} onChange={e=>setPwForm(f=>({...f,current:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/>
               </div>
-              <div style={{ marginBottom:14 }}>
+              <div style={{ marginBottom:16 }}>
                 <label style={lbl}>New password</label>
                 <input type="password" placeholder="••••••••" value={pwForm.next} onChange={e=>setPwForm(f=>({...f,next:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/>
               </div>
-              <div style={{ marginBottom:14 }}>
+              <div style={{ marginBottom:16 }}>
                 <label style={lbl}>Confirm new password</label>
                 <input type="password" placeholder="••••••••" value={pwForm.confirm} onChange={e=>setPwForm(f=>({...f,confirm:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/>
               </div>
-              {pwError&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:10, padding:"10px 14px", marginBottom:14, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{pwError}</p></div>}
-              {pwMessage&&<div style={{ background:C.sageLight, borderRadius:10, padding:"10px 14px", marginBottom:14, display:"flex", gap:8 }}><Icon name="checkCircle" size={15} active color={C.sage}/><p style={{ color:C.sage, fontSize:13, margin:0 }}>{pwMessage}</p></div>}
-              <button onClick={handleChangePassword} disabled={pwLoading} style={{ width:"100%", padding:"12px 0", background:pwLoading?C.muted:C.clay, color:"#fff", border:"none", borderRadius:10, fontSize:13, fontWeight:800, cursor:pwLoading?"not-allowed":"pointer", fontFamily:"inherit" }}>
+              {pwError&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:R.md, padding:"10px 14px", marginBottom:16, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{pwError}</p></div>}
+              {pwMessage&&<div style={{ background:C.sageLight, borderRadius:R.md, padding:"10px 14px", marginBottom:16, display:"flex", gap:8 }}><Icon name="checkCircle" size={15} active color={C.sage}/><p style={{ color:C.sage, fontSize:13, margin:0 }}>{pwMessage}</p></div>}
+              <button onClick={handleChangePassword} disabled={pwLoading} className="btn-press" style={{ width:"100%", padding:"13px 0", background:pwLoading?C.muted:C.clay, color:"#fff", border:"none", borderRadius:R.md, fontSize:13, fontWeight:800, cursor:pwLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:pwLoading?"none":SHADOW.button }}>
                 {pwLoading ? "Updating..." : "Update password"}
               </button>
             </div>
 
             {/* ── Logout ── */}
-            <button onClick={handleLogout} style={{ width:"100%", padding:"13px 0", background:"none", color:C.walnut, border:`1.5px solid ${C.border}`, borderRadius:12, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+            <button onClick={handleLogout} className="btn-press" style={{ width:"100%", padding:"14px 0", background:"none", color:C.walnut, border:`1.5px solid ${C.border}`, borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
               <Icon name="logout" size={16} color={C.walnut}/>Log out
             </button>
           </div>
         )}
+        </Fade>
       </div>
 
       {/* Bottom nav */}
       <div style={{ position:"fixed", bottom:0, left:0, right:0, background:C.clay, borderTop:"1px solid rgba(255,255,255,0.15)", display:"flex", padding:"10px 0 14px", zIndex:100, boxShadow:"0 -4px 20px rgba(44,24,16,0.08)" }}>
         {tabs.map(t=>(
-          <button key={t.id} onClick={()=>setTab(t.id)} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4, background:"none", border:"none", cursor:"pointer", padding:"2px 0", fontFamily:"inherit" }}>
-            <Icon name={t.icon} size={21} active={tab===t.id} color={tab===t.id?"#fff":"rgba(255,255,255,0.65)"}/>
-            <span style={{ fontSize:10, fontWeight:tab===t.id?800:500, color:tab===t.id?"#fff":"rgba(255,255,255,0.65)" }}>{t.label}</span>
+          <button key={t.id} onClick={()=>setTab(t.id)} className="btn-press" style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4, background:"none", border:"none", cursor:"pointer", padding:"2px 0", fontFamily:"inherit" }}>
+            <span style={{ display:"inline-flex", transition:"transform 0.2s cubic-bezier(0.4,0,0.2,1)", transform:tab===t.id?"scale(1.08) translateY(-1px)":"scale(1)" }}>
+              <Icon name={t.icon} size={21} active={tab===t.id} color={tab===t.id?"#fff":"rgba(255,255,255,0.65)"}/>
+            </span>
+            <span style={{ fontSize:10, fontWeight:tab===t.id?800:500, color:tab===t.id?"#fff":"rgba(255,255,255,0.65)", transition:"color 0.2s ease, font-weight 0.2s ease" }}>{t.label}</span>
           </button>
         ))}
       </div>
