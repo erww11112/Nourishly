@@ -790,7 +790,7 @@ export default function Nourishly() {
   // ── Main app ──
   return (
     <div style={{ background:C.bg, minHeight:"100vh", fontFamily:"system-ui,-apple-system,sans-serif" }}>
-      <div style={{ background:`linear-gradient(135deg,${C.walnut} 0%,#5C2E1A 100%)`, padding:"18px 20px 0" }}>
+      <div style={{ background:C.clay, padding:"18px 20px 0" }}>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", paddingBottom:18 }}>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
             <Logo size={36}/>
@@ -1039,11 +1039,11 @@ export default function Nourishly() {
       </div>
 
       {/* Bottom nav */}
-      <div style={{ position:"fixed", bottom:0, left:0, right:0, background:C.card, borderTop:`1px solid ${C.border}`, display:"flex", padding:"10px 0 14px", zIndex:100, boxShadow:"0 -4px 20px rgba(44,24,16,0.08)" }}>
+      <div style={{ position:"fixed", bottom:0, left:0, right:0, background:C.clay, borderTop:"1px solid rgba(255,255,255,0.15)", display:"flex", padding:"10px 0 14px", zIndex:100, boxShadow:"0 -4px 20px rgba(44,24,16,0.08)" }}>
         {tabs.map(t=>(
           <button key={t.id} onClick={()=>setTab(t.id)} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4, background:"none", border:"none", cursor:"pointer", padding:"2px 0", fontFamily:"inherit" }}>
-            <Icon name={t.icon} size={21} active={tab===t.id}/>
-            <span style={{ fontSize:10, fontWeight:tab===t.id?800:500, color:tab===t.id?C.clay:C.muted }}>{t.label}</span>
+            <Icon name={t.icon} size={21} active={tab===t.id} color={tab===t.id?"#fff":"rgba(255,255,255,0.65)"}/>
+            <span style={{ fontSize:10, fontWeight:tab===t.id?800:500, color:tab===t.id?"#fff":"rgba(255,255,255,0.65)" }}>{t.label}</span>
           </button>
         ))}
       </div>
