@@ -393,19 +393,6 @@ function Onboarding({ onComplete }) {
   );
 }
 
-// ── Stat card ──────────────────────────────────────────────────────────────
-function StatCard({ icon, value, label, accent }) {
-  return (
-    <div style={{ flex:1, background:C.card, borderRadius:R.lg, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"16px 10px", textAlign:"center" }}>
-      <div style={{ width:32, height:32, borderRadius:R.sm, background:accent?C.clayLight:C.sageLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 10px" }}>
-        <Icon name={icon} size={16} color={accent?C.clay:C.sage} />
-      </div>
-      <p style={{ fontWeight:900, fontSize:18, color:C.walnut, margin:"0 0 2px" }}>{value}</p>
-      <p style={{ fontSize:10, color:C.muted, margin:0, textTransform:"uppercase", letterSpacing:"0.05em" }}>{label}</p>
-    </div>
-  );
-}
-
 function NChip({ label, value, color }) {
   return (
     <div style={{ flex:1, background:C.bg, borderRadius:R.sm, padding:"11px 8px", textAlign:"center", border:`1px solid ${C.border}` }}>
@@ -831,13 +818,6 @@ export default function Nourishly() {
         {/* HOME */}
         {tab==="home"&&(
           <div>
-            {savedPlans.length>0&&(
-              <div style={{ display:"flex", gap:12, marginBottom:20 }}>
-                <StatCard icon="bookmark" value={savedPlans.length} label="Plans" accent/>
-                <StatCard icon="calendar" value={savedPlans.length*7} label="Meals"/>
-                <StatCard icon="users" value={form.familySize||"–"} label="Family"/>
-              </div>
-            )}
             <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"26px 22px", marginBottom:20 }}>
               <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:22 }}>
                 <div style={{ width:40, height:40, borderRadius:R.sm, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center" }}><Icon name="calendar" size={20} color={C.clay}/></div>
