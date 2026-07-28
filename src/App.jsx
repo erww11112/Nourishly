@@ -39,6 +39,8 @@ const sb = {
   signIn: async (e,p) => { const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},body:JSON.stringify({email:e,password:p})}); const d = await r.json(); return { ...d, __ok: r.ok, __status: r.status }; },
   refresh: async (refreshToken) => { const r = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},body:JSON.stringify({refresh_token:refreshToken})}); const d = await r.json(); return { ...d, __ok: r.ok, __status: r.status }; },
   updateUser: async (token,body) => { const r = await fetch(`${SUPABASE_URL}/auth/v1/user`,{method:"PUT",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY,"Authorization":`Bearer ${token}`},body:JSON.stringify(body)}); const d = await r.json(); return { ...d, __ok: r.ok, __status: r.status }; },
+  recover: async (e) => { const r = await fetch(`${SUPABASE_URL}/auth/v1/recover`,{method:"POST",headers:{"Content-Type":"application/json","apikey":SUPABASE_ANON_KEY},body:JSON.stringify({email:e})}); const d = await r.json(); return { ...d, __ok: r.ok, __status: r.status }; },
+  getUser: async (token) => { const r = await fetch(`${SUPABASE_URL}/auth/v1/user`,{headers:{"apikey":SUPABASE_ANON_KEY,"Authorization":`Bearer ${token}`}}); const d = await r.json(); return { ...d, __ok: r.ok, __status: r.status }; },
   from: async (table,t) => ({
     select: async (f="") => (await fetch(`${SUPABASE_URL}/rest/v1/${table}?${f}&order=created_at.desc`,{headers:sbH(t)})).json(),
     insert: async (d) => { const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:"POST",headers:sbH(t),body:JSON.stringify(d)}); const body=await r.json(); body.__ok=r.ok; body.__status=r.status; return body; },
@@ -553,7 +555,32 @@ export default function Nourishly() {
   const [error, setError] = useState("");
   const [swappingMeal, setSwappingMeal] = useState(null);
 
+  const [forgotForm, setForgotForm] = useState({ email:"" });
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError] = useState("");
+  const [forgotSent, setForgotSent] = useState(false);
+
+  const [resetSession, setResetSession] = useState(null);
+  const [resetForm, setResetForm] = useState({ password:"", confirm:"" });
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState("");
+
   useEffect(()=>{
+    const hash=window.location.hash;
+    if(hash&&hash.includes("type=recovery")&&hash.includes("access_token=")){
+      const params=new URLSearchParams(hash.slice(1));
+      const accessToken=params.get("access_token");
+      const refreshToken=params.get("refresh_token");
+      window.history.replaceState(null,"",window.location.pathname+window.location.search);
+      if(accessToken){
+        (async()=>{
+          const u=await sb.getUser(accessToken);
+          if(u.__ok){ setResetSession({ access_token:accessToken, refresh_token:refreshToken, user:u }); setScreen("resetPassword"); }
+          else setScreen("slides");
+        })();
+        return;
+      }
+    }
     const t=setTimeout(()=>{
       if(session?.access_token){ setScreen("app"); loadProfile(session,session.user.id); }
       else setScreen("slides");
@@ -600,6 +627,34 @@ export default function Nourishly() {
       }
     }catch(e){ setError(e.message||"Something went wrong."); }
     finally{ setAuthLoading(false); }
+  };
+
+  const handleForgotPassword=async()=>{
+    if(!forgotForm.email){ setForgotError("Please enter your email."); return; }
+    setForgotLoading(true); setForgotError("");
+    try{
+      const data=await sb.recover(forgotForm.email);
+      if(!data.__ok||data.error||data.error_description) throw new Error(data.error_description||data.error?.message||data.msg||"Couldn't send reset email. Please try again.");
+      setForgotSent(true);
+    }catch(e){ setForgotError(e.message||"Something went wrong."); }
+    finally{ setForgotLoading(false); }
+  };
+
+  const handleSetNewPassword=async()=>{
+    setResetError("");
+    if(!resetForm.password||!resetForm.confirm){ setResetError("Please fill in both fields."); return; }
+    if(resetForm.password.length<6){ setResetError("Password must be at least 6 characters."); return; }
+    if(resetForm.password!==resetForm.confirm){ setResetError("Passwords don't match."); return; }
+    setResetLoading(true);
+    try{
+      const result=await sb.updateUser(resetSession.access_token,{ password:resetForm.password });
+      if(!result.__ok||result.error||result.error_description) throw new Error(result.msg||result.error_description||result.error?.message||"Couldn't update your password.");
+      const newSession={ access_token:resetSession.access_token, refresh_token:resetSession.refresh_token, user:result };
+      saveSession(newSession);
+      setScreen("app");
+      loadProfile(newSession,newSession.user.id);
+    }catch(e){ setResetError(e.message||"Something went wrong."); }
+    finally{ setResetLoading(false); }
   };
 
   const handleGenerate=async(overrideForm, overrideSession)=>{
@@ -775,19 +830,66 @@ export default function Nourishly() {
           </div>
         )}
         <div style={{ background:C.card, borderRadius:R.xl, padding:"28px 22px", border:`1px solid ${C.border}`, boxShadow:SHADOW.raised }}>
-          <div style={{ display:"flex", background:C.bg, borderRadius:R.md, padding:4, marginBottom:24 }}>
-            {[["signup","Create account"],["login","Sign in"]].map(([mode,label])=>(
-              <button key={mode} onClick={()=>{ setAuthMode(mode); setError(""); }} className="btn-press" style={{ flex:1, padding:"9px 0", borderRadius:R.sm, border:"none", cursor:"pointer", fontWeight:700, fontSize:13, fontFamily:"inherit", background:authMode===mode?C.card:"transparent", color:authMode===mode?C.walnut:C.muted, boxShadow:authMode===mode?"0 2px 8px rgba(44,24,16,0.1)":"none", transition:"all 0.15s" }}>{label}</button>
-            ))}
-          </div>
-          {authMode==="signup"&&<div style={{ marginBottom:16 }}><label style={lbl}>Your name</label><input type="text" placeholder="e.g. Maria" value={authForm.name} onChange={e=>setAuthForm(f=>({...f,name:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>}
-          <div style={{ marginBottom:16 }}><label style={lbl}>Email</label><input type="email" placeholder="you@email.com" value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
-          <div style={{ marginBottom:24 }}><label style={lbl}>Password</label><input type="password" placeholder="••••••••" value={authForm.password} onChange={e=>setAuthForm(f=>({...f,password:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
-          {error&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:R.md, padding:"10px 14px", marginBottom:18, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{error}</p></div>}
-          <button onClick={handleAuth} disabled={authLoading} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(authLoading?C.muted:C.clay), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:authLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:authLoading?"none":SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center" }}>
-            {authLoading?"Please wait...":authMode==="signup"?"Start planning":"Welcome back"}
+          {authMode==="forgot" ? (
+            <>
+              <p style={{ fontWeight:800, fontSize:16, color:C.walnut, margin:"0 0 4px" }}>Reset your password</p>
+              <p style={{ fontSize:13, color:C.muted, margin:"0 0 20px" }}>Enter your email and we'll send you a reset link.</p>
+              {forgotSent ? (
+                <div style={{ background:C.sageLight, border:"1px solid #B8CDB4", borderRadius:R.md, padding:"14px 16px", marginBottom:18, display:"flex", gap:8 }}>
+                  <Icon name="checkCircle" size={15} active color={C.sage}/>
+                  <p style={{ color:C.sage, fontSize:13, margin:0, lineHeight:1.5 }}>Check your email for a reset link.</p>
+                </div>
+              ) : (
+                <>
+                  <div style={{ marginBottom:20 }}><label style={lbl}>Email</label><input type="email" placeholder="you@email.com" value={forgotForm.email} onChange={e=>setForgotForm({ email:e.target.value })} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
+                  {forgotError&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:R.md, padding:"10px 14px", marginBottom:18, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{forgotError}</p></div>}
+                  <button onClick={handleForgotPassword} disabled={forgotLoading} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(forgotLoading?C.muted:C.clay), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:forgotLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:forgotLoading?"none":SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                    {forgotLoading?"Sending...":"Send reset link"}
+                  </button>
+                </>
+              )}
+              <button onClick={()=>{ setAuthMode("login"); setForgotError(""); setForgotSent(false); }} className="btn-press" style={{ width:"100%", padding:"12px 0", marginTop:14, background:"none", color:C.muted, border:"none", cursor:"pointer", fontWeight:700, fontSize:13, fontFamily:"inherit" }}>Back to sign in</button>
+            </>
+          ) : (
+            <>
+              <div style={{ display:"flex", background:C.bg, borderRadius:R.md, padding:4, marginBottom:24 }}>
+                {[["signup","Create account"],["login","Sign in"]].map(([mode,label])=>(
+                  <button key={mode} onClick={()=>{ setAuthMode(mode); setError(""); }} className="btn-press" style={{ flex:1, padding:"9px 0", borderRadius:R.sm, border:"none", cursor:"pointer", fontWeight:700, fontSize:13, fontFamily:"inherit", background:authMode===mode?C.card:"transparent", color:authMode===mode?C.walnut:C.muted, boxShadow:authMode===mode?"0 2px 8px rgba(44,24,16,0.1)":"none", transition:"all 0.15s" }}>{label}</button>
+                ))}
+              </div>
+              {authMode==="signup"&&<div style={{ marginBottom:16 }}><label style={lbl}>Your name</label><input type="text" placeholder="e.g. Maria" value={authForm.name} onChange={e=>setAuthForm(f=>({...f,name:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>}
+              <div style={{ marginBottom:16 }}><label style={lbl}>Email</label><input type="email" placeholder="you@email.com" value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
+              <div style={{ marginBottom:authMode==="login"?10:24 }}><label style={lbl}>Password</label><input type="password" placeholder="••••••••" value={authForm.password} onChange={e=>setAuthForm(f=>({...f,password:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
+              {authMode==="login"&&<div style={{ textAlign:"right", marginBottom:14 }}><button onClick={()=>{ setAuthMode("forgot"); setError(""); setForgotSent(false); setForgotError(""); setForgotForm({ email:authForm.email||"" }); }} className="btn-press" style={{ background:"none", border:"none", cursor:"pointer", color:C.clay, fontSize:12.5, fontWeight:700, fontFamily:"inherit", padding:0 }}>Forgot password?</button></div>}
+              {error&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:R.md, padding:"10px 14px", marginBottom:18, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{error}</p></div>}
+              <button onClick={handleAuth} disabled={authLoading} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(authLoading?C.muted:C.clay), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:authLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:authLoading?"none":SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                {authLoading?"Please wait...":authMode==="signup"?"Start planning":"Welcome back"}
+              </button>
+              <p style={{ textAlign:"center", color:C.muted, fontSize:12, margin:"14px 0 0" }}>Your data stays private · No credit card needed</p>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  if(screen==="resetPassword") return (
+    <div style={{ background:C.bg, minHeight:"100vh", fontFamily:FONT }}>
+      <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#7A3018 45%,${C.clay} 100%)`, padding:"48px 24px 0", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:0, marginBottom:0, backgroundColor:C.clay }}>
+        <Logo size={60} ring/>
+        <h1 style={{ color:"#fff", fontSize:26, fontWeight:900, margin:"16px 0 6px", letterSpacing:"-0.5px" }}>Nourishly</h1>
+        <p style={{ color:"rgba(255,255,255,0.6)", fontSize:13, margin:"0 0 0" }}>Set your new password</p>
+        <InlineWave bgColor={C.bg} />
+      </div>
+      <div style={{ maxWidth:420, margin:"0 auto", padding:"0 20px 48px" }}>
+        <div style={{ background:C.card, borderRadius:R.xl, padding:"28px 22px", border:`1px solid ${C.border}`, boxShadow:SHADOW.raised }}>
+          <p style={{ fontWeight:800, fontSize:16, color:C.walnut, margin:"0 0 20px" }}>Choose a new password</p>
+          <div style={{ marginBottom:16 }}><label style={lbl}>New password</label><input type="password" placeholder="••••••••" value={resetForm.password} onChange={e=>setResetForm(f=>({...f,password:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
+          <div style={{ marginBottom:24 }}><label style={lbl}>Confirm new password</label><input type="password" placeholder="••••••••" value={resetForm.confirm} onChange={e=>setResetForm(f=>({...f,confirm:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
+          {resetError&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:R.md, padding:"10px 14px", marginBottom:18, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{resetError}</p></div>}
+          <button onClick={handleSetNewPassword} disabled={resetLoading} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(resetLoading?C.muted:C.clay), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:resetLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:resetLoading?"none":SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center" }}>
+            {resetLoading?"Please wait...":"Set new password"}
           </button>
-          <p style={{ textAlign:"center", color:C.muted, fontSize:12, margin:"14px 0 0" }}>Your data stays private · No credit card needed</p>
         </div>
       </div>
     </div>
