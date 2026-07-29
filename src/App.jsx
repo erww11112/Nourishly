@@ -135,8 +135,8 @@ const MEAL_IMAGES = {
     "https://images.unsplash.com/photo-1622973536968-3ead9e780960?w=800&q=80",
   ],
   chicken: [
-    "https://images.unsplash.com/photo-1598103442097-8b74394b95c1?w=800&q=80",
-    "https://images.unsplash.com/photo-1598103442097-8b74394b95c1?w=800&q=80",
+    "https://images.unsplash.com/photo-1616401616927-3c81de22dfa8?w=800&q=80",
+    "https://images.unsplash.com/photo-1602534923950-d2c7e6be0ca0?w=800&q=80",
   ],
   salad: [
     "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80",
@@ -148,7 +148,7 @@ const MEAL_IMAGES = {
   ],
   curry: [
     "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80",
-    "https://images.unsplash.com/photo-1604579278540-ba7c1b297250?w=800&q=80",
+    "https://images.unsplash.com/photo-1710091691780-c7eb0dc50cf8?w=800&q=80",
   ],
   taco: [
     "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=800&q=80",
@@ -196,7 +196,7 @@ const MEAL_IMAGES = {
   ],
   eggs: [
     "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800&q=80",
-    "https://images.unsplash.com/photo-1607103058027-4c5c8e2b5c92?w=800&q=80",
+    "https://images.unsplash.com/photo-1494597706938-de2cd7341979?w=800&q=80",
   ],
   default: [
     "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80",
@@ -669,7 +669,9 @@ export default function Nourishly() {
     const userName=profile?.name||sess?.user?.email?.split("@")[0]||"your family";
     console.log("[nourishly] handleGenerate start", { hasToken:!!token, userId, usedOverrideSession:!!overrideSession });
     if(token&&userId){ try{ const r=await(await sb.from("profiles",token)).update({ family_size:parseInt(f.familySize), allergies:f.allergies, cook_time:f.cookTime },`id=eq.${userId}`); if(!r.__ok) console.error("[nourishly] failed to update profile family_size/allergies/cook_time", r); }catch(e){ console.error("[nourishly] error updating profile family_size/allergies/cook_time", e); } }
-    const prompt=`You are a friendly expert meal planning assistant. Generate a Monday to Sunday dinner plan for ${userName}'s family of ${f.familySize}. Allergies: ${f.allergies||"none"}. Cook time: ${f.cookTime}. Return ONLY valid JSON, no markdown:\n{"days":[{"day":"Monday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Tuesday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Wednesday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Thursday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Friday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Saturday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Sunday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]}]}`;
+    const recentMealNames=Array.from(new Set(savedPlans.flatMap(p=>(p.days||[]).map(d=>d.name)).filter(Boolean))).slice(0,25);
+    const varietySeed=Math.random().toString(36).slice(2,8);
+    const prompt=`You are a friendly expert meal planning assistant. Generate a Monday to Sunday dinner plan for ${userName}'s family of ${f.familySize}. Allergies: ${f.allergies||"none"}. Cook time: ${f.cookTime}.\nVariety rules (strict): each of the 7 days must use a different main protein (e.g. chicken, beef, pork, fish, seafood, lamb, tofu/vegetarian, eggs) and a different dish/cuisine style — never repeat the same protein or dish type twice in the same week.${recentMealNames.length?` Also avoid repeating any of these meals from this family's recent weeks: ${recentMealNames.join(", ")}.`:""} Randomization seed ${varietySeed} — use it to pick a fresh, different combination of meals than you might otherwise default to.\nReturn ONLY valid JSON, no markdown:\n{"days":[{"day":"Monday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Tuesday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Wednesday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Thursday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Friday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Saturday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Sunday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]}]}`;
     try{
       const res=await fetch("/api/generate-meal-plan",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:4000, messages:[{ role:"user", content:prompt }] }) });
       if(!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -696,7 +698,9 @@ export default function Nourishly() {
   const handleSwap=async meal=>{
     setSwappingMeal(meal?.day);
     try{
-      const prompt=`Suggest ONE alternative dinner meal (not ${meal?.name}) for a family of ${form.familySize||4} with ${form.allergies||"no"} allergies that takes about ${form.cookTime||"30 minutes"} to cook. Return ONLY JSON: {"day":"${meal?.day}","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]}`;
+      const otherMealNames=(mealPlan?.days||[]).filter(d=>d.day!==meal?.day).map(d=>d.name).filter(Boolean);
+      const avoidNames=Array.from(new Set([meal?.name, ...otherMealNames].filter(Boolean)));
+      const prompt=`Suggest ONE alternative dinner meal for a family of ${form.familySize||4} with ${form.allergies||"no"} allergies that takes about ${form.cookTime||"30 minutes"} to cook. It must use a different main protein and dish style than the rest of this week's plan, and must not match any of these meals already used this week: ${avoidNames.join(", ")}. Return ONLY JSON: {"day":"${meal?.day}","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]}`;
       const res=await fetch("/api/generate-meal-plan",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:600, messages:[{ role:"user", content:prompt }] }) });
       const data=await res.json();
       const text=(data?.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("");
