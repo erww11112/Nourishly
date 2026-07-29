@@ -270,6 +270,39 @@ function useMealImage(name) {
   return { url: variants[index], failed: false };
 }
 
+// ── Assigns one image per meal for a whole week, guaranteeing no repeats ────
+// within those 7 days. Prefers each meal's own category (starting from its
+// hashed variant) but falls back to any unused image from the full pool once
+// a category's variants are all taken — e.g. two chicken dishes in one week.
+function assignWeekImages(days) {
+  const result = {};
+  if (!days?.length) return result;
+  const usedUrls = new Set();
+  const categoryOrder = Object.keys(MEAL_IMAGES);
+  days.forEach(meal => {
+    const name = meal?.name || "";
+    const category = getMealCategory(name);
+    const variants = MEAL_IMAGES[category] || MEAL_IMAGES.default;
+    const startIdx = hashString(name) % variants.length;
+    let chosen = null;
+    for (let i = 0; i < variants.length && !chosen; i++) {
+      const candidate = variants[(startIdx + i) % variants.length];
+      if (!usedUrls.has(candidate)) chosen = candidate;
+    }
+    if (!chosen) {
+      outer: for (const cat of categoryOrder) {
+        for (const url of MEAL_IMAGES[cat]) {
+          if (!usedUrls.has(url)) { chosen = url; break outer; }
+        }
+      }
+    }
+    if (!chosen) chosen = variants[startIdx] || MEAL_IMAGES.default[0];
+    usedUrls.add(chosen);
+    result[meal?.day] = chosen;
+  });
+  return result;
+}
+
 // ── Fade transition wrapper ────────────────────────────────────────────────
 function Fade({ id, children }) {
   const [visible, setVisible] = useState(false);
@@ -405,9 +438,10 @@ function NChip({ label, value, color }) {
 }
 
 // ── Meal card ──────────────────────────────────────────────────────────────
-function MealCard({ meal, onSwap, onMarkTried, triedMeals=[], isPaid=false }) {
+function MealCard({ meal, onSwap, onMarkTried, triedMeals=[], isPaid=false, imageUrl }) {
   const [open, setOpen] = useState(false);
-  const { url, failed } = useMealImage(meal?.name);
+  const { url: fallbackUrl, failed } = useMealImage(meal?.name);
+  const url = imageUrl || fallbackUrl;
   const n = NUTRITION(meal?.name);
   const tried = triedMeals.includes(meal?.day);
 
@@ -809,6 +843,7 @@ export default function Nourishly() {
   };
 
   const totalN=mealPlan?.days?.reduce((a,m)=>{ const n=NUTRITION(m.name); return { cal:a.cal+n.cal, protein:a.protein+n.protein, carbs:a.carbs+n.carbs, fat:a.fat+n.fat }; },{ cal:0,protein:0,carbs:0,fat:0 });
+  const weekImages=assignWeekImages(mealPlan?.days);
 
   const inp={ width:"100%", boxSizing:"border-box", padding:"13px 15px", borderRadius:R.md, border:`1.5px solid ${C.border}`, fontSize:14, color:C.walnut, background:C.bg, outline:"none", fontFamily:"inherit", transition:"border-color 0.15s ease" };
   const lbl={ display:"block", fontWeight:700, fontSize:11, color:C.walnut, marginBottom:6, textTransform:"uppercase", letterSpacing:"0.07em" };
@@ -991,7 +1026,7 @@ export default function Nourishly() {
               {mealPlan.days?.map(meal=>(
                 <div key={meal.day} style={{ position:"relative" }}>
                   {swappingMeal===meal.day&&<div style={{ position:"absolute", inset:0, background:"rgba(232,221,208,0.88)", borderRadius:R.xl, display:"flex", alignItems:"center", justifyContent:"center", zIndex:10 }}><p style={{ color:C.clay, fontWeight:700, fontSize:14 }}>Finding alternative...</p></div>}
-                  <MealCard meal={meal} onSwap={handleSwap} onMarkTried={handleMarkTried} triedMeals={triedMeals} isPaid={profile?.subscription_status==="active"}/>
+                  <MealCard meal={meal} onSwap={handleSwap} onMarkTried={handleMarkTried} triedMeals={triedMeals} isPaid={profile?.subscription_status==="active"} imageUrl={weekImages[meal.day]}/>
                 </div>
               ))}
               <button onClick={()=>{ setMealPlan(null); setTab("home"); }} className="btn-press" style={{ width:"100%", padding:"14px 0", marginTop:10, background:"none", color:C.clay, border:`2px solid ${C.clay}`, borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit" }}>Generate a new plan</button>
