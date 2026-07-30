@@ -1,10 +1,11 @@
 import { createContext } from "react";
 import { en } from "../locales/en";
 import { pt } from "../locales/pt";
+import { es } from "../locales/es";
 
 // Add a new language by importing its locale file and adding it here —
 // nothing else in the app needs to change.
-export const locales = { en, pt };
+export const locales = { en, pt, es };
 export const LANG_STORAGE_KEY = "nourishly_lang";
 
 function resolveKey(dict, key) {
