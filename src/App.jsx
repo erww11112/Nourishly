@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { LanguageProvider, useT, useLang } from "./i18n";
+import { LanguageProvider, useT, useLang, LANGUAGE_NAMES } from "./i18n";
 
 const SUPABASE_URL = "https://loaxiwaotfxmvyxpzdud.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvYXhpd2FvdGZ4bXZ5eHB6ZHVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1MzI2NzUsImV4cCI6MjA5ODEwODY3NX0.Eq3cjV7V1TfOkkFuCEhwZ9PBBRSBEDzhEGkkHeRqUa8";
@@ -229,43 +229,66 @@ function getMealCategory(n="") {
   return "default";
 }
 
+// Meal-plan generations from 2026-08 onward carry an explicit English
+// "category" tag from Claude (needed once meal names can be in any UI
+// language). Prefer that tag; fall back to keyword-matching the name for
+// plans saved before this field existed, or if Claude returns something
+// outside the known category list.
+function resolveMealCategory(meal) {
+  const cat = meal?.category;
+  if (cat && MEAL_IMAGES[cat]) return cat;
+  return getMealCategory(meal?.name);
+}
+
+// Only the dish categories that ARE a single protein map here — dish-style
+// categories (pasta, salad, curry, etc.) carry no reliable protein signal on
+// their own, so the shopping list falls back to scanning the (English) name.
+const CATEGORY_TO_PROTEIN = { chicken:"chicken", salmon:"salmon", fish:"fish", lamb:"lamb", pork:"pork", steak:"beef", eggs:"eggs" };
+
 function hashString(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) { hash = (hash << 5) - hash + str.charCodeAt(i); hash |= 0; }
   return Math.abs(hash);
 }
 
-function MealIcon({ name="", size=18, color="#fff" }) {
-  const n = name.toLowerCase();
+function MealIcon({ meal, size=18, color="#fff" }) {
+  const category = resolveMealCategory(meal);
   const p = { width:size, height:size, viewBox:"0 0 24 24", fill:"none", stroke:color, strokeWidth:2, strokeLinecap:"round", strokeLinejoin:"round" };
-  if (n.includes("salad")) return <svg {...p}><path d="M3 12a9 9 0 0018 0"/><path d="M3 12h18M12 12V6"/></svg>;
-  if (n.includes("soup")||n.includes("stew")) return <svg {...p}><path d="M4 11h16l-1 6a2 2 0 01-2 2H7a2 2 0 01-2-2l-1-6z"/><path d="M9 11V8M15 11V8"/></svg>;
-  if (n.includes("fish")||n.includes("salmon")) return <svg {...p}><path d="M3 12c3-4 9-6 13-3M16 9c3 0 5 1.5 5 3s-2 3-5 3c-4 3-10 1-13-3"/><circle cx="6.5" cy="11" r="0.7" fill={color}/></svg>;
-  if (n.includes("pizza")) return <svg {...p}><path d="M12 3l9 16H3L12 3z"/><circle cx="11" cy="11" r="0.7" fill={color}/><circle cx="13.5" cy="14" r="0.7" fill={color}/></svg>;
-  if (n.includes("taco")||n.includes("burrito")) return <svg {...p}><path d="M3 16c2-7 16-7 18 0"/><path d="M5 16h14"/></svg>;
-  if (n.includes("burger")) return <svg {...p}><path d="M4 10h16M4 14h16M6 6h12a2 2 0 012 2H4a2 2 0 012-2zM5 18h14a2 2 0 002 2H3a2 2 0 002-2z"/></svg>;
-  return <svg {...p}><circle cx="12" cy="12" r="8"/><path d="M8 12h8M12 8v8" strokeWidth="2" opacity="0.6"/></svg>;
+  switch (category) {
+    case "salad": return <svg {...p}><path d="M3 12a9 9 0 0018 0"/><path d="M3 12h18M12 12V6"/></svg>;
+    case "soup": return <svg {...p}><path d="M4 11h16l-1 6a2 2 0 01-2 2H7a2 2 0 01-2-2l-1-6z"/><path d="M9 11V8M15 11V8"/></svg>;
+    case "fish": case "salmon": return <svg {...p}><path d="M3 12c3-4 9-6 13-3M16 9c3 0 5 1.5 5 3s-2 3-5 3c-4 3-10 1-13-3"/><circle cx="6.5" cy="11" r="0.7" fill={color}/></svg>;
+    case "pizza": return <svg {...p}><path d="M12 3l9 16H3L12 3z"/><circle cx="11" cy="11" r="0.7" fill={color}/><circle cx="13.5" cy="14" r="0.7" fill={color}/></svg>;
+    case "taco": return <svg {...p}><path d="M3 16c2-7 16-7 18 0"/><path d="M5 16h14"/></svg>;
+    case "burger": return <svg {...p}><path d="M4 10h16M4 14h16M6 6h12a2 2 0 012 2H4a2 2 0 012-2zM5 18h14a2 2 0 002 2H3a2 2 0 002-2z"/></svg>;
+    default: return <svg {...p}><circle cx="12" cy="12" r="8"/><path d="M8 12h8M12 8v8" strokeWidth="2" opacity="0.6"/></svg>;
+  }
 }
 
-const NUTRITION = (n="") => {
-  const s = n.toLowerCase();
-  if (s.includes("salad")) return { cal:320, protein:18, carbs:22, fat:14 };
-  if (s.includes("pasta")) return { cal:560, protein:22, carbs:72, fat:16 };
-  if (s.includes("chicken")) return { cal:420, protein:42, carbs:28, fat:14 };
-  if (s.includes("steak")||s.includes("beef")) return { cal:620, protein:48, carbs:12, fat:32 };
-  if (s.includes("fish")||s.includes("salmon")) return { cal:380, protein:38, carbs:18, fat:16 };
-  if (s.includes("curry")) return { cal:520, protein:28, carbs:48, fat:22 };
-  if (s.includes("soup")||s.includes("stew")) return { cal:360, protein:24, carbs:32, fat:14 };
-  if (s.includes("burger")) return { cal:680, protein:38, carbs:52, fat:34 };
-  if (s.includes("pizza")) return { cal:580, protein:26, carbs:64, fat:24 };
-  if (s.includes("taco")||s.includes("burrito")) return { cal:540, protein:30, carbs:56, fat:20 };
-  if (s.includes("rice")||s.includes("risotto")) return { cal:480, protein:18, carbs:68, fat:14 };
-  return { cal:480, protein:28, carbs:45, fat:18 };
+const NUTRITION_BY_CATEGORY = {
+  salad:{ cal:320, protein:18, carbs:22, fat:14 },
+  pasta:{ cal:560, protein:22, carbs:72, fat:16 },
+  chicken:{ cal:420, protein:42, carbs:28, fat:14 },
+  steak:{ cal:620, protein:48, carbs:12, fat:32 },
+  fish:{ cal:380, protein:38, carbs:18, fat:16 },
+  salmon:{ cal:380, protein:38, carbs:18, fat:16 },
+  curry:{ cal:520, protein:28, carbs:48, fat:22 },
+  soup:{ cal:360, protein:24, carbs:32, fat:14 },
+  burger:{ cal:680, protein:38, carbs:52, fat:34 },
+  pizza:{ cal:580, protein:26, carbs:64, fat:24 },
+  taco:{ cal:540, protein:30, carbs:56, fat:20 },
+  rice:{ cal:480, protein:18, carbs:68, fat:14 },
+  default:{ cal:480, protein:28, carbs:45, fat:18 },
 };
+function NUTRITION(meal) {
+  const category = resolveMealCategory(meal);
+  return NUTRITION_BY_CATEGORY[category] || NUTRITION_BY_CATEGORY.default;
+}
 
-function useMealImage(name) {
+function useMealImage(meal) {
+  const name = meal?.name;
   if (!name) return { url: MEAL_IMAGES.default[0], failed: false };
-  const category = getMealCategory(name);
+  const category = resolveMealCategory(meal);
   const variants = MEAL_IMAGES[category] || MEAL_IMAGES.default;
   const index = hashString(name) % variants.length;
   return { url: variants[index], failed: false };
@@ -282,7 +305,7 @@ function assignWeekImages(days) {
   const categoryOrder = Object.keys(MEAL_IMAGES);
   days.forEach(meal => {
     const name = meal?.name || "";
-    const category = getMealCategory(name);
+    const category = resolveMealCategory(meal);
     const variants = MEAL_IMAGES[category] || MEAL_IMAGES.default;
     const startIdx = hashString(name) % variants.length;
     let chosen = null;
@@ -373,6 +396,36 @@ function WelcomeSlides({ onDone }) {
   );
 }
 
+// ── Language picker (first onboarding step, new signups only) ───────────────
+// Sets the active app language immediately on tap, then hands off — every
+// screen after this (including the meal-generation prompt) uses it from here.
+function ChooseLanguage({ onComplete }) {
+  const t = useT();
+  const { lang, setLang, availableLangs } = useLang();
+  const labelKeys = { en:"profile.languageEnglish", pt:"profile.languagePortuguese", es:"profile.languageSpanish" };
+  const choose = code => { setLang(code); onComplete(); };
+
+  return (
+    <div style={{ background:C.bg, minHeight:"100vh", fontFamily:FONT, display:"flex", flexDirection:"column" }}>
+      <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#7A3018 40%,${C.clay} 100%)`, padding:"48px 28px 0", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:0, marginBottom:0 }}>
+        <Logo size={52} ring />
+        <div style={{ marginTop:28, marginBottom:0 }}>
+          <h2 style={{ color:"#fff", fontSize:24, fontWeight:800, margin:"0 0 10px", lineHeight:1.3, letterSpacing:"-0.4px" }}>{t("chooseLanguage.title")}</h2>
+          <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, margin:0, lineHeight:1.5 }}>{t("chooseLanguage.subtitle")}</p>
+        </div>
+        <InlineWave bgColor={C.bg} />
+      </div>
+      <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"center", gap:12, padding:"0 28px 36px" }}>
+        {availableLangs.map(code=>(
+          <button key={code} onClick={()=>choose(code)} className="btn-press" style={{ width:"100%", padding:"18px 0", background:lang===code?btnBg():C.card, color:lang===code?"#fff":C.walnut, border:`1.5px solid ${lang===code?"transparent":C.border}`, borderRadius:R.md, fontSize:16, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:lang===code?SHADOW.button:"none", transition:"all 0.15s" }}>
+            {t(labelKeys[code])}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Onboarding questions (orange header + wave + fade transitions) ──────────
 function Onboarding({ onComplete }) {
   const t = useT();
@@ -445,9 +498,9 @@ function NChip({ label, value, color }) {
 function MealCard({ meal, onSwap, onMarkTried, triedMeals=[], isPaid=false, imageUrl }) {
   const t = useT();
   const [open, setOpen] = useState(false);
-  const { url: fallbackUrl, failed } = useMealImage(meal?.name);
+  const { url: fallbackUrl, failed } = useMealImage(meal);
   const url = imageUrl || fallbackUrl;
-  const n = NUTRITION(meal?.name);
+  const n = NUTRITION(meal);
   const tried = triedMeals.includes(meal?.day);
 
   return (
@@ -460,7 +513,7 @@ function MealCard({ meal, onSwap, onMarkTried, triedMeals=[], isPaid=false, imag
         <div style={{ position:"absolute", inset:0, background:"linear-gradient(to top,rgba(44,24,16,0.84) 0%,rgba(44,24,16,0.18) 55%,transparent 100%)" }}/>
         {/* Icon badge always visible over photo */}
         <div style={{ position:"absolute", top:12, left:12, width:34, height:34, borderRadius:R.sm, background:"rgba(255,255,255,0.2)", backdropFilter:"blur(6px)", display:"flex", alignItems:"center", justifyContent:"center" }}>
-          <MealIcon name={meal?.name} size={17} color="#fff" />
+          <MealIcon meal={meal} size={17} color="#fff" />
         </div>
         <div style={{ position:"absolute", top:10, right:12, display:"flex", gap:6 }}>
           {tried&&<div className="check-pop" style={{ background:C.sage, borderRadius:R.sm, width:30, height:30, display:"flex", alignItems:"center", justifyContent:"center" }}><Icon name="check" size={14} color="#fff"/></div>}
@@ -527,8 +580,11 @@ function ShoppingList({ days }) {
     dairy:{label:t("shoppingList.categories.dairy"),items:[],icon:"checkCircle"},
     pantry:{label:t("shoppingList.categories.pantry"),items:t("shoppingList.pantryDefaults"),icon:"cart"},
   };
-  // Detection keywords stay in English — they're matched against meal names,
-  // which are always generated in English by the AI regardless of UI language.
+  // Detection keywords stay in English — they're matched against meal names.
+  // For plans where the AI wrote the name in another UI language, this scan
+  // simply won't hit anything; the category-tag hint below covers protein
+  // detection in that case (veg/grain/dairy have no such tag, so those stay
+  // best-effort for non-English plans).
   const prot=["chicken","beef","salmon","fish","lamb","pork","shrimp","tuna","turkey","tofu"];
   const veg=["tomato","spinach","pepper","broccoli","carrot","onion","garlic","lettuce","mushroom","lemon","basil","parsley","ginger"];
   const gr=["pasta","rice","noodle","bread","tortilla","quinoa","couscous","lentil","bean"];
@@ -540,6 +596,8 @@ function ShoppingList({ days }) {
     veg.forEach(v=>{if(n.includes(v)&&!cats.vegHerbs.items.includes(label(v)))cats.vegHerbs.items.push(label(v));});
     gr.forEach(g=>{if(n.includes(g)&&!cats.grainsPasta.items.includes(label(g)))cats.grainsPasta.items.push(label(g));});
     da.forEach(d=>{if(n.includes(d)&&!cats.dairy.items.includes(label(d)))cats.dairy.items.push(label(d));});
+    const catProtein=CATEGORY_TO_PROTEIN[resolveMealCategory(m)];
+    if(catProtein&&!cats.proteins.items.includes(label(catProtein)))cats.proteins.items.push(label(catProtein));
   });
   if(!cats.proteins.items.length)cats.proteins.items=days?.slice(0,3).map(d=>d.name.split(" ")[0])||[label("chicken")];
   if(!cats.vegHerbs.items.length)cats.vegHerbs.items=t("shoppingList.vegDefaults");
@@ -732,7 +790,8 @@ function NourishlyApp() {
     if(token&&userId){ try{ const r=await(await sb.from("profiles",token)).update({ family_size:parseInt(f.familySize), allergies:f.allergies, cook_time:f.cookTime },`id=eq.${userId}`); if(!r.__ok) console.error("[nourishly] failed to update profile family_size/allergies/cook_time", r); }catch(e){ console.error("[nourishly] error updating profile family_size/allergies/cook_time", e); } }
     const recentMealNames=Array.from(new Set(savedPlans.flatMap(p=>(p.days||[]).map(d=>d.name)).filter(Boolean))).slice(0,25);
     const varietySeed=Math.random().toString(36).slice(2,8);
-    const prompt=`You are a friendly expert meal planning assistant. Generate a Monday to Sunday dinner plan for ${userName}'s family of ${f.familySize}. Allergies: ${f.allergies||"none"}. Cook time: ${f.cookTime}.\nVariety rules (strict): each of the 7 days must use a different main protein (e.g. chicken, beef, pork, fish, seafood, lamb, tofu/vegetarian, eggs) and a different dish/cuisine style — never repeat the same protein or dish type twice in the same week.\nProtein-mix quota (strict, unless it conflicts with the allergies listed above): out of the 7 days, include AT LEAST 1-2 fish or seafood dishes, AT LEAST 1 vegetarian dish (no meat, poultry, or fish), and NO MORE THAN 3-4 days total where the main protein is chicken, beef, pork, or lamb combined. Do not make the week meat-dominated — fish/seafood and vegetarian meals must have real representation, not just one token day.${recentMealNames.length?` Also avoid repeating any of these meals from this family's recent weeks: ${recentMealNames.join(", ")}.`:""} Randomization seed ${varietySeed} — use it to pick a fresh, different combination of meals than you might otherwise default to.\nReturn ONLY valid JSON, no markdown:\n{"days":[{"day":"Monday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Tuesday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Wednesday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Thursday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Friday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Saturday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]},{"day":"Sunday","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]}]}`;
+    const languageName=LANGUAGE_NAMES[lang]||"English";
+    const prompt=`You are a friendly expert meal planning assistant. Generate a Monday to Sunday dinner plan for ${userName}'s family of ${f.familySize}. Allergies: ${f.allergies||"none"}. Cook time: ${f.cookTime}.\nLanguage (strict): write every "day", "name", "description", "prepTime", and "steps" value in natural, native-sounding ${languageName} — never machine-translated, this is the family's chosen app language. The "day" value must be that weekday's name written in ${languageName} (Monday through Sunday, in order, translated).\nVariety rules (strict): each of the 7 days must use a different main protein (e.g. chicken, beef, pork, fish, seafood, lamb, tofu/vegetarian, eggs) and a different dish/cuisine style — never repeat the same protein or dish type twice in the same week.\nProtein-mix quota (strict, unless it conflicts with the allergies listed above): out of the 7 days, include AT LEAST 1-2 fish or seafood dishes, AT LEAST 1 vegetarian dish (no meat, poultry, or fish), and NO MORE THAN 3-4 days total where the main protein is chicken, beef, pork, or lamb combined. Do not make the week meat-dominated — fish/seafood and vegetarian meals must have real representation, not just one token day.${recentMealNames.length?` Also avoid repeating any of these meals from this family's recent weeks: ${recentMealNames.join(", ")}.`:""} Randomization seed ${varietySeed} — use it to pick a fresh, different combination of meals than you might otherwise default to.\nCategory tag (strict, ALWAYS in English regardless of the language above — this is an internal app tag, never shown to the user): for every day also include a "category" field, a single lowercase English word chosen from EXACTLY this list — pasta, chicken, salad, salmon, curry, taco, burger, soup, rice, noodles, steak, pizza, fish, lamb, pork, sandwich, eggs, default — picking whichever best matches that day's dominant protein or dish style. Never translate this field and never use a word outside this list.\nReturn ONLY valid JSON, no markdown, with exactly 7 entries covering Monday through Sunday in order, each shaped like this example (translate the field values, not the JSON keys):\n{"days":[{"day":"<weekday in ${languageName}>","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"],"category":"chicken"}]}`;
     try{
       const res=await fetch("/api/generate-meal-plan",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:4000, messages:[{ role:"user", content:prompt }] }) });
       if(!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -761,7 +820,8 @@ function NourishlyApp() {
     try{
       const otherMealNames=(mealPlan?.days||[]).filter(d=>d.day!==meal?.day).map(d=>d.name).filter(Boolean);
       const avoidNames=Array.from(new Set([meal?.name, ...otherMealNames].filter(Boolean)));
-      const prompt=`Suggest ONE alternative dinner meal for a family of ${form.familySize||4} with ${form.allergies||"no"} allergies that takes about ${form.cookTime||"30 minutes"} to cook. It must use a different main protein and dish style than the rest of this week's plan, and must not match any of these meals already used this week: ${avoidNames.join(", ")}. Return ONLY JSON: {"day":"${meal?.day}","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"]}`;
+      const languageName=LANGUAGE_NAMES[lang]||"English";
+      const prompt=`Suggest ONE alternative dinner meal for a family of ${form.familySize||4} with ${form.allergies||"no"} allergies that takes about ${form.cookTime||"30 minutes"} to cook. It must use a different main protein and dish style than the rest of this week's plan, and must not match any of these meals already used this week: ${avoidNames.join(", ")}.\nWrite the "name", "description", "prepTime", and "steps" values in natural, native-sounding ${languageName}.\nAlso include a "category" field — a single lowercase English word chosen from EXACTLY this list: pasta, chicken, salad, salmon, curry, taco, burger, soup, rice, noodles, steak, pizza, fish, lamb, pork, sandwich, eggs, default — matching the dish's dominant protein or style. Never translate this field.\nReturn ONLY JSON: {"day":"${meal?.day}","name":"Meal Name","description":"One warm sentence.","prepTime":"X minutes","steps":["Step 1","Step 2","Step 3","Step 4"],"category":"chicken"}`;
       const res=await fetch("/api/generate-meal-plan",{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ model:"claude-sonnet-4-6", max_tokens:600, messages:[{ role:"user", content:prompt }] }) });
       const data=await res.json();
       const text=(data?.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("");
@@ -878,7 +938,7 @@ function NourishlyApp() {
     }
   };
 
-  const totalN=mealPlan?.days?.reduce((a,m)=>{ const n=NUTRITION(m.name); return { cal:a.cal+n.cal, protein:a.protein+n.protein, carbs:a.carbs+n.carbs, fat:a.fat+n.fat }; },{ cal:0,protein:0,carbs:0,fat:0 });
+  const totalN=mealPlan?.days?.reduce((a,m)=>{ const n=NUTRITION(m); return { cal:a.cal+n.cal, protein:a.protein+n.protein, carbs:a.carbs+n.carbs, fat:a.fat+n.fat }; },{ cal:0,protein:0,carbs:0,fat:0 });
   const weekImages=assignWeekImages(mealPlan?.days);
 
   const inp={ width:"100%", boxSizing:"border-box", padding:"13px 15px", borderRadius:R.md, border:`1.5px solid ${C.border}`, fontSize:14, color:C.walnut, background:C.bg, outline:"none", fontFamily:"inherit", transition:"border-color 0.15s ease" };
@@ -892,7 +952,8 @@ function NourishlyApp() {
   const dateLocale=lang==="pt"?"pt-PT":"en-GB";
 
   if(screen==="splash") return <Splash/>;
-  if(screen==="slides") return <WelcomeSlides onDone={()=>setScreen("onboarding")}/>;
+  if(screen==="slides") return <WelcomeSlides onDone={()=>setScreen("chooseLanguage")}/>;
+  if(screen==="chooseLanguage") return <ChooseLanguage onComplete={()=>setScreen("onboarding")}/>;
   if(screen==="onboarding") return <Onboarding onComplete={handleOnboardingComplete}/>;
 
   if(screen==="auth"||screen==="welcome") return (

@@ -19,6 +19,12 @@ export const en = {
   // ── Splash screen ──────────────────────────────────────────────────────────
   splash: {},
 
+  // ── Language picker (first onboarding step, new signups only) ───────────
+  chooseLanguage: {
+    title: "Choose your language",
+    subtitle: "You can change this anytime in your profile",
+  },
+
   // ── Welcome slides (before onboarding) ───────────────────────────────────
   welcome: {
     slide1Title: "Tired of not knowing what to cook?",
@@ -220,7 +226,7 @@ export const en = {
     // they're matched against Claude's output, only the label shown is localized.
     ingredients: {
       chicken: "Chicken", beef: "Beef", salmon: "Salmon", fish: "Fish", lamb: "Lamb",
-      pork: "Pork", shrimp: "Shrimp", tuna: "Tuna", turkey: "Turkey", tofu: "Tofu",
+      pork: "Pork", shrimp: "Shrimp", tuna: "Tuna", turkey: "Turkey", tofu: "Tofu", eggs: "Eggs",
       tomato: "Tomato", spinach: "Spinach", pepper: "Pepper", broccoli: "Broccoli",
       carrot: "Carrot", onion: "Onion", garlic: "Garlic", lettuce: "Lettuce",
       mushroom: "Mushroom", lemon: "Lemon", basil: "Basil", parsley: "Parsley",

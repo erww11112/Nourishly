@@ -18,6 +18,12 @@ export const pt = {
   // ── Ecrã inicial (splash) ────────────────────────────────────────────────
   splash: {},
 
+  // ── Seletor de idioma (primeiro passo do onboarding, só para contas novas) ──
+  chooseLanguage: {
+    title: "Escolhe o teu idioma",
+    subtitle: "Podes alterar isto a qualquer momento no teu perfil",
+  },
+
   // ── Slides de boas-vindas (antes do onboarding) ─────────────────────────
   welcome: {
     slide1Title: "Cansado de não saber o que cozinhar?",
@@ -219,7 +225,7 @@ export const pt = {
     // é traduzido.
     ingredients: {
       chicken: "Frango", beef: "Carne de vaca", salmon: "Salmão", fish: "Peixe", lamb: "Borrego",
-      pork: "Porco", shrimp: "Camarão", tuna: "Atum", turkey: "Peru", tofu: "Tofu",
+      pork: "Porco", shrimp: "Camarão", tuna: "Atum", turkey: "Peru", tofu: "Tofu", eggs: "Ovos",
       tomato: "Tomate", spinach: "Espinafres", pepper: "Pimento", broccoli: "Brócolos",
       carrot: "Cenoura", onion: "Cebola", garlic: "Alho", lettuce: "Alface",
       mushroom: "Cogumelos", lemon: "Limão", basil: "Manjericão", parsley: "Salsa",
