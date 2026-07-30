@@ -695,14 +695,14 @@ function NourishlyApp() {
         (async()=>{
           const u=await sb.getUser(accessToken);
           if(u.__ok){ setResetSession({ access_token:accessToken, refresh_token:refreshToken, user:u }); setScreen("resetPassword"); }
-          else setScreen("slides");
+          else { setLang("en"); setScreen("slides"); }
         })();
         return;
       }
     }
     const splashTimer=setTimeout(()=>{
       if(session?.access_token){ setScreen("app"); loadProfile(session,session.user.id); }
-      else setScreen("slides");
+      else { setLang("en"); setScreen("slides"); }
     },1100);
     return ()=>clearTimeout(splashTimer);
   },[]);
@@ -836,7 +836,7 @@ function NourishlyApp() {
     if(token&&userId){ const meal=mealPlan?.days?.find(d=>d.day===day); try{ await(await sb.from("meals_tried",token)).insert({ user_id:userId, day, meal_name:meal?.name, rating:5 }); }catch{} }
   };
 
-  const handleLogout=()=>{ saveSession(null); setProfile(null); setMealPlan(null); setSavedPlans([]); setTriedMeals([]); setTab("home"); setScreen("slides"); };
+  const handleLogout=()=>{ saveSession(null); setProfile(null); setMealPlan(null); setSavedPlans([]); setTriedMeals([]); setTab("home"); setLang("en"); setScreen("slides"); };
 
   // ── Language: always persisted locally; best-effort synced to `profiles`
   // for logged-in users so it follows them across devices. Wrapped so a
