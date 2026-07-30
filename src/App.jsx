@@ -1028,7 +1028,7 @@ function NourishlyApp() {
                     <div style={{ display:"flex", alignItems:"center", gap:12 }}>
                       <div style={{ width:38, height:38, borderRadius:R.sm, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center" }}><Icon name="calendar" size={17} color={C.clay}/></div>
                       <div>
-                        <p style={{ fontWeight:700, fontSize:14, color:C.walnut, margin:"0 0 2px" }}>{t("home.planOf",{name:profile?.name||t("home.yourFallback")})}</p>
+                        <p style={{ fontWeight:700, fontSize:14, color:C.walnut, margin:"0 0 2px" }}>{profile?.name?t("home.planOf",{name:profile.name}):t("home.yourPlanFallback")}</p>
                         <p style={{ fontSize:12, color:C.muted, margin:0 }}>{new Date(plan.created_at).toLocaleDateString(dateLocale,{ day:"numeric", month:"short", year:"numeric" })}</p>
                       </div>
                     </div>
@@ -1113,7 +1113,7 @@ function NourishlyApp() {
                 <div key={i} style={{ background:C.card, borderRadius:R.lg, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"18px 20px", marginBottom:14 }}>
                   <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:12 }}>
                     <div>
-                      <p style={{ fontWeight:800, fontSize:15, color:C.walnut, margin:"0 0 3px" }}>{t("saved.mealPlanOf",{name:profile?.name||t("saved.yourFallback")})}</p>
+                      <p style={{ fontWeight:800, fontSize:15, color:C.walnut, margin:"0 0 3px" }}>{profile?.name?t("saved.mealPlanOf",{name:profile.name}):t("saved.yourMealPlanFallback")}</p>
                       <p style={{ fontSize:12, color:C.muted, margin:0 }}>{new Date(plan.created_at).toLocaleDateString(dateLocale,{ day:"numeric", month:"short", year:"numeric" })}</p>
                     </div>
                     <button onClick={()=>{ setMealPlan({days:plan.days}); setTriedMeals([]); setTab("plan"); }} className="btn-press" style={{ background:C.clayLight, color:C.clay, border:"none", borderRadius:R.sm, padding:"8px 14px", fontSize:12, fontWeight:800, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:4 }}>{t("saved.view")}<Icon name="chevronRight" size={13} color={C.clay}/></button>
