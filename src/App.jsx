@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { LanguageProvider, useT, useLang } from "./i18n";
 
 const SUPABASE_URL = "https://loaxiwaotfxmvyxpzdud.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvYXhpd2FvdGZ4bXZ5eHB6ZHVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1MzI2NzUsImV4cCI6MjA5ODEwODY3NX0.Eq3cjV7V1TfOkkFuCEhwZ9PBBRSBEDzhEGkkHeRqUa8";
@@ -316,13 +317,14 @@ function Fade({ id, children }) {
 
 // ── Splash ─────────────────────────────────────────────────────────────────
 function Splash() {
+  const t = useT();
   return (
     <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#5C2E1A 45%,${C.clay} 100%)`, minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", fontFamily:FONT }}>
       <div style={{ animation:"splashPulse 1.6s ease-in-out infinite" }}>
         <Logo size={88} ring />
       </div>
-      <h1 style={{ color:"#fff", fontSize:28, fontWeight:900, margin:"22px 0 6px", letterSpacing:"-0.5px" }}>Nourishly</h1>
-      <p style={{ color:"rgba(255,255,255,0.45)", fontSize:13, margin:0 }}>Family meals, made easy</p>
+      <h1 style={{ color:"#fff", fontSize:28, fontWeight:900, margin:"22px 0 6px", letterSpacing:"-0.5px" }}>{t("common.appName")}</h1>
+      <p style={{ color:"rgba(255,255,255,0.45)", fontSize:13, margin:0 }}>{t("common.tagline")}</p>
       <style>{`@keyframes splashPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.07);opacity:0.88}}`}</style>
     </div>
   );
@@ -330,10 +332,11 @@ function Splash() {
 
 // ── Welcome slides (orange bg + wave into beige) ───────────────────────────
 function WelcomeSlides({ onDone }) {
+  const t = useT();
   const [slide, setSlide] = useState(0);
   const slides = [
-    { icon:"clock", title:"Tired of not knowing what to cook?", body:"The same five meals on repeat. The 6pm panic. The takeaway you didn't really want. Sound familiar?" },
-    { icon:"heart", title:"More time with your kids. Less time wondering what's for dinner.", body:"A full week of home-cooked dinners, planned for your family in under a minute — so you can focus on what actually matters." },
+    { icon:"clock", title:t("welcome.slide1Title"), body:t("welcome.slide1Body") },
+    { icon:"heart", title:t("welcome.slide2Title"), body:t("welcome.slide2Body") },
   ];
   const s = slides[slide];
   const headerColor = C.clay;
@@ -362,7 +365,7 @@ function WelcomeSlides({ onDone }) {
           {slides.map((_,i)=><div key={i} style={{ width:i===slide?24:7, height:7, borderRadius:4, background:i===slide?C.clay:C.border, transition:"all 0.25s" }}/>)}
         </div>
         <button onClick={()=>slide<slides.length-1?setSlide(s=>s+1):onDone()} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
-          {slide<slides.length-1?"Continue":"Let's begin"}
+          {slide<slides.length-1?t("welcome.continue"):t("welcome.begin")}
           <Icon name="chevronRight" size={18} color="#fff" />
         </button>
       </div>
@@ -372,10 +375,11 @@ function WelcomeSlides({ onDone }) {
 
 // ── Onboarding questions (orange header + wave + fade transitions) ──────────
 function Onboarding({ onComplete }) {
+  const t = useT();
   const questions = [
-    { key:"familySize", icon:"users", title:"How many people are eating?", sub:"Including yourself and any children", placeholder:"e.g. 4", type:"number" },
-    { key:"allergies", icon:"leaf", title:"Any allergies or dietary needs?", sub:"We'll work around them completely", placeholder:"e.g. no nuts — or leave blank", type:"text" },
-    { key:"cookTime", icon:"clock", title:"How long to cook on a weeknight?", sub:"We'll match every recipe to this", placeholder:"e.g. 30 minutes", type:"text" },
+    { key:"familySize", icon:"users", title:t("onboarding.familySizeTitle"), sub:t("onboarding.familySizeSub"), placeholder:t("common.fields.familySizePlaceholder"), type:"number" },
+    { key:"allergies", icon:"leaf", title:t("onboarding.allergiesTitle"), sub:t("onboarding.allergiesSub"), placeholder:t("common.fields.allergiesPlaceholder"), type:"text" },
+    { key:"cookTime", icon:"clock", title:t("onboarding.cookTimeTitle"), sub:t("onboarding.cookTimeSub"), placeholder:t("common.fields.cookTimePlaceholder"), type:"text" },
   ];
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({ familySize:"", allergies:"", cookTime:"" });
@@ -418,10 +422,10 @@ function Onboarding({ onComplete }) {
 
         <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
           <button onClick={next} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
-            {step===questions.length-1?"Almost there":"Continue"}
+            {step===questions.length-1?t("onboarding.almostThere"):t("onboarding.continue")}
             <Icon name="chevronRight" size={18} color="#fff" />
           </button>
-          {step>0&&<button onClick={back} className="btn-press" style={{ width:"100%", padding:"12px 0", background:"none", color:C.muted, border:`1.5px solid ${C.border}`, borderRadius:R.md, fontSize:14, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>Back</button>}
+          {step>0&&<button onClick={back} className="btn-press" style={{ width:"100%", padding:"12px 0", background:"none", color:C.muted, border:`1.5px solid ${C.border}`, borderRadius:R.md, fontSize:14, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>{t("onboarding.back")}</button>}
         </div>
       </div>
     </div>
@@ -439,6 +443,7 @@ function NChip({ label, value, color }) {
 
 // ── Meal card ──────────────────────────────────────────────────────────────
 function MealCard({ meal, onSwap, onMarkTried, triedMeals=[], isPaid=false, imageUrl }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const { url: fallbackUrl, failed } = useMealImage(meal?.name);
   const url = imageUrl || fallbackUrl;
@@ -481,28 +486,28 @@ function MealCard({ meal, onSwap, onMarkTried, triedMeals=[], isPaid=false, imag
           <div style={{ padding:"20px 20px 24px", opacity:open?1:0, transition:`opacity 0.3s ease ${open?"0.1s":"0s"}` }}>
             {meal?.description&&<p style={{ fontSize:14, color:C.muted, margin:"0 0 18px", lineHeight:1.65, fontStyle:"italic" }}>"{meal.description}"</p>}
             <div style={{ display:"flex", gap:8, marginBottom:22 }}>
-              <NChip label="Cal" value={n.cal} color={C.clay}/>
+              <NChip label={t("plan.calLabel")} value={n.cal} color={C.clay}/>
               {isPaid ? (
                 <>
-                  <NChip label="Protein" value={`${n.protein}g`} color={C.sage}/>
-                  <NChip label="Carbs" value={`${n.carbs}g`} color={C.clayMid}/>
-                  <NChip label="Fat" value={`${n.fat}g`} color={C.muted}/>
+                  <NChip label={t("plan.proteinLabel")} value={`${n.protein}g`} color={C.sage}/>
+                  <NChip label={t("plan.carbsLabel")} value={`${n.carbs}g`} color={C.clayMid}/>
+                  <NChip label={t("plan.fatLabel")} value={`${n.fat}g`} color={C.muted}/>
                 </>
               ) : (
                 <div style={{ flex:3, background:C.clayLight, borderRadius:R.sm, padding:"10px 12px", display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}>
                   <Icon name="checkCircle" size={13} color={C.clay}/>
-                  <span style={{ fontSize:11, color:C.clay, fontWeight:700 }}>Full nutrition on Plus</span>
+                  <span style={{ fontSize:11, color:C.clay, fontWeight:700 }}>{t("plan.plusFeatureChip")}</span>
                 </div>
               )}
             </div>
-            <p style={{ fontSize:11, fontWeight:800, color:C.clay, margin:"0 0 16px", textTransform:"uppercase", letterSpacing:"0.1em" }}>How to make it</p>
+            <p style={{ fontSize:11, fontWeight:800, color:C.clay, margin:"0 0 16px", textTransform:"uppercase", letterSpacing:"0.1em" }}>{t("mealCard.howToMakeIt")}</p>
             {meal?.steps?.map((step,i)=>(
               <div key={i} style={{ display:"flex", gap:12, marginBottom:14, alignItems:"flex-start" }}>
                 <div style={{ width:26, height:26, borderRadius:"50%", background:i===0?C.clay:C.clayLight, color:i===0?"#fff":C.clay, fontSize:12, fontWeight:800, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, marginTop:1 }}>{i+1}</div>
                 <p style={{ fontSize:14, color:C.walnut, margin:0, lineHeight:1.65 }}>{step}</p>
               </div>
             ))}
-            {!tried&&<button onClick={()=>onMarkTried&&onMarkTried(meal?.day)} className="btn-press" style={{ width:"100%", padding:"12px 0", marginTop:10, background:C.sageLight, color:C.sage, border:`1.5px solid #B8CDB4`, borderRadius:R.md, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}><Icon name="checkCircle" size={16} color={C.sage}/>Mark as cooked</button>}
+            {!tried&&<button onClick={()=>onMarkTried&&onMarkTried(meal?.day)} className="btn-press" style={{ width:"100%", padding:"12px 0", marginTop:10, background:C.sageLight, color:C.sage, border:`1.5px solid #B8CDB4`, borderRadius:R.md, fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}><Icon name="checkCircle" size={16} color={C.sage}/>{t("mealCard.markAsCooked")}</button>}
           </div>
         </div>
       </div>
@@ -512,22 +517,34 @@ function MealCard({ meal, onSwap, onMarkTried, triedMeals=[], isPaid=false, imag
 
 // ── Shopping list ──────────────────────────────────────────────────────────
 function ShoppingList({ days }) {
-  const cats = { "Proteins":{items:[],icon:"flame"}, "Vegetables & Herbs":{items:[],icon:"leaf"}, "Grains & Pasta":{items:[],icon:"list"}, "Dairy":{items:[],icon:"checkCircle"}, "Pantry":{items:["Olive oil","Salt & pepper","Mixed herbs","Stock cubes"],icon:"cart"} };
+  const t = useT();
+  // Internal category keys stay in English/stable; only the displayed label
+  // (c.label) is localized, so lookups like cats.proteins keep working.
+  const cats = {
+    proteins:{label:t("shoppingList.categories.proteins"),items:[],icon:"flame"},
+    vegHerbs:{label:t("shoppingList.categories.vegHerbs"),items:[],icon:"leaf"},
+    grainsPasta:{label:t("shoppingList.categories.grainsPasta"),items:[],icon:"list"},
+    dairy:{label:t("shoppingList.categories.dairy"),items:[],icon:"checkCircle"},
+    pantry:{label:t("shoppingList.categories.pantry"),items:t("shoppingList.pantryDefaults"),icon:"cart"},
+  };
+  // Detection keywords stay in English — they're matched against meal names,
+  // which are always generated in English by the AI regardless of UI language.
   const prot=["chicken","beef","salmon","fish","lamb","pork","shrimp","tuna","turkey","tofu"];
   const veg=["tomato","spinach","pepper","broccoli","carrot","onion","garlic","lettuce","mushroom","lemon","basil","parsley","ginger"];
   const gr=["pasta","rice","noodle","bread","tortilla","quinoa","couscous","lentil","bean"];
   const da=["cheese","butter","milk","cream","yogurt","parmesan","mozzarella"];
+  const label=keyword=>t(`shoppingList.ingredients.${keyword}`);
   days?.forEach(m=>{
     const n=m.name.toLowerCase();
-    prot.forEach(p=>{if(n.includes(p)&&!cats["Proteins"].items.some(i=>i.toLowerCase().includes(p)))cats["Proteins"].items.push(p.charAt(0).toUpperCase()+p.slice(1));});
-    veg.forEach(v=>{if(n.includes(v)&&!cats["Vegetables & Herbs"].items.some(i=>i.toLowerCase().includes(v)))cats["Vegetables & Herbs"].items.push(v.charAt(0).toUpperCase()+v.slice(1));});
-    gr.forEach(g=>{if(n.includes(g)&&!cats["Grains & Pasta"].items.some(i=>i.toLowerCase().includes(g)))cats["Grains & Pasta"].items.push(g.charAt(0).toUpperCase()+g.slice(1));});
-    da.forEach(d=>{if(n.includes(d)&&!cats["Dairy"].items.some(i=>i.toLowerCase().includes(d)))cats["Dairy"].items.push(d.charAt(0).toUpperCase()+d.slice(1));});
+    prot.forEach(p=>{if(n.includes(p)&&!cats.proteins.items.includes(label(p)))cats.proteins.items.push(label(p));});
+    veg.forEach(v=>{if(n.includes(v)&&!cats.vegHerbs.items.includes(label(v)))cats.vegHerbs.items.push(label(v));});
+    gr.forEach(g=>{if(n.includes(g)&&!cats.grainsPasta.items.includes(label(g)))cats.grainsPasta.items.push(label(g));});
+    da.forEach(d=>{if(n.includes(d)&&!cats.dairy.items.includes(label(d)))cats.dairy.items.push(label(d));});
   });
-  if(!cats["Proteins"].items.length)cats["Proteins"].items=days?.slice(0,3).map(d=>d.name.split(" ")[0])||["Protein"];
-  if(!cats["Vegetables & Herbs"].items.length)cats["Vegetables & Herbs"].items=["Mixed salad leaves","Cherry tomatoes","Fresh herbs","Garlic","Onions"];
-  if(!cats["Grains & Pasta"].items.length)cats["Grains & Pasta"].items=["Rice","Pasta"];
-  if(!cats["Dairy"].items.length)cats["Dairy"].items=["Butter","Parmesan"];
+  if(!cats.proteins.items.length)cats.proteins.items=days?.slice(0,3).map(d=>d.name.split(" ")[0])||[label("chicken")];
+  if(!cats.vegHerbs.items.length)cats.vegHerbs.items=t("shoppingList.vegDefaults");
+  if(!cats.grainsPasta.items.length)cats.grainsPasta.items=t("shoppingList.grainDefaults");
+  if(!cats.dairy.items.length)cats.dairy.items=t("shoppingList.dairyDefaults");
 
   const [checked,setChecked]=useState({});
   const toggle=key=>setChecked(p=>({...p,[key]:!p[key]}));
@@ -538,7 +555,7 @@ function ShoppingList({ days }) {
     <div>
       <div style={{ background:C.card, borderRadius:R.lg, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"18px 20px", marginBottom:20 }}>
         <div style={{ display:"flex", justifyContent:"space-between", marginBottom:12 }}>
-          <p style={{ fontWeight:700, fontSize:14, color:C.walnut, margin:0 }}>Shopping progress</p>
+          <p style={{ fontWeight:700, fontSize:14, color:C.walnut, margin:0 }}>{t("shoppingList.progress")}</p>
           <span style={{ fontSize:13, color:C.clay, fontWeight:700 }}>{done}/{total}</span>
         </div>
         <div style={{ background:C.border, borderRadius:4, height:6, overflow:"hidden" }}>
@@ -549,7 +566,7 @@ function ShoppingList({ days }) {
         <div key={cat} style={{ background:C.card, borderRadius:R.lg, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"16px 20px", marginBottom:14 }}>
           <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
             <Icon name={c.icon} size={15} color={C.clay}/>
-            <p style={{ fontSize:13, fontWeight:800, color:C.walnut, margin:0 }}>{cat}</p>
+            <p style={{ fontSize:13, fontWeight:800, color:C.walnut, margin:0 }}>{c.label}</p>
           </div>
           {c.items.map((item,i)=>{
             const key=cat+item;
@@ -566,7 +583,7 @@ function ShoppingList({ days }) {
       ))}
       <div style={{ background:C.sageLight, border:`1px solid #B8CDB4`, borderRadius:R.md, padding:"14px 18px", display:"flex", gap:10 }}>
         <Icon name="alert" size={15} color={C.sage}/>
-        <p style={{ fontSize:12, color:C.sage, margin:0, lineHeight:1.5 }}><strong>Check your cupboards first</strong><br/>Salt, pepper, olive oil, garlic — you likely already have these.</p>
+        <p style={{ fontSize:12, color:C.sage, margin:0, lineHeight:1.5 }}><strong>{t("shoppingList.tipTitle")}</strong><br/>{t("shoppingList.tipBody")}</p>
       </div>
     </div>
   );
@@ -574,6 +591,16 @@ function ShoppingList({ days }) {
 
 // ── Main ───────────────────────────────────────────────────────────────────
 export default function Nourishly() {
+  return (
+    <LanguageProvider>
+      <NourishlyApp />
+    </LanguageProvider>
+  );
+}
+
+function NourishlyApp() {
+  const t = useT();
+  const { lang, setLang } = useLang();
   const [screen, setScreen] = useState("splash");
   const [tab, setTab] = useState("home");
   const [authMode, setAuthMode] = useState("signup");
@@ -615,21 +642,21 @@ export default function Nourishly() {
         return;
       }
     }
-    const t=setTimeout(()=>{
+    const splashTimer=setTimeout(()=>{
       if(session?.access_token){ setScreen("app"); loadProfile(session,session.user.id); }
       else setScreen("slides");
     },1100);
-    return ()=>clearTimeout(t);
+    return ()=>clearTimeout(splashTimer);
   },[]);
 
   const saveSession=s=>{ setSession(s); try{ localStorage.setItem("nourishly_session",JSON.stringify(s)); }catch{} };
 
   const loadProfile=async(sess,userId)=>{
     try{
-      const p=await withAutoRefresh(sess, saveSession, async(t)=>(await sb.from("profiles",t)).select(`id=eq.${userId}&limit=1`));
+      const p=await withAutoRefresh(sess, saveSession, async(tok)=>(await sb.from("profiles",tok)).select(`id=eq.${userId}&limit=1`));
       console.log("[nourishly] loadProfile fetched", { userId, isArray:Array.isArray(p), row:Array.isArray(p)?p[0]:p, subscription_status:Array.isArray(p)&&p[0]?p[0].subscription_status:undefined });
-      if(Array.isArray(p)&&p[0]){ setProfile(p[0]); if(p[0].family_size) setForm({ familySize:p[0].family_size, allergies:p[0].allergies||"", cookTime:p[0].cook_time||"" }); }
-      const pl=await withAutoRefresh(sess, saveSession, async(t)=>(await sb.from("meal_plans",t)).select(`user_id=eq.${userId}&limit=10`));
+      if(Array.isArray(p)&&p[0]){ setProfile(p[0]); if(p[0].family_size) setForm({ familySize:p[0].family_size, allergies:p[0].allergies||"", cookTime:p[0].cook_time||"" }); if(p[0].language) setLang(p[0].language); }
+      const pl=await withAutoRefresh(sess, saveSession, async(tok)=>(await sb.from("meal_plans",tok)).select(`user_id=eq.${userId}&limit=10`));
       if(Array.isArray(pl)){ setSavedPlans(pl); if(pl.length>0 && !mealPlan){ setMealPlan({days:pl[0].days}); setTriedMeals([]); } }
     }catch{}
   };
@@ -637,66 +664,66 @@ export default function Nourishly() {
   const handleOnboardingComplete=answers=>{ setForm(answers); setScreen("auth"); };
 
   const handleAuth=async()=>{
-    if(!authForm.email||!authForm.password){ setError("Please fill in all fields."); return; }
-    if(authMode==="signup"&&!authForm.name){ setError("Please enter your name."); return; }
+    if(!authForm.email||!authForm.password){ setError(t("auth.fillAllFields")); return; }
+    if(authMode==="signup"&&!authForm.name){ setError(t("auth.enterName")); return; }
     setAuthLoading(true); setError("");
     try{
       let data;
       if(authMode==="signup"){
         data=await sb.signUp(authForm.email,authForm.password);
-        if(!data.__ok||data.error||data.error_description) throw new Error(data.error_description||data.error?.message||data.msg||"Sign up failed");
+        if(!data.__ok||data.error||data.error_description) throw new Error(data.error_description||data.error?.message||data.msg||t("auth.signupFailed"));
         if(data.access_token&&data.user?.id){
           saveSession(data);
           const profileResult=await(await sb.from("profiles",data.access_token)).upsert({ id:data.user.id, name:authForm.name, email:authForm.email, subscription_status:"free", generations_used_this_month:0, streak_weeks:0, family_size:form.familySize?parseInt(form.familySize):null, allergies:form.allergies, cook_time:form.cookTime });
-          if(!profileResult.__ok) throw new Error(profileResult.message||"Couldn't create your profile. Please try again or contact support.");
+          if(!profileResult.__ok) throw new Error(profileResult.message||t("auth.profileCreateFailed"));
           setProfile({ name:authForm.name, email:authForm.email, streak_weeks:0 });
           setScreen("app");
           if(form.familySize&&form.cookTime) handleGenerate(form, data);
-        } else { setError("Account created — check your email to confirm, then sign in."); setAuthMode("login"); }
+        } else { setError(t("auth.confirmEmail")); setAuthMode("login"); }
       } else {
         data=await sb.signIn(authForm.email,authForm.password);
-        if(!data.__ok||data.error||data.error_description) throw new Error(data.error_description||data.error?.message||data.msg||"Invalid email or password.");
-        if(!data.access_token||!data.user?.id) throw new Error("Invalid email or password.");
+        if(!data.__ok||data.error||data.error_description) throw new Error(data.error_description||data.error?.message||data.msg||t("auth.invalidCredentials"));
+        if(!data.access_token||!data.user?.id) throw new Error(t("auth.invalidCredentials"));
         saveSession(data); setScreen("app"); loadProfile(data,data.user.id);
       }
-    }catch(e){ setError(e.message||"Something went wrong."); }
+    }catch(e){ setError(e.message||t("auth.somethingWrong")); }
     finally{ setAuthLoading(false); }
   };
 
   const handleForgotPassword=async()=>{
-    if(!forgotForm.email){ setForgotError("Please enter your email."); return; }
+    if(!forgotForm.email){ setForgotError(t("forgotPassword.enterEmail")); return; }
     setForgotLoading(true); setForgotError("");
     try{
       const data=await sb.recover(forgotForm.email);
-      if(!data.__ok||data.error||data.error_description) throw new Error(data.error_description||data.error?.message||data.msg||"Couldn't send reset email. Please try again.");
+      if(!data.__ok||data.error||data.error_description) throw new Error(data.error_description||data.error?.message||data.msg||t("forgotPassword.sendFailed"));
       setForgotSent(true);
-    }catch(e){ setForgotError(e.message||"Something went wrong."); }
+    }catch(e){ setForgotError(e.message||t("auth.somethingWrong")); }
     finally{ setForgotLoading(false); }
   };
 
   const handleSetNewPassword=async()=>{
     setResetError("");
-    if(!resetForm.password||!resetForm.confirm){ setResetError("Please fill in both fields."); return; }
-    if(resetForm.password.length<6){ setResetError("Password must be at least 6 characters."); return; }
-    if(resetForm.password!==resetForm.confirm){ setResetError("Passwords don't match."); return; }
+    if(!resetForm.password||!resetForm.confirm){ setResetError(t("resetPassword.fillBothFields")); return; }
+    if(resetForm.password.length<6){ setResetError(t("resetPassword.tooShort")); return; }
+    if(resetForm.password!==resetForm.confirm){ setResetError(t("resetPassword.noMatch")); return; }
     setResetLoading(true);
     try{
       const result=await sb.updateUser(resetSession.access_token,{ password:resetForm.password });
-      if(!result.__ok||result.error||result.error_description) throw new Error(result.msg||result.error_description||result.error?.message||"Couldn't update your password.");
+      if(!result.__ok||result.error||result.error_description) throw new Error(result.msg||result.error_description||result.error?.message||t("resetPassword.updateFailed"));
       const newSession={ access_token:resetSession.access_token, refresh_token:resetSession.refresh_token, user:result };
       saveSession(newSession);
       setScreen("app");
       loadProfile(newSession,newSession.user.id);
-    }catch(e){ setResetError(e.message||"Something went wrong."); }
+    }catch(e){ setResetError(e.message||t("auth.somethingWrong")); }
     finally{ setResetLoading(false); }
   };
 
   const handleGenerate=async(overrideForm, overrideSession)=>{
     const f=overrideForm||form;
-    if(!f.familySize||!f.cookTime){ setError("Please fill in family size and cook time."); return; }
+    if(!f.familySize||!f.cookTime){ setError(t("home.fillFamilyCookTime")); return; }
     const isPaid = profile?.subscription_status === "active";
     const usedThisMonth = profile?.generations_used_this_month || 0;
-    if(!isPaid && usedThisMonth >= 2){ setError("You've used your 2 free plans this month. Upgrade to Nourishly Plus for unlimited plans."); return; }
+    if(!isPaid && usedThisMonth >= 2){ setError(t("home.freeLimitReached")); return; }
     setError(""); setLoading(true);
     const sess=overrideSession||session;
     const token=sess?.access_token; const userId=sess?.user?.id;
@@ -723,9 +750,9 @@ export default function Nourishly() {
       }
       if(!parsed.days?.length) throw new Error("No days found");
       setMealPlan(parsed); setTriedMeals([]);
-      if(token&&userId){ try{ const weekOf=new Date().toISOString().split("T")[0]; const saved=await withAutoRefresh(sess, saveSession, async(t)=>(await sb.from("meal_plans",t)).insert({ user_id:userId, days:parsed.days, week_of:weekOf })); if(Array.isArray(saved)&&saved[0]){ setSavedPlans(prev=>[saved[0],...prev.slice(0,9)]); const newCount=(profile?.generations_used_this_month||0)+1; console.log("[nourishly] about to update generations_used_this_month", { userId, currentProfileCount:profile?.generations_used_this_month, newCount }); const updResult=await withAutoRefresh(sess, saveSession, async(t)=>(await sb.from("profiles",t)).update({ generations_used_this_month:newCount },`id=eq.${userId}`)); console.log("[nourishly] profiles update response", updResult); if(Array.isArray(updResult)&&updResult[0]){ setProfile(prev=>prev?{...prev, generations_used_this_month:newCount}:prev); } else { setError("Plan saved, but your usage count couldn't be updated — it may show the wrong number until this is fixed."); } } else { setError("Plan generated but couldn't be saved. Please try logging in again."); } }catch(e){ setError("Plan generated but couldn't be saved: " + e.message); } } else { console.log("[nourishly] skipped save — missing token or userId", { hasToken:!!token, userId }); }
+      if(token&&userId){ try{ const weekOf=new Date().toISOString().split("T")[0]; const saved=await withAutoRefresh(sess, saveSession, async(tok)=>(await sb.from("meal_plans",tok)).insert({ user_id:userId, days:parsed.days, week_of:weekOf })); if(Array.isArray(saved)&&saved[0]){ setSavedPlans(prev=>[saved[0],...prev.slice(0,9)]); const newCount=(profile?.generations_used_this_month||0)+1; console.log("[nourishly] about to update generations_used_this_month", { userId, currentProfileCount:profile?.generations_used_this_month, newCount }); const updResult=await withAutoRefresh(sess, saveSession, async(tok)=>(await sb.from("profiles",tok)).update({ generations_used_this_month:newCount },`id=eq.${userId}`)); console.log("[nourishly] profiles update response", updResult); if(Array.isArray(updResult)&&updResult[0]){ setProfile(prev=>prev?{...prev, generations_used_this_month:newCount}:prev); } else { setError(t("home.planSavedButUpdateFailed")); } } else { setError(t("home.planNotSaved")); } }catch(e){ setError(t("home.planNotSavedError",{error:e.message})); } } else { console.log("[nourishly] skipped save — missing token or userId", { hasToken:!!token, userId }); }
       setTab("plan");
-    }catch(e){ setError(`Something went wrong: ${e.message}`); }
+    }catch(e){ setError(t("home.genericError",{error:e.message})); }
     finally{ setLoading(false); }
   };
 
@@ -751,6 +778,15 @@ export default function Nourishly() {
 
   const handleLogout=()=>{ saveSession(null); setProfile(null); setMealPlan(null); setSavedPlans([]); setTriedMeals([]); setTab("home"); setScreen("slides"); };
 
+  // ── Language: always persisted locally; best-effort synced to `profiles`
+  // for logged-in users so it follows them across devices. Wrapped so a
+  // missing `language` column on `profiles` can't break the language switch.
+  const handleChangeLanguage=async(code)=>{
+    setLang(code);
+    const token=session?.access_token; const userId=session?.user?.id;
+    if(token&&userId){ try{ await(await sb.from("profiles",token)).update({ language:code },`id=eq.${userId}`); }catch{} }
+  };
+
   const [managingSubscription, setManagingSubscription] = useState(false);
   const handleManageSubscription = async () => {
     if (!profile?.stripe_customer_id) return;
@@ -763,9 +799,9 @@ export default function Nourishly() {
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
-      else setError(data.error || "Couldn't open the subscription portal. Please try again.");
+      else setError(data.error || t("profile.portalOpenFailed"));
     } catch (e) {
-      setError("Couldn't open the subscription portal: " + e.message);
+      setError(t("profile.portalOpenFailedError",{error:e.message}));
     } finally {
       setManagingSubscription(false);
     }
@@ -783,9 +819,9 @@ export default function Nourishly() {
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
-      else setError(data.error || "Couldn't start checkout. Please try again.");
+      else setError(data.error || t("profile.checkoutFailed"));
     } catch (e) {
-      setError("Couldn't start checkout: " + e.message);
+      setError(t("profile.checkoutFailedError",{error:e.message}));
     } finally {
       setUpgrading(false);
     }
@@ -801,12 +837,12 @@ export default function Nourishly() {
     setSavingPrefs(true); setPrefsSaved(false); setError("");
     try {
       const updates = { family_size: form.familySize ? parseInt(form.familySize) : null, allergies: form.allergies, cook_time: form.cookTime };
-      const result = await withAutoRefresh(session, saveSession, async (t) => (await sb.from("profiles", t)).update(updates, `id=eq.${userId}`));
-      if (!result.__ok) throw new Error(result.message || "Couldn't save your preferences. Please try again.");
+      const result = await withAutoRefresh(session, saveSession, async (tok) => (await sb.from("profiles", tok)).update(updates, `id=eq.${userId}`));
+      if (!result.__ok) throw new Error(result.message || t("profile.savePrefsFailed"));
       setProfile(prev => prev ? { ...prev, ...updates } : prev);
       setPrefsSaved(true);
     } catch (e) {
-      setError(e.message || "Couldn't save your preferences.");
+      setError(e.message || t("profile.savePrefsFailed"));
     } finally {
       setSavingPrefs(false);
     }
@@ -821,22 +857,22 @@ export default function Nourishly() {
   const [pwError, setPwError] = useState("");
   const handleChangePassword = async () => {
     setPwError(""); setPwMessage("");
-    if (!pwForm.current || !pwForm.next || !pwForm.confirm) { setPwError("Please fill in all fields."); return; }
-    if (pwForm.next.length < 6) { setPwError("New password must be at least 6 characters."); return; }
-    if (pwForm.next !== pwForm.confirm) { setPwError("New passwords don't match."); return; }
+    if (!pwForm.current || !pwForm.next || !pwForm.confirm) { setPwError(t("auth.fillAllFields")); return; }
+    if (pwForm.next.length < 6) { setPwError(t("profile.newPasswordTooShort")); return; }
+    if (pwForm.next !== pwForm.confirm) { setPwError(t("profile.newPasswordNoMatch")); return; }
     const email = profile?.email || session?.user?.email;
-    if (!email) { setPwError("Couldn't find your account email."); return; }
+    if (!email) { setPwError(t("profile.noAccountEmail")); return; }
     setPwLoading(true);
     try {
       const verify = await sb.signIn(email, pwForm.current);
-      if (!verify.__ok || verify.error || verify.error_description) throw new Error("Current password is incorrect.");
+      if (!verify.__ok || verify.error || verify.error_description) throw new Error(t("profile.currentPasswordWrong"));
       const token = verify.access_token || session?.access_token;
       const result = await sb.updateUser(token, { password: pwForm.next });
-      if (!result.__ok || result.error || result.error_description) throw new Error(result.msg || result.error_description || result.error?.message || "Couldn't update your password.");
-      setPwMessage("Password updated successfully.");
+      if (!result.__ok || result.error || result.error_description) throw new Error(result.msg || result.error_description || result.error?.message || t("profile.passwordUpdateFailed"));
+      setPwMessage(t("profile.passwordUpdated"));
       setPwForm({ current:"", next:"", confirm:"" });
     } catch (e) {
-      setPwError(e.message || "Couldn't update your password.");
+      setPwError(e.message || t("profile.passwordUpdateFailed"));
     } finally {
       setPwLoading(false);
     }
@@ -847,7 +883,13 @@ export default function Nourishly() {
 
   const inp={ width:"100%", boxSizing:"border-box", padding:"13px 15px", borderRadius:R.md, border:`1.5px solid ${C.border}`, fontSize:14, color:C.walnut, background:C.bg, outline:"none", fontFamily:"inherit", transition:"border-color 0.15s ease" };
   const lbl={ display:"block", fontWeight:700, fontSize:11, color:C.walnut, marginBottom:6, textTransform:"uppercase", letterSpacing:"0.07em" };
-  const tabs=[{ id:"home",label:"Home",icon:"home" },{ id:"plan",label:"This week",icon:"calendar" },{ id:"shopping",label:"Shopping",icon:"cart" },{ id:"saved",label:"Saved",icon:"bookmark" },{ id:"profile",label:"Profile",icon:"user" }];
+  const tabs=[{ id:"home",label:t("nav.home"),icon:"home" },{ id:"plan",label:t("nav.thisWeek"),icon:"calendar" },{ id:"shopping",label:t("nav.shopping"),icon:"cart" },{ id:"saved",label:t("nav.saved"),icon:"bookmark" },{ id:"profile",label:t("nav.profile"),icon:"user" }];
+  const prefFields=[
+    { label:t("common.fields.familySize"), name:"familySize", placeholder:t("common.fields.familySizePlaceholder"), type:"number" },
+    { label:t("common.fields.allergies"), name:"allergies", placeholder:t("common.fields.allergiesPlaceholder"), type:"text" },
+    { label:t("common.fields.cookTime"), name:"cookTime", placeholder:t("common.fields.cookTimePlaceholder"), type:"text" },
+  ];
+  const dateLocale=lang==="pt"?"pt-PT":"en-GB";
 
   if(screen==="splash") return <Splash/>;
   if(screen==="slides") return <WelcomeSlides onDone={()=>setScreen("onboarding")}/>;
@@ -857,54 +899,54 @@ export default function Nourishly() {
     <div style={{ background:C.bg, minHeight:"100vh", fontFamily:FONT }}>
       <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#7A3018 45%,${C.clay} 100%)`, padding:"48px 24px 0", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:0, marginBottom:0, backgroundColor:C.clay }}>
         <Logo size={60} ring/>
-        <h1 style={{ color:"#fff", fontSize:26, fontWeight:900, margin:"16px 0 6px", letterSpacing:"-0.5px" }}>Nourishly</h1>
-        <p style={{ color:"rgba(255,255,255,0.6)", fontSize:13, margin:"0 0 0" }}>Family meals, made easy</p>
+        <h1 style={{ color:"#fff", fontSize:26, fontWeight:900, margin:"16px 0 6px", letterSpacing:"-0.5px" }}>{t("common.appName")}</h1>
+        <p style={{ color:"rgba(255,255,255,0.6)", fontSize:13, margin:"0 0 0" }}>{t("common.tagline")}</p>
         <InlineWave bgColor={C.bg} />
       </div>
       <div style={{ maxWidth:420, margin:"0 auto", padding:"0 20px 48px" }}>
         {form.familySize&&(
           <div style={{ background:C.clayLight, borderRadius:R.md, padding:"12px 16px", marginBottom:20, display:"flex", alignItems:"center", gap:8 }}>
             <Icon name="checkCircle" size={16} active color={C.clay}/>
-            <p style={{ fontSize:12, color:C.clay, margin:0, fontWeight:600 }}>Your preferences are saved — just create your account</p>
+            <p style={{ fontSize:12, color:C.clay, margin:0, fontWeight:600 }}>{t("auth.prefsSavedBanner")}</p>
           </div>
         )}
         <div style={{ background:C.card, borderRadius:R.xl, padding:"28px 22px", border:`1px solid ${C.border}`, boxShadow:SHADOW.raised }}>
           {authMode==="forgot" ? (
             <>
-              <p style={{ fontWeight:800, fontSize:16, color:C.walnut, margin:"0 0 4px" }}>Reset your password</p>
-              <p style={{ fontSize:13, color:C.muted, margin:"0 0 20px" }}>Enter your email and we'll send you a reset link.</p>
+              <p style={{ fontWeight:800, fontSize:16, color:C.walnut, margin:"0 0 4px" }}>{t("forgotPassword.title")}</p>
+              <p style={{ fontSize:13, color:C.muted, margin:"0 0 20px" }}>{t("forgotPassword.subtitle")}</p>
               {forgotSent ? (
                 <div style={{ background:C.sageLight, border:"1px solid #B8CDB4", borderRadius:R.md, padding:"14px 16px", marginBottom:18, display:"flex", gap:8 }}>
                   <Icon name="checkCircle" size={15} active color={C.sage}/>
-                  <p style={{ color:C.sage, fontSize:13, margin:0, lineHeight:1.5 }}>Check your email for a reset link.</p>
+                  <p style={{ color:C.sage, fontSize:13, margin:0, lineHeight:1.5 }}>{t("forgotPassword.sentMessage")}</p>
                 </div>
               ) : (
                 <>
-                  <div style={{ marginBottom:20 }}><label style={lbl}>Email</label><input type="email" placeholder="you@email.com" value={forgotForm.email} onChange={e=>setForgotForm({ email:e.target.value })} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
+                  <div style={{ marginBottom:20 }}><label style={lbl}>{t("auth.email")}</label><input type="email" placeholder={t("auth.emailPlaceholder")} value={forgotForm.email} onChange={e=>setForgotForm({ email:e.target.value })} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
                   {forgotError&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:R.md, padding:"10px 14px", marginBottom:18, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{forgotError}</p></div>}
                   <button onClick={handleForgotPassword} disabled={forgotLoading} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(forgotLoading?C.muted:C.clay), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:forgotLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:forgotLoading?"none":SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                    {forgotLoading?"Sending...":"Send reset link"}
+                    {forgotLoading?t("forgotPassword.sending"):t("forgotPassword.sendLink")}
                   </button>
                 </>
               )}
-              <button onClick={()=>{ setAuthMode("login"); setForgotError(""); setForgotSent(false); }} className="btn-press" style={{ width:"100%", padding:"12px 0", marginTop:14, background:"none", color:C.muted, border:"none", cursor:"pointer", fontWeight:700, fontSize:13, fontFamily:"inherit" }}>Back to sign in</button>
+              <button onClick={()=>{ setAuthMode("login"); setForgotError(""); setForgotSent(false); }} className="btn-press" style={{ width:"100%", padding:"12px 0", marginTop:14, background:"none", color:C.muted, border:"none", cursor:"pointer", fontWeight:700, fontSize:13, fontFamily:"inherit" }}>{t("forgotPassword.backToSignIn")}</button>
             </>
           ) : (
             <>
               <div style={{ display:"flex", background:C.bg, borderRadius:R.md, padding:4, marginBottom:24 }}>
-                {[["signup","Create account"],["login","Sign in"]].map(([mode,label])=>(
+                {[["signup",t("auth.createAccount")],["login",t("auth.signIn")]].map(([mode,label])=>(
                   <button key={mode} onClick={()=>{ setAuthMode(mode); setError(""); }} className="btn-press" style={{ flex:1, padding:"9px 0", borderRadius:R.sm, border:"none", cursor:"pointer", fontWeight:700, fontSize:13, fontFamily:"inherit", background:authMode===mode?C.card:"transparent", color:authMode===mode?C.walnut:C.muted, boxShadow:authMode===mode?"0 2px 8px rgba(44,24,16,0.1)":"none", transition:"all 0.15s" }}>{label}</button>
                 ))}
               </div>
-              {authMode==="signup"&&<div style={{ marginBottom:16 }}><label style={lbl}>Your name</label><input type="text" placeholder="e.g. Maria" value={authForm.name} onChange={e=>setAuthForm(f=>({...f,name:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>}
-              <div style={{ marginBottom:16 }}><label style={lbl}>Email</label><input type="email" placeholder="you@email.com" value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
-              <div style={{ marginBottom:authMode==="login"?10:24 }}><label style={lbl}>Password</label><input type="password" placeholder="••••••••" value={authForm.password} onChange={e=>setAuthForm(f=>({...f,password:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
-              {authMode==="login"&&<div style={{ textAlign:"right", marginBottom:14 }}><button onClick={()=>{ setAuthMode("forgot"); setError(""); setForgotSent(false); setForgotError(""); setForgotForm({ email:authForm.email||"" }); }} className="btn-press" style={{ background:"none", border:"none", cursor:"pointer", color:C.clay, fontSize:12.5, fontWeight:700, fontFamily:"inherit", padding:0 }}>Forgot password?</button></div>}
+              {authMode==="signup"&&<div style={{ marginBottom:16 }}><label style={lbl}>{t("auth.yourName")}</label><input type="text" placeholder={t("auth.yourNamePlaceholder")} value={authForm.name} onChange={e=>setAuthForm(f=>({...f,name:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>}
+              <div style={{ marginBottom:16 }}><label style={lbl}>{t("auth.email")}</label><input type="email" placeholder={t("auth.emailPlaceholder")} value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
+              <div style={{ marginBottom:authMode==="login"?10:24 }}><label style={lbl}>{t("auth.password")}</label><input type="password" placeholder="••••••••" value={authForm.password} onChange={e=>setAuthForm(f=>({...f,password:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
+              {authMode==="login"&&<div style={{ textAlign:"right", marginBottom:14 }}><button onClick={()=>{ setAuthMode("forgot"); setError(""); setForgotSent(false); setForgotError(""); setForgotForm({ email:authForm.email||"" }); }} className="btn-press" style={{ background:"none", border:"none", cursor:"pointer", color:C.clay, fontSize:12.5, fontWeight:700, fontFamily:"inherit", padding:0 }}>{t("auth.forgotPassword")}</button></div>}
               {error&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:R.md, padding:"10px 14px", marginBottom:18, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{error}</p></div>}
               <button onClick={handleAuth} disabled={authLoading} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(authLoading?C.muted:C.clay), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:authLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:authLoading?"none":SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                {authLoading?"Please wait...":authMode==="signup"?"Start planning":"Welcome back"}
+                {authLoading?t("auth.pleaseWait"):authMode==="signup"?t("auth.startPlanning"):t("auth.welcomeBack")}
               </button>
-              <p style={{ textAlign:"center", color:C.muted, fontSize:12, margin:"14px 0 0" }}>Your data stays private · No credit card needed</p>
+              <p style={{ textAlign:"center", color:C.muted, fontSize:12, margin:"14px 0 0" }}>{t("auth.privacyFooter")}</p>
             </>
           )}
         </div>
@@ -916,18 +958,18 @@ export default function Nourishly() {
     <div style={{ background:C.bg, minHeight:"100vh", fontFamily:FONT }}>
       <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#7A3018 45%,${C.clay} 100%)`, padding:"48px 24px 0", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:0, marginBottom:0, backgroundColor:C.clay }}>
         <Logo size={60} ring/>
-        <h1 style={{ color:"#fff", fontSize:26, fontWeight:900, margin:"16px 0 6px", letterSpacing:"-0.5px" }}>Nourishly</h1>
-        <p style={{ color:"rgba(255,255,255,0.6)", fontSize:13, margin:"0 0 0" }}>Set your new password</p>
+        <h1 style={{ color:"#fff", fontSize:26, fontWeight:900, margin:"16px 0 6px", letterSpacing:"-0.5px" }}>{t("common.appName")}</h1>
+        <p style={{ color:"rgba(255,255,255,0.6)", fontSize:13, margin:"0 0 0" }}>{t("resetPassword.headerSubtitle")}</p>
         <InlineWave bgColor={C.bg} />
       </div>
       <div style={{ maxWidth:420, margin:"0 auto", padding:"0 20px 48px" }}>
         <div style={{ background:C.card, borderRadius:R.xl, padding:"28px 22px", border:`1px solid ${C.border}`, boxShadow:SHADOW.raised }}>
-          <p style={{ fontWeight:800, fontSize:16, color:C.walnut, margin:"0 0 20px" }}>Choose a new password</p>
-          <div style={{ marginBottom:16 }}><label style={lbl}>New password</label><input type="password" placeholder="••••••••" value={resetForm.password} onChange={e=>setResetForm(f=>({...f,password:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
-          <div style={{ marginBottom:24 }}><label style={lbl}>Confirm new password</label><input type="password" placeholder="••••••••" value={resetForm.confirm} onChange={e=>setResetForm(f=>({...f,confirm:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
+          <p style={{ fontWeight:800, fontSize:16, color:C.walnut, margin:"0 0 20px" }}>{t("resetPassword.cardTitle")}</p>
+          <div style={{ marginBottom:16 }}><label style={lbl}>{t("resetPassword.newPassword")}</label><input type="password" placeholder="••••••••" value={resetForm.password} onChange={e=>setResetForm(f=>({...f,password:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
+          <div style={{ marginBottom:24 }}><label style={lbl}>{t("resetPassword.confirmNewPassword")}</label><input type="password" placeholder="••••••••" value={resetForm.confirm} onChange={e=>setResetForm(f=>({...f,confirm:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
           {resetError&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:R.md, padding:"10px 14px", marginBottom:18, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{resetError}</p></div>}
           <button onClick={handleSetNewPassword} disabled={resetLoading} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(resetLoading?C.muted:C.clay), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:resetLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:resetLoading?"none":SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center" }}>
-            {resetLoading?"Please wait...":"Set new password"}
+            {resetLoading?t("resetPassword.pleaseWait"):t("resetPassword.submit")}
           </button>
         </div>
       </div>
@@ -942,8 +984,8 @@ export default function Nourishly() {
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
             <Logo size={36}/>
             <div>
-              <h1 style={{ color:"#fff", margin:0, fontSize:18, fontWeight:900 }}>Nourishly</h1>
-              <p style={{ color:"rgba(255,255,255,0.5)", margin:0, fontSize:11 }}>Hey {profile?.name?.split(" ")[0]||"there"}</p>
+              <h1 style={{ color:"#fff", margin:0, fontSize:18, fontWeight:900 }}>{t("common.appName")}</h1>
+              <p style={{ color:"rgba(255,255,255,0.5)", margin:0, fontSize:11 }}>{t("nav.greeting",{name:profile?.name?.split(" ")[0]||t("nav.greetingFallback")})}</p>
             </div>
           </div>
           <div style={{ display:"flex", gap:8, alignItems:"center" }}>
@@ -963,11 +1005,11 @@ export default function Nourishly() {
               <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:22 }}>
                 <div style={{ width:40, height:40, borderRadius:R.sm, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center" }}><Icon name="calendar" size={20} color={C.clay}/></div>
                 <div>
-                  <p style={{ fontWeight:900, fontSize:18, color:C.walnut, margin:0, letterSpacing:"-0.3px" }}>Plan this week</p>
-                  <p style={{ fontSize:12, color:C.muted, margin:0 }}>A fresh week of dinners, sorted</p>
+                  <p style={{ fontWeight:900, fontSize:18, color:C.walnut, margin:0, letterSpacing:"-0.3px" }}>{t("home.cardTitle")}</p>
+                  <p style={{ fontSize:12, color:C.muted, margin:0 }}>{t("home.cardSubtitle")}</p>
                 </div>
               </div>
-              {[{label:"Family size",name:"familySize",placeholder:"e.g. 4",type:"number"},{label:"Allergies or restrictions",name:"allergies",placeholder:"e.g. no nuts — or leave blank",type:"text"},{label:"Weeknight cook time",name:"cookTime",placeholder:"e.g. 30 minutes",type:"text"}].map(field=>(
+              {prefFields.map(field=>(
                 <div key={field.name} style={{ marginBottom:16 }}>
                   <label style={lbl}>{field.label}</label>
                   <input type={field.type} placeholder={field.placeholder} value={form[field.name]} onChange={e=>setForm(f=>({...f,[field.name]:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/>
@@ -975,19 +1017,19 @@ export default function Nourishly() {
               ))}
               {error&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:R.md, padding:"10px 14px", marginBottom:16, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{error}</p></div>}
               <button onClick={()=>handleGenerate()} disabled={loading} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(loading?C.muted:C.clay), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:loading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:loading?"none":SHADOW.button, transition:"background 0.2s ease, box-shadow 0.2s ease", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
-                {loading?<><Icon name="refresh" size={16} color="#fff"/>Building your plan...</>:<>Build my meal plan<Icon name="chevronRight" size={16} color="#fff"/></>}
+                {loading?<><Icon name="refresh" size={16} color="#fff"/>{t("home.building")}</>:<>{t("home.buildButton")}<Icon name="chevronRight" size={16} color="#fff"/></>}
               </button>
             </div>
             {savedPlans.length>0&&(
               <div>
-                <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 12px" }}>Recent plans</p>
+                <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 12px" }}>{t("home.recentPlans")}</p>
                 {savedPlans.slice(0,3).map((plan,i)=>(
                   <div key={i} onClick={()=>{ setMealPlan({days:plan.days}); setTriedMeals([]); setTab("plan"); }} className="btn-press" style={{ background:C.card, borderRadius:R.lg, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"16px 18px", marginBottom:12, display:"flex", alignItems:"center", justifyContent:"space-between", cursor:"pointer" }}>
                     <div style={{ display:"flex", alignItems:"center", gap:12 }}>
                       <div style={{ width:38, height:38, borderRadius:R.sm, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center" }}><Icon name="calendar" size={17} color={C.clay}/></div>
                       <div>
-                        <p style={{ fontWeight:700, fontSize:14, color:C.walnut, margin:"0 0 2px" }}>{profile?.name||"Your"}'s plan</p>
-                        <p style={{ fontSize:12, color:C.muted, margin:0 }}>{new Date(plan.created_at).toLocaleDateString("en-GB",{ day:"numeric", month:"short", year:"numeric" })}</p>
+                        <p style={{ fontWeight:700, fontSize:14, color:C.walnut, margin:"0 0 2px" }}>{t("home.planOf",{name:profile?.name||t("home.yourFallback")})}</p>
+                        <p style={{ fontSize:12, color:C.muted, margin:0 }}>{new Date(plan.created_at).toLocaleDateString(dateLocale,{ day:"numeric", month:"short", year:"numeric" })}</p>
                       </div>
                     </div>
                     <Icon name="chevronRight" size={18} color={C.clay}/>
@@ -1005,38 +1047,38 @@ export default function Nourishly() {
               <div style={{ background:C.card, borderRadius:R.lg, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"18px 20px", marginBottom:20 }}>
                 <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
                   <Icon name="chart" size={14} color={C.muted}/>
-                  <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:0 }}>Weekly nutrition totals</p>
+                  <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:0 }}>{t("plan.nutritionTotals")}</p>
                 </div>
                 <div style={{ display:"flex", gap:8 }}>
-                  <NChip label="Cal" value={totalN?.cal} color={C.clay}/>
+                  <NChip label={t("plan.calLabel")} value={totalN?.cal} color={C.clay}/>
                   {profile?.subscription_status==="active" ? (
                     <>
-                      <NChip label="Protein" value={`${totalN?.protein}g`} color={C.sage}/>
-                      <NChip label="Carbs" value={`${totalN?.carbs}g`} color={C.clayMid}/>
-                      <NChip label="Fat" value={`${totalN?.fat}g`} color={C.muted}/>
+                      <NChip label={t("plan.proteinLabel")} value={`${totalN?.protein}g`} color={C.sage}/>
+                      <NChip label={t("plan.carbsLabel")} value={`${totalN?.carbs}g`} color={C.clayMid}/>
+                      <NChip label={t("plan.fatLabel")} value={`${totalN?.fat}g`} color={C.muted}/>
                     </>
                   ) : (
                     <div style={{ flex:3, background:C.clayLight, borderRadius:R.sm, padding:"10px 12px", display:"flex", alignItems:"center", justifyContent:"center", gap:6 }}>
                       <Icon name="checkCircle" size={13} color={C.clay}/>
-                      <span style={{ fontSize:11, color:C.clay, fontWeight:700 }}>Full nutrition on Plus</span>
+                      <span style={{ fontSize:11, color:C.clay, fontWeight:700 }}>{t("plan.plusFeatureChip")}</span>
                     </div>
                   )}
                 </div>
               </div>
               {mealPlan.days?.map(meal=>(
                 <div key={meal.day} style={{ position:"relative" }}>
-                  {swappingMeal===meal.day&&<div style={{ position:"absolute", inset:0, background:"rgba(232,221,208,0.88)", borderRadius:R.xl, display:"flex", alignItems:"center", justifyContent:"center", zIndex:10 }}><p style={{ color:C.clay, fontWeight:700, fontSize:14 }}>Finding alternative...</p></div>}
+                  {swappingMeal===meal.day&&<div style={{ position:"absolute", inset:0, background:"rgba(232,221,208,0.88)", borderRadius:R.xl, display:"flex", alignItems:"center", justifyContent:"center", zIndex:10 }}><p style={{ color:C.clay, fontWeight:700, fontSize:14 }}>{t("plan.findingAlternative")}</p></div>}
                   <MealCard meal={meal} onSwap={handleSwap} onMarkTried={handleMarkTried} triedMeals={triedMeals} isPaid={profile?.subscription_status==="active"} imageUrl={weekImages[meal.day]}/>
                 </div>
               ))}
-              <button onClick={()=>{ setMealPlan(null); setTab("home"); }} className="btn-press" style={{ width:"100%", padding:"14px 0", marginTop:10, background:"none", color:C.clay, border:`2px solid ${C.clay}`, borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit" }}>Generate a new plan</button>
+              <button onClick={()=>{ setMealPlan(null); setTab("home"); }} className="btn-press" style={{ width:"100%", padding:"14px 0", marginTop:10, background:"none", color:C.clay, border:`2px solid ${C.clay}`, borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit" }}>{t("plan.generateNewPlan")}</button>
             </div>
           ):(
             <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"56px 28px", textAlign:"center" }}>
               <div style={{ width:64, height:64, borderRadius:R.lg, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}><Icon name="calendar" size={28} color={C.clay}/></div>
-              <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>No meal plan yet</p>
-              <p style={{ fontSize:14, color:C.muted, margin:"0 0 22px" }}>Head to Home and build your first week of dinners.</p>
-              <button onClick={()=>setTab("home")} className="btn-press" style={{ padding:"13px 28px", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>Go to Home</button>
+              <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>{t("plan.emptyTitle")}</p>
+              <p style={{ fontSize:14, color:C.muted, margin:"0 0 22px" }}>{t("plan.emptySubtitle")}</p>
+              <button onClick={()=>setTab("home")} className="btn-press" style={{ padding:"13px 28px", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>{t("plan.goToHome")}</button>
             </div>
           )
         )}
@@ -1046,18 +1088,18 @@ export default function Nourishly() {
           profile?.subscription_status!=="active" ? (
             <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"56px 28px", textAlign:"center" }}>
               <div style={{ width:64, height:64, borderRadius:R.lg, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}><Icon name="cart" size={28} color={C.clay}/></div>
-              <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>Shopping lists are a Plus feature</p>
-              <p style={{ fontSize:14, color:C.muted, margin:"0 0 22px" }}>Upgrade to Nourishly Plus for an automatic, organised shopping list every week.</p>
+              <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>{t("shopping.paywallTitle")}</p>
+              <p style={{ fontSize:14, color:C.muted, margin:"0 0 22px" }}>{t("shopping.paywallSubtitle")}</p>
               <button onClick={handleUpgrade} disabled={upgrading} className="btn-press" style={{ padding:"13px 28px", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:upgrading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>
-                {upgrading ? "Redirecting..." : "Upgrade — €7.99/mo"}
+                {upgrading ? t("shopping.redirecting") : t("shopping.upgradeButton")}
               </button>
             </div>
           ) : mealPlan?<ShoppingList days={mealPlan.days}/>:(
             <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"56px 28px", textAlign:"center" }}>
               <div style={{ width:64, height:64, borderRadius:R.lg, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}><Icon name="cart" size={28} color={C.clay}/></div>
-              <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>No shopping list yet</p>
-              <p style={{ fontSize:14, color:C.muted, margin:"0 0 22px" }}>Generate a meal plan and your list appears here.</p>
-              <button onClick={()=>setTab("home")} className="btn-press" style={{ padding:"13px 28px", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>Build a plan</button>
+              <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>{t("shopping.emptyTitle")}</p>
+              <p style={{ fontSize:14, color:C.muted, margin:"0 0 22px" }}>{t("shopping.emptySubtitle")}</p>
+              <button onClick={()=>setTab("home")} className="btn-press" style={{ padding:"13px 28px", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>{t("shopping.buildPlan")}</button>
             </div>
           )
         )}
@@ -1066,19 +1108,19 @@ export default function Nourishly() {
         {tab==="saved"&&(
           savedPlans.length>0?(
             <div>
-              <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 12px" }}>{savedPlans.length} saved {savedPlans.length===1?"plan":"plans"}</p>
+              <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 12px" }}>{savedPlans.length===1?t("saved.countOne",{count:savedPlans.length}):t("saved.countOther",{count:savedPlans.length})}</p>
               {savedPlans.map((plan,i)=>(
                 <div key={i} style={{ background:C.card, borderRadius:R.lg, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"18px 20px", marginBottom:14 }}>
                   <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:12 }}>
                     <div>
-                      <p style={{ fontWeight:800, fontSize:15, color:C.walnut, margin:"0 0 3px" }}>{profile?.name||"Your"}'s meal plan</p>
-                      <p style={{ fontSize:12, color:C.muted, margin:0 }}>{new Date(plan.created_at).toLocaleDateString("en-GB",{ day:"numeric", month:"short", year:"numeric" })}</p>
+                      <p style={{ fontWeight:800, fontSize:15, color:C.walnut, margin:"0 0 3px" }}>{t("saved.mealPlanOf",{name:profile?.name||t("saved.yourFallback")})}</p>
+                      <p style={{ fontSize:12, color:C.muted, margin:0 }}>{new Date(plan.created_at).toLocaleDateString(dateLocale,{ day:"numeric", month:"short", year:"numeric" })}</p>
                     </div>
-                    <button onClick={()=>{ setMealPlan({days:plan.days}); setTriedMeals([]); setTab("plan"); }} className="btn-press" style={{ background:C.clayLight, color:C.clay, border:"none", borderRadius:R.sm, padding:"8px 14px", fontSize:12, fontWeight:800, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:4 }}>View<Icon name="chevronRight" size={13} color={C.clay}/></button>
+                    <button onClick={()=>{ setMealPlan({days:plan.days}); setTriedMeals([]); setTab("plan"); }} className="btn-press" style={{ background:C.clayLight, color:C.clay, border:"none", borderRadius:R.sm, padding:"8px 14px", fontSize:12, fontWeight:800, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", gap:4 }}>{t("saved.view")}<Icon name="chevronRight" size={13} color={C.clay}/></button>
                   </div>
                   <div style={{ display:"flex", flexWrap:"wrap", gap:6 }}>
                     {plan.days?.slice(0,5).map((d,j)=><span key={j} style={{ background:C.bg, color:C.muted, fontSize:11, padding:"3px 9px", borderRadius:20, border:`1px solid ${C.border}` }}>{d.name}</span>)}
-                    {plan.days?.length>5&&<span style={{ color:C.muted, fontSize:11, padding:"3px 0" }}>+{plan.days.length-5} more</span>}
+                    {plan.days?.length>5&&<span style={{ color:C.muted, fontSize:11, padding:"3px 0" }}>{t("saved.moreCount",{count:plan.days.length-5})}</span>}
                   </div>
                 </div>
               ))}
@@ -1086,9 +1128,9 @@ export default function Nourishly() {
           ):(
             <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"56px 28px", textAlign:"center" }}>
               <div style={{ width:64, height:64, borderRadius:R.lg, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}><Icon name="bookmark" size={28} color={C.clay}/></div>
-              <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>No saved plans yet</p>
-              <p style={{ fontSize:14, color:C.muted, margin:"0 0 22px" }}>Your plans save automatically every time you generate one.</p>
-              <button onClick={()=>setTab("home")} className="btn-press" style={{ padding:"13px 28px", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>Create first plan</button>
+              <p style={{ fontWeight:800, fontSize:17, color:C.walnut, margin:"0 0 8px" }}>{t("saved.emptyTitle")}</p>
+              <p style={{ fontSize:14, color:C.muted, margin:"0 0 22px" }}>{t("saved.emptySubtitle")}</p>
+              <button onClick={()=>setTab("home")} className="btn-press" style={{ padding:"13px 28px", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>{t("saved.createFirst")}</button>
             </div>
           )
         )}
@@ -1101,7 +1143,7 @@ export default function Nourishly() {
             <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"22px", marginBottom:20, display:"flex", alignItems:"center", gap:16 }}>
               <div style={{ width:52, height:52, borderRadius:R.md, background:C.clayLight, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}><Icon name="user" size={26} color={C.clay}/></div>
               <div>
-                <p style={{ fontWeight:800, fontSize:16, color:C.walnut, margin:"0 0 3px" }}>{profile?.name||"Your account"}</p>
+                <p style={{ fontWeight:800, fontSize:16, color:C.walnut, margin:"0 0 3px" }}>{profile?.name||t("profile.accountFallback")}</p>
                 <p style={{ fontSize:13, color:C.muted, margin:0 }}>{profile?.email||session?.user?.email||""}</p>
               </div>
             </div>
@@ -1111,39 +1153,49 @@ export default function Nourishly() {
               <div style={{ background:C.clay, borderRadius:R.lg, boxShadow:SHADOW.card, padding:"16px 20px", marginBottom:20 }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
                   <Icon name="checkCircle" size={18} active color="#fff"/>
-                  <p style={{ color:"#fff", fontSize:13, fontWeight:700, margin:0 }}>Nourishly Plus — unlimited plans unlocked</p>
+                  <p style={{ color:"#fff", fontSize:13, fontWeight:700, margin:0 }}>{t("profile.plusActive")}</p>
                 </div>
                 <button onClick={handleManageSubscription} disabled={managingSubscription} className="btn-press" style={{ width:"100%", padding:"10px 0", background:"rgba(255,255,255,0.15)", color:"#fff", border:"1px solid rgba(255,255,255,0.3)", borderRadius:R.md, fontSize:12, fontWeight:700, cursor:managingSubscription?"not-allowed":"pointer", fontFamily:"inherit" }}>
-                  {managingSubscription ? "Redirecting..." : "Manage subscription"}
+                  {managingSubscription ? t("profile.redirecting") : t("profile.manageSubscription")}
                 </button>
               </div>
             ) : (
               <div style={{ background:C.card, border:`1.5px solid ${C.border}`, borderRadius:R.lg, boxShadow:SHADOW.card, padding:"16px 20px", marginBottom:20 }}>
                 <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
-                  <p style={{ fontSize:13, fontWeight:700, color:C.walnut, margin:0 }}>Free plan</p>
-                  <p style={{ fontSize:12, color:C.muted, margin:0 }}>{profile?.generations_used_this_month||0}/2 plans used this month</p>
+                  <p style={{ fontSize:13, fontWeight:700, color:C.walnut, margin:0 }}>{t("profile.freePlan")}</p>
+                  <p style={{ fontSize:12, color:C.muted, margin:0 }}>{t("profile.plansUsed",{used:profile?.generations_used_this_month||0})}</p>
                 </div>
                 <div style={{ background:C.bg, borderRadius:4, height:6, overflow:"hidden", marginBottom:14 }}>
                   <div style={{ height:"100%", width:`${Math.min(100,((profile?.generations_used_this_month||0)/2)*100)}%`, background:C.clay, borderRadius:4, transition:"width 0.3s" }}/>
                 </div>
                 <button onClick={handleUpgrade} disabled={upgrading} className="btn-press" style={{ width:"100%", padding:"13px 0", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:13, fontWeight:800, cursor:upgrading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:SHADOW.button }}>
-                  {upgrading ? "Redirecting to checkout..." : "Upgrade to Nourishly Plus — €7.99/mo"}
+                  {upgrading ? t("profile.redirectingCheckout") : t("profile.upgradeButton")}
                 </button>
               </div>
             )}
 
+            {/* ── Language switcher ── */}
+            <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"22px", marginBottom:20 }}>
+              <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 18px" }}>{t("profile.language")}</p>
+              <div style={{ display:"flex", background:C.bg, borderRadius:R.md, padding:4 }}>
+                {[["en",t("profile.languageEnglish")],["pt",t("profile.languagePortuguese")]].map(([code,label])=>(
+                  <button key={code} onClick={()=>handleChangeLanguage(code)} className="btn-press" style={{ flex:1, padding:"9px 0", borderRadius:R.sm, border:"none", cursor:"pointer", fontWeight:700, fontSize:13, fontFamily:"inherit", background:lang===code?C.card:"transparent", color:lang===code?C.walnut:C.muted, boxShadow:lang===code?"0 2px 8px rgba(44,24,16,0.1)":"none", transition:"all 0.15s" }}>{label}</button>
+                ))}
+              </div>
+            </div>
+
             {/* ── Edit preferences: family size / allergies / cook time ──
                  Saves straight to `profiles`; does NOT generate a new plan. */}
             <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"22px", marginBottom:20 }}>
-              <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 18px" }}>Preferences</p>
-              {[{label:"Family size",name:"familySize",placeholder:"e.g. 4",type:"number"},{label:"Allergies or restrictions",name:"allergies",placeholder:"e.g. no nuts — or leave blank",type:"text"},{label:"Weeknight cook time",name:"cookTime",placeholder:"e.g. 30 minutes",type:"text"}].map(field=>(
+              <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 18px" }}>{t("profile.preferencesTitle")}</p>
+              {prefFields.map(field=>(
                 <div key={field.name} style={{ marginBottom:16 }}>
                   <label style={lbl}>{field.label}</label>
                   <input type={field.type} placeholder={field.placeholder} value={form[field.name]} onChange={e=>{ setForm(f=>({...f,[field.name]:e.target.value})); setPrefsSaved(false); }} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/>
                 </div>
               ))}
               <button onClick={handleSavePreferences} disabled={savingPrefs} className="btn-press" style={{ width:"100%", padding:"13px 0", background:btnBg(savingPrefs?C.muted:C.clay), color:"#fff", border:"none", borderRadius:R.md, fontSize:13, fontWeight:800, cursor:savingPrefs?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:savingPrefs?"none":SHADOW.button }}>
-                {savingPrefs ? "Saving..." : prefsSaved ? "Saved ✓" : "Save preferences"}
+                {savingPrefs ? t("profile.saving") : prefsSaved ? t("profile.saved") : t("profile.save")}
               </button>
             </div>
 
@@ -1151,29 +1203,29 @@ export default function Nourishly() {
                  Verifies the current password via sign-in, then calls Supabase's
                  auth/v1/user endpoint — both checked with the __ok pattern. */}
             <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"22px", marginBottom:20 }}>
-              <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 18px" }}>Change password</p>
+              <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 18px" }}>{t("profile.changePasswordTitle")}</p>
               <div style={{ marginBottom:16 }}>
-                <label style={lbl}>Current password</label>
+                <label style={lbl}>{t("profile.currentPassword")}</label>
                 <input type="password" placeholder="••••••••" value={pwForm.current} onChange={e=>setPwForm(f=>({...f,current:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/>
               </div>
               <div style={{ marginBottom:16 }}>
-                <label style={lbl}>New password</label>
+                <label style={lbl}>{t("resetPassword.newPassword")}</label>
                 <input type="password" placeholder="••••••••" value={pwForm.next} onChange={e=>setPwForm(f=>({...f,next:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/>
               </div>
               <div style={{ marginBottom:16 }}>
-                <label style={lbl}>Confirm new password</label>
+                <label style={lbl}>{t("resetPassword.confirmNewPassword")}</label>
                 <input type="password" placeholder="••••••••" value={pwForm.confirm} onChange={e=>setPwForm(f=>({...f,confirm:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/>
               </div>
               {pwError&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:R.md, padding:"10px 14px", marginBottom:16, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{pwError}</p></div>}
               {pwMessage&&<div style={{ background:C.sageLight, borderRadius:R.md, padding:"10px 14px", marginBottom:16, display:"flex", gap:8 }}><Icon name="checkCircle" size={15} active color={C.sage}/><p style={{ color:C.sage, fontSize:13, margin:0 }}>{pwMessage}</p></div>}
               <button onClick={handleChangePassword} disabled={pwLoading} className="btn-press" style={{ width:"100%", padding:"13px 0", background:btnBg(pwLoading?C.muted:C.clay), color:"#fff", border:"none", borderRadius:R.md, fontSize:13, fontWeight:800, cursor:pwLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:pwLoading?"none":SHADOW.button }}>
-                {pwLoading ? "Updating..." : "Update password"}
+                {pwLoading ? t("profile.updating") : t("profile.updatePassword")}
               </button>
             </div>
 
             {/* ── Logout ── */}
             <button onClick={handleLogout} className="btn-press" style={{ width:"100%", padding:"14px 0", background:"none", color:C.walnut, border:`1.5px solid ${C.border}`, borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
-              <Icon name="logout" size={16} color={C.walnut}/>Log out
+              <Icon name="logout" size={16} color={C.walnut}/>{t("profile.logout")}
             </button>
           </div>
         )}
@@ -1182,12 +1234,12 @@ export default function Nourishly() {
 
       {/* Bottom nav */}
       <div style={{ position:"fixed", bottom:0, left:0, right:0, background:C.clay, borderTop:"1px solid rgba(255,255,255,0.15)", display:"flex", padding:"10px 0 14px", zIndex:100, boxShadow:"0 -4px 20px rgba(44,24,16,0.08)" }}>
-        {tabs.map(t=>(
-          <button key={t.id} onClick={()=>setTab(t.id)} className="btn-press" style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4, background:"none", border:"none", cursor:"pointer", padding:"2px 0", fontFamily:"inherit" }}>
-            <span style={{ display:"inline-flex", transition:"transform 0.2s cubic-bezier(0.4,0,0.2,1)", transform:tab===t.id?"scale(1.08) translateY(-1px)":"scale(1)" }}>
-              <Icon name={t.icon} size={24} active={tab===t.id} color={tab===t.id?"#fff":"rgba(255,255,255,0.65)"}/>
+        {tabs.map(navTab=>(
+          <button key={navTab.id} onClick={()=>setTab(navTab.id)} className="btn-press" style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4, background:"none", border:"none", cursor:"pointer", padding:"2px 0", fontFamily:"inherit" }}>
+            <span style={{ display:"inline-flex", transition:"transform 0.2s cubic-bezier(0.4,0,0.2,1)", transform:tab===navTab.id?"scale(1.08) translateY(-1px)":"scale(1)" }}>
+              <Icon name={navTab.icon} size={24} active={tab===navTab.id} color={tab===navTab.id?"#fff":"rgba(255,255,255,0.65)"}/>
             </span>
-            <span style={{ fontSize:10, fontWeight:tab===t.id?800:500, color:tab===t.id?"#fff":"rgba(255,255,255,0.65)", transition:"color 0.2s ease, font-weight 0.2s ease" }}>{t.label}</span>
+            <span style={{ fontSize:10, fontWeight:tab===navTab.id?800:500, color:tab===navTab.id?"#fff":"rgba(255,255,255,0.65)", transition:"color 0.2s ease, font-weight 0.2s ease" }}>{navTab.label}</span>
           </button>
         ))}
       </div>

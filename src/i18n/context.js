@@ -1,0 +1,31 @@
+import { createContext } from "react";
+import { en } from "../locales/en";
+import { pt } from "../locales/pt";
+
+// Add a new language by importing its locale file and adding it here —
+// nothing else in the app needs to change.
+export const locales = { en, pt };
+export const LANG_STORAGE_KEY = "nourishly_lang";
+
+function resolveKey(dict, key) {
+  let node = dict;
+  for (const part of key.split(".")) {
+    node = node?.[part];
+    if (node === undefined) return undefined;
+  }
+  return node;
+}
+
+// Looks up `key` (dot path, e.g. "profile.plansUsed") in the given locale's
+// dictionary and interpolates `{var}` placeholders from `vars`. Falls back to
+// the English string, then to the raw key, so a missing translation never
+// renders blank.
+export function translate(langCode, key, vars) {
+  let value = resolveKey(locales[langCode] || locales.en, key);
+  if (value === undefined) value = resolveKey(locales.en, key);
+  if (typeof value !== "string") return value ?? key;
+  if (!vars) return value;
+  return value.replace(/\{(\w+)\}/g, (_, name) => (vars[name] !== undefined ? vars[name] : `{${name}}`));
+}
+
+export const LanguageContext = createContext(null);
