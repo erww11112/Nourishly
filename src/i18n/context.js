@@ -2,15 +2,16 @@ import { createContext } from "react";
 import { en } from "../locales/en";
 import { pt } from "../locales/pt";
 import { es } from "../locales/es";
+import { zh } from "../locales/zh";
 
 // Add a new language by importing its locale file and adding it here —
 // nothing else in the app needs to change.
-export const locales = { en, pt, es };
+export const locales = { en, pt, es, zh };
 export const LANG_STORAGE_KEY = "nourishly_lang";
 
 // Plain-English names for each language code, used only in prompts sent to
 // Claude (so it knows what "pt" means) — never shown to the user directly.
-export const LANGUAGE_NAMES = { en: "English", pt: "Portuguese", es: "Spanish" };
+export const LANGUAGE_NAMES = { en: "English", pt: "Portuguese", es: "Spanish", zh: "Mandarin Chinese" };
 
 function resolveKey(dict, key) {
   let node = dict;
