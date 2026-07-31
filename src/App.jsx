@@ -402,7 +402,7 @@ function WelcomeSlides({ onDone }) {
 function ChooseLanguage({ onComplete }) {
   const t = useT();
   const { lang, setLang, availableLangs } = useLang();
-  const labelKeys = { en:"profile.languageEnglish", pt:"profile.languagePortuguese", es:"profile.languageSpanish", zh:"profile.languageChinese", fr:"profile.languageFrench", de:"profile.languageGerman" };
+  const labelKeys = { en:"profile.languageEnglish", pt:"profile.languagePortuguese", es:"profile.languageSpanish", zh:"profile.languageChinese", fr:"profile.languageFrench", de:"profile.languageGerman", it:"profile.languageItalian" };
   const choose = code => { setLang(code); onComplete(); };
 
   return (
@@ -1239,7 +1239,7 @@ function NourishlyApp() {
             <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"22px", marginBottom:20 }}>
               <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 18px" }}>{t("profile.language")}</p>
               <div style={{ display:"flex", background:C.bg, borderRadius:R.md, padding:4 }}>
-                {[["en",t("profile.languageEnglish")],["pt",t("profile.languagePortuguese")],["es",t("profile.languageSpanish")],["zh",t("profile.languageChinese")],["fr",t("profile.languageFrench")],["de",t("profile.languageGerman")]].map(([code,label])=>(
+                {[["en",t("profile.languageEnglish")],["pt",t("profile.languagePortuguese")],["es",t("profile.languageSpanish")],["zh",t("profile.languageChinese")],["fr",t("profile.languageFrench")],["de",t("profile.languageGerman")],["it",t("profile.languageItalian")]].map(([code,label])=>(
                   <button key={code} onClick={()=>handleChangeLanguage(code)} className="btn-press" style={{ flex:1, padding:"9px 0", borderRadius:R.sm, border:"none", cursor:"pointer", fontWeight:700, fontSize:13, fontFamily:"inherit", background:lang===code?C.card:"transparent", color:lang===code?C.walnut:C.muted, boxShadow:lang===code?"0 2px 8px rgba(44,24,16,0.1)":"none", transition:"all 0.15s" }}>{label}</button>
                 ))}
               </div>

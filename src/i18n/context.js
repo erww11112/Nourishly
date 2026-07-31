@@ -5,15 +5,16 @@ import { es } from "../locales/es";
 import { zh } from "../locales/zh";
 import { fr } from "../locales/fr";
 import { de } from "../locales/de";
+import { it } from "../locales/it";
 
 // Add a new language by importing its locale file and adding it here —
 // nothing else in the app needs to change.
-export const locales = { en, pt, es, zh, fr, de };
+export const locales = { en, pt, es, zh, fr, de, it };
 export const LANG_STORAGE_KEY = "nourishly_lang";
 
 // Plain-English names for each language code, used only in prompts sent to
 // Claude (so it knows what "pt" means) — never shown to the user directly.
-export const LANGUAGE_NAMES = { en: "English", pt: "Portuguese", es: "Spanish", zh: "Mandarin Chinese", fr: "French", de: "German" };
+export const LANGUAGE_NAMES = { en: "English", pt: "Portuguese", es: "Spanish", zh: "Mandarin Chinese", fr: "French", de: "German", it: "Italian" };
 
 function resolveKey(dict, key) {
   let node = dict;
