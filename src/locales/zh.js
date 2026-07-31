@@ -197,6 +197,7 @@ export const zh = {
     languageGerman: "Deutsch",
     languageItalian: "Italiano",
     languageRussian: "Русский",
+    languageHindi: "हिन्दी",
     portalOpenFailed: "无法打开订阅管理页面，请重试。",
     portalOpenFailedError: "无法打开订阅管理页面：{error}",
     checkoutFailed: "无法开始付款流程，请重试。",

@@ -197,6 +197,7 @@ export const ru = {
     languageGerman: "Deutsch",
     languageItalian: "Italiano",
     languageRussian: "Русский",
+    languageHindi: "हिन्दी",
     portalOpenFailed: "Не удалось открыть портал управления подпиской. Попробуй ещё раз.",
     portalOpenFailedError: "Не удалось открыть портал управления подпиской: {error}",
     checkoutFailed: "Не удалось начать оплату. Попробуй ещё раз.",

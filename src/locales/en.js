@@ -198,6 +198,7 @@ export const en = {
     languageGerman: "Deutsch",
     languageItalian: "Italiano",
     languageRussian: "Русский",
+    languageHindi: "हिन्दी",
     portalOpenFailed: "Couldn't open the subscription portal. Please try again.",
     portalOpenFailedError: "Couldn't open the subscription portal: {error}",
     checkoutFailed: "Couldn't start checkout. Please try again.",
