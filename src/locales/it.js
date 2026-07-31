@@ -196,6 +196,7 @@ export const it = {
     languageFrench: "Français",
     languageGerman: "Deutsch",
     languageItalian: "Italiano",
+    languageRussian: "Русский",
     portalOpenFailed: "Non è stato possibile aprire il portale dell'abbonamento. Riprova.",
     portalOpenFailedError: "Non è stato possibile aprire il portale dell'abbonamento: {error}",
     checkoutFailed: "Non è stato possibile avviare il pagamento. Riprova.",

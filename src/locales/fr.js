@@ -196,6 +196,7 @@ export const fr = {
     languageFrench: "Français",
     languageGerman: "Deutsch",
     languageItalian: "Italiano",
+    languageRussian: "Русский",
     portalOpenFailed: "Impossible d'ouvrir le portail d'abonnement. Réessaie.",
     portalOpenFailedError: "Impossible d'ouvrir le portail d'abonnement : {error}",
     checkoutFailed: "Impossible de démarrer le paiement. Réessaie.",
