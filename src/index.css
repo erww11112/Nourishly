@@ -19,6 +19,12 @@ html, body, #root {
   opacity: 0.88;
 }
 
+/* Directional icons (forward chevrons, the logout arrow) point the wrong way
+   once the page flips to RTL — mirror them in place around their own center. */
+html[dir="rtl"] .rtl-mirror {
+  transform: scaleX(-1);
+}
+
 /* "Mark as cooked" checkmark badge pops in rather than snapping into place */
 @keyframes checkPop {
   0% { transform: scale(0); opacity: 0; }

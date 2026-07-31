@@ -1,5 +1,5 @@
-import { useState, useCallback, useMemo } from "react";
-import { LanguageContext, locales, LANG_STORAGE_KEY, translate } from "./context";
+import { useState, useCallback, useMemo, useEffect } from "react";
+import { LanguageContext, locales, LANG_STORAGE_KEY, RTL_LANGS, translate } from "./context";
 
 export function LanguageProvider({ children }) {
   const [lang, setLangState] = useState(() => {
@@ -14,6 +14,13 @@ export function LanguageProvider({ children }) {
     setLangState(next);
     try { localStorage.setItem(LANG_STORAGE_KEY, next); } catch {}
   }, []);
+
+  // Keep <html dir/lang> in sync so RTL languages flip layout direction and
+  // the browser/assistive tech know what script is being read.
+  useEffect(() => {
+    document.documentElement.dir = RTL_LANGS.has(lang) ? "rtl" : "ltr";
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   const t = useCallback((key, vars) => translate(lang, key, vars), [lang]);
 

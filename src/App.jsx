@@ -84,8 +84,8 @@ function Icon({ name, size=22, active=false, color }) {
     case "flame": return <svg {...p}><path d="M12 3c1 3-2 4-2 7a4 4 0 008 0c0-1.5-1-2.5-1-2.5.5 3-1.5 4-2.5 4a2.5 2.5 0 01-2.5-2.5c0-2 2-3 0-6z" fill={active?s:"none"}/></svg>;
     case "chart": return <svg {...p}><path d="M4 20V10M10 20V4M16 20v-7M22 20v-3"/></svg>;
     case "list": return <svg {...p}><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.3" fill={s}/><circle cx="4.5" cy="12" r="1.3" fill={s}/><circle cx="4.5" cy="18" r="1.3" fill={s}/></svg>;
-    case "logout": return <svg {...p}><path d="M9 4H6a2 2 0 00-2 2v12a2 2 0 002 2h3"/><path d="M16 16l4-4-4-4M20 12H9"/></svg>;
-    case "chevronRight": return <svg {...p}><path d="M9 5l7 7-7 7"/></svg>;
+    case "logout": return <svg {...p} className="rtl-mirror"><path d="M9 4H6a2 2 0 00-2 2v12a2 2 0 002 2h3"/><path d="M16 16l4-4-4-4M20 12H9"/></svg>;
+    case "chevronRight": return <svg {...p} className="rtl-mirror"><path d="M9 5l7 7-7 7"/></svg>;
     case "refresh": return <svg {...p}><path d="M3 12a9 9 0 0115.5-6.3M21 12a9 9 0 01-15.5 6.3"/><path d="M16 3v5h-5M8 21v-5h5"/></svg>;
     case "check": return <svg {...p}><path d="M5 13l4 4 10-10"/></svg>;
     case "checkCircle": return <svg {...p}><circle cx="12" cy="12" r="9" fill={active?s:"none"}/><path d="M8 12l3 3 5-6" stroke={active?C.bg:s}/></svg>;
@@ -402,7 +402,7 @@ function WelcomeSlides({ onDone }) {
 function ChooseLanguage({ onComplete }) {
   const t = useT();
   const { lang, setLang, availableLangs } = useLang();
-  const labelKeys = { en:"profile.languageEnglish", pt:"profile.languagePortuguese", es:"profile.languageSpanish", zh:"profile.languageChinese", fr:"profile.languageFrench", de:"profile.languageGerman", it:"profile.languageItalian", ru:"profile.languageRussian", hi:"profile.languageHindi" };
+  const labelKeys = { en:"profile.languageEnglish", pt:"profile.languagePortuguese", es:"profile.languageSpanish", zh:"profile.languageChinese", fr:"profile.languageFrench", de:"profile.languageGerman", it:"profile.languageItalian", ru:"profile.languageRussian", hi:"profile.languageHindi", ar:"profile.languageArabic" };
   const choose = code => { setLang(code); onComplete(); };
 
   return (
@@ -512,10 +512,10 @@ function MealCard({ meal, onSwap, onMarkTried, triedMeals=[], isPaid=false, imag
         }
         <div style={{ position:"absolute", inset:0, background:"linear-gradient(to top,rgba(44,24,16,0.84) 0%,rgba(44,24,16,0.18) 55%,transparent 100%)" }}/>
         {/* Icon badge always visible over photo */}
-        <div style={{ position:"absolute", top:12, left:12, width:34, height:34, borderRadius:R.sm, background:"rgba(255,255,255,0.2)", backdropFilter:"blur(6px)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+        <div style={{ position:"absolute", top:12, insetInlineStart:12, width:34, height:34, borderRadius:R.sm, background:"rgba(255,255,255,0.2)", backdropFilter:"blur(6px)", display:"flex", alignItems:"center", justifyContent:"center" }}>
           <MealIcon meal={meal} size={17} color="#fff" />
         </div>
-        <div style={{ position:"absolute", top:10, right:12, display:"flex", gap:6 }}>
+        <div style={{ position:"absolute", top:10, insetInlineEnd:12, display:"flex", gap:6 }}>
           {tried&&<div className="check-pop" style={{ background:C.sage, borderRadius:R.sm, width:30, height:30, display:"flex", alignItems:"center", justifyContent:"center" }}><Icon name="check" size={14} color="#fff"/></div>}
           <button onClick={e=>{e.stopPropagation();onSwap&&onSwap(meal);}} className="btn-press" style={{ background:"rgba(255,255,255,0.2)", backdropFilter:"blur(6px)", border:"none", borderRadius:R.sm, width:30, height:30, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer" }}>
             <Icon name="refresh" size={15} color="#fff"/>
@@ -1002,7 +1002,7 @@ function NourishlyApp() {
               {authMode==="signup"&&<div style={{ marginBottom:16 }}><label style={lbl}>{t("auth.yourName")}</label><input type="text" placeholder={t("auth.yourNamePlaceholder")} value={authForm.name} onChange={e=>setAuthForm(f=>({...f,name:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>}
               <div style={{ marginBottom:16 }}><label style={lbl}>{t("auth.email")}</label><input type="email" placeholder={t("auth.emailPlaceholder")} value={authForm.email} onChange={e=>setAuthForm(f=>({...f,email:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
               <div style={{ marginBottom:authMode==="login"?10:24 }}><label style={lbl}>{t("auth.password")}</label><input type="password" placeholder="••••••••" value={authForm.password} onChange={e=>setAuthForm(f=>({...f,password:e.target.value}))} style={inp} onFocus={e=>{e.target.style.borderColor=C.clay;}} onBlur={e=>{e.target.style.borderColor=C.border;}}/></div>
-              {authMode==="login"&&<div style={{ textAlign:"right", marginBottom:14 }}><button onClick={()=>{ setAuthMode("forgot"); setError(""); setForgotSent(false); setForgotError(""); setForgotForm({ email:authForm.email||"" }); }} className="btn-press" style={{ background:"none", border:"none", cursor:"pointer", color:C.clay, fontSize:12.5, fontWeight:700, fontFamily:"inherit", padding:0 }}>{t("auth.forgotPassword")}</button></div>}
+              {authMode==="login"&&<div style={{ textAlign:"end", marginBottom:14 }}><button onClick={()=>{ setAuthMode("forgot"); setError(""); setForgotSent(false); setForgotError(""); setForgotForm({ email:authForm.email||"" }); }} className="btn-press" style={{ background:"none", border:"none", cursor:"pointer", color:C.clay, fontSize:12.5, fontWeight:700, fontFamily:"inherit", padding:0 }}>{t("auth.forgotPassword")}</button></div>}
               {error&&<div style={{ background:"#FEF2F2", border:"1px solid #FECACA", borderRadius:R.md, padding:"10px 14px", marginBottom:18, display:"flex", gap:8 }}><Icon name="alert" size={15} color="#DC2626"/><p style={{ color:"#DC2626", fontSize:13, margin:0 }}>{error}</p></div>}
               <button onClick={handleAuth} disabled={authLoading} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(authLoading?C.muted:C.clay), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:authLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:authLoading?"none":SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center" }}>
                 {authLoading?t("auth.pleaseWait"):authMode==="signup"?t("auth.startPlanning"):t("auth.welcomeBack")}
@@ -1239,7 +1239,7 @@ function NourishlyApp() {
             <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"22px", marginBottom:20 }}>
               <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 18px" }}>{t("profile.language")}</p>
               <div style={{ display:"flex", background:C.bg, borderRadius:R.md, padding:4 }}>
-                {[["en",t("profile.languageEnglish")],["pt",t("profile.languagePortuguese")],["es",t("profile.languageSpanish")],["zh",t("profile.languageChinese")],["fr",t("profile.languageFrench")],["de",t("profile.languageGerman")],["it",t("profile.languageItalian")],["ru",t("profile.languageRussian")],["hi",t("profile.languageHindi")]].map(([code,label])=>(
+                {[["en",t("profile.languageEnglish")],["pt",t("profile.languagePortuguese")],["es",t("profile.languageSpanish")],["zh",t("profile.languageChinese")],["fr",t("profile.languageFrench")],["de",t("profile.languageGerman")],["it",t("profile.languageItalian")],["ru",t("profile.languageRussian")],["hi",t("profile.languageHindi")],["ar",t("profile.languageArabic")]].map(([code,label])=>(
                   <button key={code} onClick={()=>handleChangeLanguage(code)} className="btn-press" style={{ flex:1, padding:"9px 0", borderRadius:R.sm, border:"none", cursor:"pointer", fontWeight:700, fontSize:13, fontFamily:"inherit", background:lang===code?C.card:"transparent", color:lang===code?C.walnut:C.muted, boxShadow:lang===code?"0 2px 8px rgba(44,24,16,0.1)":"none", transition:"all 0.15s" }}>{label}</button>
                 ))}
               </div>

@@ -198,6 +198,7 @@ export const pt = {
     languageItalian: "Italiano",
     languageRussian: "Русский",
     languageHindi: "हिन्दी",
+    languageArabic: "العربية",
     portalOpenFailed: "Não foi possível abrir o portal de subscrição. Tenta novamente.",
     portalOpenFailedError: "Não foi possível abrir o portal de subscrição: {error}",
     checkoutFailed: "Não foi possível iniciar o pagamento. Tenta novamente.",

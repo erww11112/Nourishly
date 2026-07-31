@@ -198,6 +198,7 @@ export const hi = {
     languageItalian: "Italiano",
     languageRussian: "Русский",
     languageHindi: "हिन्दी",
+    languageArabic: "العربية",
     portalOpenFailed: "सब्सक्रिप्शन प्रबंधन पेज नहीं खुल पाया। दोबारा कोशिश करें।",
     portalOpenFailedError: "सब्सक्रिप्शन प्रबंधन पेज नहीं खुल पाया: {error}",
     checkoutFailed: "भुगतान शुरू नहीं हो पाया। दोबारा कोशिश करें।",

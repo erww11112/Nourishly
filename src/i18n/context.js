@@ -8,15 +8,20 @@ import { de } from "../locales/de";
 import { it } from "../locales/it";
 import { ru } from "../locales/ru";
 import { hi } from "../locales/hi";
+import { ar } from "../locales/ar";
 
 // Add a new language by importing its locale file and adding it here —
 // nothing else in the app needs to change.
-export const locales = { en, pt, es, zh, fr, de, it, ru, hi };
+export const locales = { en, pt, es, zh, fr, de, it, ru, hi, ar };
 export const LANG_STORAGE_KEY = "nourishly_lang";
 
 // Plain-English names for each language code, used only in prompts sent to
 // Claude (so it knows what "pt" means) — never shown to the user directly.
-export const LANGUAGE_NAMES = { en: "English", pt: "Portuguese", es: "Spanish", zh: "Mandarin Chinese", fr: "French", de: "German", it: "Italian", ru: "Russian", hi: "Hindi" };
+export const LANGUAGE_NAMES = { en: "English", pt: "Portuguese", es: "Spanish", zh: "Mandarin Chinese", fr: "French", de: "German", it: "Italian", ru: "Russian", hi: "Hindi", ar: "Arabic" };
+
+// Languages that read right-to-left — LanguageProvider flips `dir` on <html>
+// whenever the active language is in this set.
+export const RTL_LANGS = new Set(["ar"]);
 
 function resolveKey(dict, key) {
   let node = dict;
