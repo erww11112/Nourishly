@@ -512,10 +512,12 @@ function MealCard({ meal, onSwap, onMarkTried, triedMeals=[], isPaid=false, imag
         }
         <div style={{ position:"absolute", inset:0, background:"linear-gradient(to top,rgba(44,24,16,0.84) 0%,rgba(44,24,16,0.18) 55%,transparent 100%)" }}/>
         {/* Icon badge always visible over photo */}
-        <div style={{ position:"absolute", top:12, insetInlineStart:12, width:34, height:34, borderRadius:R.sm, background:"rgba(255,255,255,0.2)", backdropFilter:"blur(6px)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+        {/* Photo overlay chrome is fixed to physical corners regardless of
+            language — it's part of the photo composition, not reading text. */}
+        <div style={{ position:"absolute", top:12, left:12, width:34, height:34, borderRadius:R.sm, background:"rgba(255,255,255,0.2)", backdropFilter:"blur(6px)", display:"flex", alignItems:"center", justifyContent:"center" }}>
           <MealIcon meal={meal} size={17} color="#fff" />
         </div>
-        <div style={{ position:"absolute", top:10, insetInlineEnd:12, display:"flex", gap:6 }}>
+        <div style={{ position:"absolute", top:10, right:12, display:"flex", gap:6, direction:"ltr" }}>
           {tried&&<div className="check-pop" style={{ background:C.sage, borderRadius:R.sm, width:30, height:30, display:"flex", alignItems:"center", justifyContent:"center" }}><Icon name="check" size={14} color="#fff"/></div>}
           <button onClick={e=>{e.stopPropagation();onSwap&&onSwap(meal);}} className="btn-press" style={{ background:"rgba(255,255,255,0.2)", backdropFilter:"blur(6px)", border:"none", borderRadius:R.sm, width:30, height:30, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer" }}>
             <Icon name="refresh" size={15} color="#fff"/>
@@ -538,7 +540,9 @@ function MealCard({ meal, onSwap, onMarkTried, triedMeals=[], isPaid=false, imag
         <div style={{ overflow:"hidden" }}>
           <div style={{ padding:"20px 20px 24px", opacity:open?1:0, transition:`opacity 0.3s ease ${open?"0.1s":"0s"}` }}>
             {meal?.description&&<p style={{ fontSize:14, color:C.muted, margin:"0 0 18px", lineHeight:1.65, fontStyle:"italic" }}>"{meal.description}"</p>}
-            <div style={{ display:"flex", gap:8, marginBottom:22 }}>
+            {/* Stat chips read like a fixed data row, not reading-order text —
+                keep Cal/Protein/Carbs/Fat in the same order in every language. */}
+            <div style={{ display:"flex", gap:8, marginBottom:22, direction:"ltr" }}>
               <NChip label={t("plan.calLabel")} value={n.cal} color={C.clay}/>
               {isPaid ? (
                 <>
@@ -994,7 +998,8 @@ function NourishlyApp() {
             </>
           ) : (
             <>
-              <div style={{ display:"flex", background:C.bg, borderRadius:R.md, padding:4, marginBottom:24 }}>
+              {/* Segmented control chrome — position stays fixed regardless of language */}
+              <div style={{ display:"flex", background:C.bg, borderRadius:R.md, padding:4, marginBottom:24, direction:"ltr" }}>
                 {[["signup",t("auth.createAccount")],["login",t("auth.signIn")]].map(([mode,label])=>(
                   <button key={mode} onClick={()=>{ setAuthMode(mode); setError(""); }} className="btn-press" style={{ flex:1, padding:"9px 0", borderRadius:R.sm, border:"none", cursor:"pointer", fontWeight:700, fontSize:13, fontFamily:"inherit", background:authMode===mode?C.card:"transparent", color:authMode===mode?C.walnut:C.muted, boxShadow:authMode===mode?"0 2px 8px rgba(44,24,16,0.1)":"none", transition:"all 0.15s" }}>{label}</button>
                 ))}
@@ -1041,7 +1046,9 @@ function NourishlyApp() {
   return (
     <div style={{ background:C.bg, minHeight:"100vh", fontFamily:FONT }}>
       <div style={{ background:C.clay, padding:"18px 20px 0" }}>
-        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", paddingBottom:18 }}>
+        {/* Header chrome stays physically fixed under RTL — only its text
+            content (the greeting) reads right-to-left, the layout doesn't. */}
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", paddingBottom:18, direction:"ltr" }}>
           <div style={{ display:"flex", alignItems:"center", gap:10 }}>
             <Logo size={36}/>
             <div>
@@ -1238,7 +1245,8 @@ function NourishlyApp() {
             {/* ── Language switcher ── */}
             <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"22px", marginBottom:20 }}>
               <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:"0 0 18px" }}>{t("profile.language")}</p>
-              <div style={{ display:"flex", background:C.bg, borderRadius:R.md, padding:4 }}>
+              {/* Segmented control chrome — position stays fixed regardless of language */}
+              <div style={{ display:"flex", background:C.bg, borderRadius:R.md, padding:4, direction:"ltr" }}>
                 {[["en",t("profile.languageEnglish")],["pt",t("profile.languagePortuguese")],["es",t("profile.languageSpanish")],["zh",t("profile.languageChinese")],["fr",t("profile.languageFrench")],["de",t("profile.languageGerman")],["it",t("profile.languageItalian")],["ru",t("profile.languageRussian")],["hi",t("profile.languageHindi")],["ar",t("profile.languageArabic")]].map(([code,label])=>(
                   <button key={code} onClick={()=>handleChangeLanguage(code)} className="btn-press" style={{ flex:1, padding:"9px 0", borderRadius:R.sm, border:"none", cursor:"pointer", fontWeight:700, fontSize:13, fontFamily:"inherit", background:lang===code?C.card:"transparent", color:lang===code?C.walnut:C.muted, boxShadow:lang===code?"0 2px 8px rgba(44,24,16,0.1)":"none", transition:"all 0.15s" }}>{label}</button>
                 ))}
@@ -1293,8 +1301,8 @@ function NourishlyApp() {
         </Fade>
       </div>
 
-      {/* Bottom nav */}
-      <div style={{ position:"fixed", bottom:0, left:0, right:0, background:C.clay, borderTop:"1px solid rgba(255,255,255,0.15)", display:"flex", padding:"10px 0 14px", zIndex:100, boxShadow:"0 -4px 20px rgba(44,24,16,0.08)" }}>
+      {/* Bottom nav — tab order stays fixed regardless of language */}
+      <div style={{ position:"fixed", bottom:0, left:0, right:0, background:C.clay, borderTop:"1px solid rgba(255,255,255,0.15)", display:"flex", padding:"10px 0 14px", zIndex:100, boxShadow:"0 -4px 20px rgba(44,24,16,0.08)", direction:"ltr" }}>
         {tabs.map(navTab=>(
           <button key={navTab.id} onClick={()=>setTab(navTab.id)} className="btn-press" style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4, background:"none", border:"none", cursor:"pointer", padding:"2px 0", fontFamily:"inherit" }}>
             <span style={{ display:"inline-flex", transition:"transform 0.2s cubic-bezier(0.4,0,0.2,1)", transform:tab===navTab.id?"scale(1.08) translateY(-1px)":"scale(1)" }}>
