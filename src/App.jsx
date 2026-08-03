@@ -121,10 +121,20 @@ function Logo({ size=40, ring }) {
 // away from the true screen edges. `inset` must equal that header's
 // horizontal padding (in px) so the negative margin cancels it out exactly,
 // letting the wave's fill reach x=0 and the full viewport width.
+//
+// DRIFT_BUFFER pushes that a little further: the .wave-drift CSS animation
+// (index.css) shifts this SVG ±6px, and without extra overhang the trailing
+// edge would briefly uncover the header's raw background as it slides — a
+// visible rectangle at the corner. The path itself doesn't need to change
+// for this: preserveAspectRatio="none" already stretches the fill to
+// whatever box width it's given, so widening the box by more than the
+// drift's travel is enough to keep every edge covered at all times.
+const DRIFT_BUFFER = 8;
 function InlineWave({ bgColor, inset = 0 }) {
+  const overhang = inset + DRIFT_BUFFER;
   return (
     <svg viewBox="0 0 1440 72" preserveAspectRatio="none" className="wave-drift"
-      style={{ display:"block", width:`calc(100% + ${inset * 2}px)`, height:72, marginTop:24, marginLeft:-inset, marginRight:-inset, flexShrink:0 }}>
+      style={{ display:"block", width:`calc(100% + ${overhang * 2}px)`, height:72, marginTop:24, marginLeft:-overhang, marginRight:-overhang, flexShrink:0 }}>
       <path
         d="M0 0 C160 48 320 8 480 40 C680 80 880 4 1080 44 C1240 76 1360 32 1440 0 L1440 72 L0 72 Z"
         fill={bgColor}
