@@ -424,6 +424,7 @@ function WelcomeSlides({ onDone }) {
 function ChooseLanguage({ onComplete }) {
   const t = useT();
   const { lang, setLang, availableLangs } = useLang();
+  const [hovered, setHovered] = useState(null);
   const labelKeys = { en:"profile.languageEnglish", pt:"profile.languagePortuguese", es:"profile.languageSpanish", zh:"profile.languageChinese", fr:"profile.languageFrench", de:"profile.languageGerman", it:"profile.languageItalian", ru:"profile.languageRussian", hi:"profile.languageHindi", ar:"profile.languageArabic" };
   const choose = code => { setLang(code); onComplete(); };
 
@@ -438,11 +439,16 @@ function ChooseLanguage({ onComplete }) {
         <InlineWave bgColor={C.bg} inset={28} />
       </div>
       <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"center", gap:14, padding:"0 28px 42px" }}>
-        {availableLangs.map(code=>(
-          <button key={code} onClick={()=>choose(code)} className="btn-press" style={{ width:"100%", padding:"18px 0", background:lang===code?btnBg():C.card, color:lang===code?"#fff":C.walnut, border:`1.5px solid ${lang===code?"transparent":C.border}`, borderRadius:R.md, fontSize:16, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:lang===code?SHADOW.button:SHADOW.card, transition:"transform 0.15s cubic-bezier(0.4,0,0.2,1), opacity 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease" }}>
-            {t(labelKeys[code])}
-          </button>
-        ))}
+        {availableLangs.map(code=>{
+          const active = lang===code || hovered===code;
+          return (
+            <button key={code} onClick={()=>choose(code)}
+              onMouseEnter={()=>setHovered(code)} onMouseLeave={()=>setHovered(h=>h===code?null:h)}
+              className="btn-press" style={{ width:"100%", padding:"18px 0", background:active?btnBg():C.card, color:active?"#fff":C.walnut, border:`1.5px solid ${active?"transparent":C.border}`, borderRadius:R.md, fontSize:16, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:active?SHADOW.button:SHADOW.card, transition:"transform 0.15s cubic-bezier(0.4,0,0.2,1), opacity 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease" }}>
+              {t(labelKeys[code])}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
