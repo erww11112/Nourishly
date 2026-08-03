@@ -123,7 +123,7 @@ function Logo({ size=40, ring }) {
 // letting the wave's fill reach x=0 and the full viewport width.
 function InlineWave({ bgColor, inset = 0 }) {
   return (
-    <svg viewBox="0 0 1440 72" preserveAspectRatio="none"
+    <svg viewBox="0 0 1440 72" preserveAspectRatio="none" className="wave-drift"
       style={{ display:"block", width:`calc(100% + ${inset * 2}px)`, height:72, marginTop:24, marginLeft:-inset, marginRight:-inset, flexShrink:0 }}>
       <path
         d="M0 0 C160 48 320 8 480 40 C680 80 880 4 1080 44 C1240 76 1360 32 1440 0 L1440 72 L0 72 Z"
