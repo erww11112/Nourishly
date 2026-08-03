@@ -39,8 +39,8 @@ html[dir="rtl"] .rtl-mirror {
    understated, purely transform-driven so it stays cheap (compositor-only,
    no layout/paint work). */
 @keyframes waveDrift {
-  0%, 100% { transform: translateX(-1.4%); }
-  50% { transform: translateX(1.4%); }
+  0%, 100% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
 }
 .wave-drift {
   animation: waveDrift 5s ease-in-out infinite;
