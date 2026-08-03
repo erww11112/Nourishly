@@ -368,14 +368,14 @@ function WelcomeSlides({ onDone }) {
   return (
     <div style={{ background:bodyColor, minHeight:"100vh", fontFamily:FONT, display:"flex", flexDirection:"column" }}>
       {/* Orange header */}
-      <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#7A3018 40%,${C.clay} 100%)`, padding:"48px 28px 0", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:0, marginBottom:0 }}>
+      <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#7A3018 40%,${C.clay} 100%)`, padding:"52px 28px 0", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:0, marginBottom:0 }}>
         <Logo size={52} ring />
         <Fade id={slide}>
-          <div style={{ marginTop:28, marginBottom:0 }}>
-            <div style={{ width:66, height:66, borderRadius:20, background:"rgba(255,255,255,0.15)", backdropFilter:"blur(8px)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}>
+          <div style={{ marginTop:32, marginBottom:0 }}>
+            <div style={{ width:68, height:68, borderRadius:20, background:"rgba(255,255,255,0.15)", backdropFilter:"blur(8px)", border:"1px solid rgba(255,255,255,0.2)", boxShadow:"0 10px 28px rgba(0,0,0,0.16)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 22px" }}>
               <Icon name={s.icon} size={30} color="#fff" />
             </div>
-            <h2 style={{ color:"#fff", fontSize:24, fontWeight:800, margin:"0 0 12px", lineHeight:1.3, letterSpacing:"-0.4px", maxWidth:280 }}>{s.title}</h2>
+            <h2 style={{ color:"#fff", fontSize:24, fontWeight:800, margin:"0 0 14px", lineHeight:1.3, letterSpacing:"-0.4px", maxWidth:280 }}>{s.title}</h2>
             <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, margin:"0 0 0", lineHeight:1.65, maxWidth:260 }}>{s.body}</p>
           </div>
         </Fade>
@@ -383,11 +383,11 @@ function WelcomeSlides({ onDone }) {
       </div>
 
       {/* Beige body */}
-      <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"flex-end", padding:"0 28px 36px" }}>
-        <div style={{ display:"flex", gap:7, justifyContent:"center", marginBottom:22 }}>
-          {slides.map((_,i)=><div key={i} style={{ width:i===slide?24:7, height:7, borderRadius:4, background:i===slide?C.clay:C.border, transition:"all 0.25s" }}/>)}
+      <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"flex-end", padding:"0 28px 42px" }}>
+        <div style={{ display:"flex", gap:8, justifyContent:"center", marginBottom:26 }}>
+          {slides.map((_,i)=><div key={i} style={{ width:i===slide?26:7, height:7, borderRadius:4, background:i===slide?C.clay:C.border, transition:"all 0.3s cubic-bezier(0.4,0,0.2,1)" }}/>)}
         </div>
-        <button onClick={()=>slide<slides.length-1?setSlide(s=>s+1):onDone()} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+        <button onClick={()=>slide<slides.length-1?setSlide(s=>s+1):onDone()} className="btn-press" style={{ width:"100%", padding:"17px 0", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
           {slide<slides.length-1?t("welcome.continue"):t("welcome.begin")}
           <Icon name="chevronRight" size={18} color="#fff" />
         </button>
@@ -407,17 +407,17 @@ function ChooseLanguage({ onComplete }) {
 
   return (
     <div style={{ background:C.bg, minHeight:"100vh", fontFamily:FONT, display:"flex", flexDirection:"column" }}>
-      <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#7A3018 40%,${C.clay} 100%)`, padding:"48px 28px 0", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:0, marginBottom:0 }}>
+      <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#7A3018 40%,${C.clay} 100%)`, padding:"52px 28px 0", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:0, marginBottom:0 }}>
         <Logo size={52} ring />
-        <div style={{ marginTop:28, marginBottom:0 }}>
-          <h2 style={{ color:"#fff", fontSize:24, fontWeight:800, margin:"0 0 10px", lineHeight:1.3, letterSpacing:"-0.4px" }}>{t("chooseLanguage.title")}</h2>
+        <div style={{ marginTop:32, marginBottom:0 }}>
+          <h2 style={{ color:"#fff", fontSize:24, fontWeight:800, margin:"0 0 12px", lineHeight:1.3, letterSpacing:"-0.4px" }}>{t("chooseLanguage.title")}</h2>
           <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, margin:0, lineHeight:1.5 }}>{t("chooseLanguage.subtitle")}</p>
         </div>
         <InlineWave bgColor={C.bg} />
       </div>
-      <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"center", gap:12, padding:"0 28px 36px" }}>
+      <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"center", gap:14, padding:"0 28px 42px" }}>
         {availableLangs.map(code=>(
-          <button key={code} onClick={()=>choose(code)} className="btn-press" style={{ width:"100%", padding:"18px 0", background:lang===code?btnBg():C.card, color:lang===code?"#fff":C.walnut, border:`1.5px solid ${lang===code?"transparent":C.border}`, borderRadius:R.md, fontSize:16, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:lang===code?SHADOW.button:"none", transition:"all 0.15s" }}>
+          <button key={code} onClick={()=>choose(code)} className="btn-press" style={{ width:"100%", padding:"18px 0", background:lang===code?btnBg():C.card, color:lang===code?"#fff":C.walnut, border:`1.5px solid ${lang===code?"transparent":C.border}`, borderRadius:R.md, fontSize:16, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:lang===code?SHADOW.button:SHADOW.card, transition:"transform 0.15s cubic-bezier(0.4,0,0.2,1), opacity 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease" }}>
             {t(labelKeys[code])}
           </button>
         ))}
@@ -444,41 +444,41 @@ function Onboarding({ onComplete }) {
   return (
     <div style={{ background:C.bg, minHeight:"100vh", fontFamily:FONT, display:"flex", flexDirection:"column" }}>
       {/* Orange header */}
-      <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#7A3018 40%,${C.clay} 100%)`, padding:"36px 28px 0", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:0, marginBottom:0, backgroundColor:C.clay }}>
+      <div style={{ background:`linear-gradient(160deg,${C.walnut} 0%,#7A3018 40%,${C.clay} 100%)`, padding:"44px 28px 0", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", paddingBottom:0, marginBottom:0, backgroundColor:C.clay }}>
         {/* Progress dots */}
-        <div style={{ display:"flex", gap:6, marginBottom:28 }}>
-          {questions.map((_,i)=><div key={i} style={{ width:i===step?22:7, height:7, borderRadius:4, background:i<=step?"rgba(255,255,255,0.9)":"rgba(255,255,255,0.25)", transition:"all 0.25s" }}/>)}
+        <div style={{ display:"flex", gap:8, marginBottom:30 }}>
+          {questions.map((_,i)=><div key={i} style={{ width:i===step?24:7, height:7, borderRadius:4, background:i<=step?"rgba(255,255,255,0.9)":"rgba(255,255,255,0.25)", transition:"all 0.3s cubic-bezier(0.4,0,0.2,1)" }}/>)}
         </div>
         <Fade id={step}>
-          <div style={{ width:70, height:70, borderRadius:22, background:"rgba(255,255,255,0.15)", backdropFilter:"blur(8px)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 18px" }}>
+          <div style={{ width:70, height:70, borderRadius:22, background:"rgba(255,255,255,0.15)", backdropFilter:"blur(8px)", border:"1px solid rgba(255,255,255,0.2)", boxShadow:"0 10px 28px rgba(0,0,0,0.16)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}>
             <Icon name={q.icon} size={32} color="#fff" />
           </div>
-          <h2 style={{ color:"#fff", fontSize:22, fontWeight:800, margin:"0 0 8px", lineHeight:1.3, letterSpacing:"-0.4px", maxWidth:280 }}>{q.title}</h2>
+          <h2 style={{ color:"#fff", fontSize:22, fontWeight:800, margin:"0 0 10px", lineHeight:1.3, letterSpacing:"-0.4px", maxWidth:280 }}>{q.title}</h2>
           <p style={{ color:"rgba(255,255,255,0.65)", fontSize:13, margin:"0 0 0", lineHeight:1.5 }}>{q.sub}</p>
         </Fade>
         <InlineWave bgColor={C.bg} />
       </div>
 
       {/* Beige body — input + buttons */}
-      <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"space-between", padding:"24px 28px 36px" }}>
+      <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"space-between", padding:"28px 28px 42px" }}>
         <Fade id={step}>
           <input
             key={step}
             type={q.type} placeholder={q.placeholder} value={answers[q.key]}
             onChange={e=>setAnswers(a=>({...a,[q.key]:e.target.value}))}
-            style={{ width:"100%", boxSizing:"border-box", padding:"16px 18px", borderRadius:14, border:`2px solid ${C.border}`, fontSize:16, color:C.walnut, background:"rgba(255,255,255,0.5)", outline:"none", fontFamily:"inherit", textAlign:"center", backdropFilter:"blur(4px)" }}
-            onFocus={e=>{e.target.style.borderColor=C.clay;e.target.style.background="rgba(255,255,255,0.9)";}}
-            onBlur={e=>{e.target.style.borderColor=C.border;e.target.style.background="rgba(255,255,255,0.5)";}}
+            style={{ width:"100%", boxSizing:"border-box", padding:"18px 20px", borderRadius:R.md, border:`1.5px solid ${C.border}`, fontSize:16, color:C.walnut, background:C.card, outline:"none", fontFamily:"inherit", textAlign:"center", boxShadow:SHADOW.card, transition:"border-color 0.15s ease, box-shadow 0.15s ease" }}
+            onFocus={e=>{e.target.style.borderColor=C.clay;e.target.style.boxShadow=`0 0 0 4px rgba(204,112,68,0.14), ${SHADOW.card}`;}}
+            onBlur={e=>{e.target.style.borderColor=C.border;e.target.style.boxShadow=SHADOW.card;}}
             autoFocus
           />
         </Fade>
 
-        <div style={{ display:"flex", flexDirection:"column", gap:12 }}>
-          <button onClick={next} className="btn-press" style={{ width:"100%", padding:"16px 0", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+        <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
+          <button onClick={next} className="btn-press" style={{ width:"100%", padding:"17px 0", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
             {step===questions.length-1?t("onboarding.almostThere"):t("onboarding.continue")}
             <Icon name="chevronRight" size={18} color="#fff" />
           </button>
-          {step>0&&<button onClick={back} className="btn-press" style={{ width:"100%", padding:"12px 0", background:"none", color:C.muted, border:`1.5px solid ${C.border}`, borderRadius:R.md, fontSize:14, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>{t("onboarding.back")}</button>}
+          {step>0&&<button onClick={back} className="btn-press" style={{ width:"100%", padding:"13px 0", background:"none", color:C.muted, border:`1.5px solid ${C.border}`, borderRadius:R.md, fontSize:14, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>{t("onboarding.back")}</button>}
         </div>
       </div>
     </div>
