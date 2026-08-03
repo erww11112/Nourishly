@@ -423,7 +423,7 @@ function WelcomeSlides({ onDone }) {
 // screen after this (including the meal-generation prompt) uses it from here.
 function ChooseLanguage({ onComplete }) {
   const t = useT();
-  const { lang, setLang, availableLangs } = useLang();
+  const { setLang, availableLangs } = useLang();
   const [hovered, setHovered] = useState(null);
   const labelKeys = { en:"profile.languageEnglish", pt:"profile.languagePortuguese", es:"profile.languageSpanish", zh:"profile.languageChinese", fr:"profile.languageFrench", de:"profile.languageGerman", it:"profile.languageItalian", ru:"profile.languageRussian", hi:"profile.languageHindi", ar:"profile.languageArabic" };
   const choose = code => { setLang(code); onComplete(); };
@@ -440,7 +440,7 @@ function ChooseLanguage({ onComplete }) {
       </div>
       <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"center", gap:14, padding:"0 28px 42px" }}>
         {availableLangs.map(code=>{
-          const active = lang===code || hovered===code;
+          const active = hovered===code;
           return (
             <button key={code} onClick={()=>choose(code)}
               onMouseEnter={()=>setHovered(code)} onMouseLeave={()=>setHovered(h=>h===code?null:h)}
