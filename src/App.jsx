@@ -116,10 +116,15 @@ function Logo({ size=40, ring }) {
 }
 
 // ── Inline wave — lives INSIDE the orange header div, no seam possible ────
-function InlineWave({ bgColor }) {
+// The header it sits in applies its own horizontal padding to itself (to
+// inset the logo/title/copy), which would also inset this SVG's 100% width
+// away from the true screen edges. `inset` must equal that header's
+// horizontal padding (in px) so the negative margin cancels it out exactly,
+// letting the wave's fill reach x=0 and the full viewport width.
+function InlineWave({ bgColor, inset = 0 }) {
   return (
     <svg viewBox="0 0 1440 72" preserveAspectRatio="none"
-      style={{ display:"block", width:"100%", height:72, marginTop:24, flexShrink:0 }}>
+      style={{ display:"block", width:`calc(100% + ${inset * 2}px)`, height:72, marginTop:24, marginLeft:-inset, marginRight:-inset, flexShrink:0 }}>
       <path
         d="M0 0 C160 48 320 8 480 40 C680 80 880 4 1080 44 C1240 76 1360 32 1440 0 L1440 72 L0 72 Z"
         fill={bgColor}
@@ -379,7 +384,7 @@ function WelcomeSlides({ onDone }) {
             <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, margin:"0 0 0", lineHeight:1.65, maxWidth:260 }}>{s.body}</p>
           </div>
         </Fade>
-        <InlineWave bgColor={bodyColor} />
+        <InlineWave bgColor={bodyColor} inset={28} />
       </div>
 
       {/* Beige body */}
@@ -413,7 +418,7 @@ function ChooseLanguage({ onComplete }) {
           <h2 style={{ color:"#fff", fontSize:24, fontWeight:800, margin:"0 0 12px", lineHeight:1.3, letterSpacing:"-0.4px" }}>{t("chooseLanguage.title")}</h2>
           <p style={{ color:"rgba(255,255,255,0.7)", fontSize:14, margin:0, lineHeight:1.5 }}>{t("chooseLanguage.subtitle")}</p>
         </div>
-        <InlineWave bgColor={C.bg} />
+        <InlineWave bgColor={C.bg} inset={28} />
       </div>
       <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"center", gap:14, padding:"0 28px 42px" }}>
         {availableLangs.map(code=>(
@@ -456,7 +461,7 @@ function Onboarding({ onComplete }) {
           <h2 style={{ color:"#fff", fontSize:22, fontWeight:800, margin:"0 0 10px", lineHeight:1.3, letterSpacing:"-0.4px", maxWidth:280 }}>{q.title}</h2>
           <p style={{ color:"rgba(255,255,255,0.65)", fontSize:13, margin:"0 0 0", lineHeight:1.5 }}>{q.sub}</p>
         </Fade>
-        <InlineWave bgColor={C.bg} />
+        <InlineWave bgColor={C.bg} inset={28} />
       </div>
 
       {/* Beige body — input + buttons */}
@@ -966,7 +971,7 @@ function NourishlyApp() {
         <Logo size={60} ring/>
         <h1 style={{ color:"#fff", fontSize:26, fontWeight:900, margin:"16px 0 6px", letterSpacing:"-0.5px" }}>{t("common.appName")}</h1>
         <p style={{ color:"rgba(255,255,255,0.6)", fontSize:13, margin:"0 0 0" }}>{t("common.tagline")}</p>
-        <InlineWave bgColor={C.bg} />
+        <InlineWave bgColor={C.bg} inset={24} />
       </div>
       <div style={{ maxWidth:420, margin:"0 auto", padding:"0 20px 48px" }}>
         {form.familySize&&(
@@ -1026,7 +1031,7 @@ function NourishlyApp() {
         <Logo size={60} ring/>
         <h1 style={{ color:"#fff", fontSize:26, fontWeight:900, margin:"16px 0 6px", letterSpacing:"-0.5px" }}>{t("common.appName")}</h1>
         <p style={{ color:"rgba(255,255,255,0.6)", fontSize:13, margin:"0 0 0" }}>{t("resetPassword.headerSubtitle")}</p>
-        <InlineWave bgColor={C.bg} />
+        <InlineWave bgColor={C.bg} inset={24} />
       </div>
       <div style={{ maxWidth:420, margin:"0 auto", padding:"0 20px 48px" }}>
         <div style={{ background:C.card, borderRadius:R.xl, padding:"28px 22px", border:`1px solid ${C.border}`, boxShadow:SHADOW.raised }}>
