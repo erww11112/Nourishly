@@ -35,15 +35,20 @@ html[dir="rtl"] .rtl-mirror {
   animation: checkPop 0.4s cubic-bezier(0.34,1.56,0.64,1);
 }
 
-/* Header wave divider drifts side to side like calm water — slow and
-   understated, purely transform-driven so it stays cheap (compositor-only,
-   no layout/paint work). */
+/* Header wave divider scrolls continuously like flowing water. The element
+   is twice the visible width (two back-to-back copies of the same shape —
+   see InlineWave in App.jsx) and slides left by exactly one copy's width;
+   since the copies are identical, the loop point is pixel-for-pixel the
+   same as the start, so it never visibly resets or jumps. `linear` timing
+   keeps the speed constant through the loop for the same reason — any
+   easing would show up as a stutter right at the seam. Purely
+   transform-driven so it stays cheap (compositor-only, no layout/paint). */
 @keyframes waveDrift {
-  0%, 100% { transform: translateX(-6px); }
-  50% { transform: translateX(6px); }
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 .wave-drift {
-  animation: waveDrift 5s ease-in-out infinite;
+  animation: waveDrift 12s linear infinite;
   will-change: transform;
 }
 @media (prefers-reduced-motion: reduce) {

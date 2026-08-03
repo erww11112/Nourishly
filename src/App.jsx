@@ -117,29 +117,36 @@ function Logo({ size=40, ring }) {
 
 // ── Inline wave — lives INSIDE the orange header div, no seam possible ────
 // The header it sits in applies its own horizontal padding to itself (to
-// inset the logo/title/copy), which would also inset this SVG's 100% width
-// away from the true screen edges. `inset` must equal that header's
+// inset the logo/title/copy), which would also inset a naive 100%-width
+// wave away from the true screen edges. `inset` must equal that header's
 // horizontal padding (in px) so the negative margin cancels it out exactly,
-// letting the wave's fill reach x=0 and the full viewport width.
+// letting the wave reach x=0 and the full viewport width.
 //
-// DRIFT_BUFFER pushes that a little further: the .wave-drift CSS animation
-// (index.css) shifts this SVG ±6px, and without extra overhang the trailing
-// edge would briefly uncover the header's raw background as it slides — a
-// visible rectangle at the corner. The path itself doesn't need to change
-// for this: preserveAspectRatio="none" already stretches the fill to
-// whatever box width it's given, so widening the box by more than the
-// drift's travel is enough to keep every edge covered at all times.
-const DRIFT_BUFFER = 8;
+// A back-and-forth drift can't read as truly infinite — it always has to
+// reverse. This scrolls instead: the path is drawn twice back-to-back (a
+// seamlessly tileable shape — the curve starts and ends at the same
+// height), inside a div twice the visible width that slides left by
+// exactly one tile's width (-50%) on a linear, infinite loop. The instant
+// it's shifted by one tile, the frame is pixel-for-pixel identical to the
+// start, so the loop has no visible seam or reset — it just flows. The
+// outer div clips it back down to the header's actual width.
+//
+// The animated transform lives on that plain <div>, not the <svg> itself —
+// percentage values in CSS transform are only reliably defined against an
+// element's own CSS box, and SVG elements are inconsistent about that
+// across browsers (this is what broke the earlier oscillating version).
 function InlineWave({ bgColor, inset = 0 }) {
-  const overhang = inset + DRIFT_BUFFER;
   return (
-    <svg viewBox="0 0 1440 72" preserveAspectRatio="none" className="wave-drift"
-      style={{ display:"block", width:`calc(100% + ${overhang * 2}px)`, height:72, marginTop:24, marginLeft:-overhang, marginRight:-overhang, flexShrink:0 }}>
-      <path
-        d="M0 0 C160 48 320 8 480 40 C680 80 880 4 1080 44 C1240 76 1360 32 1440 0 L1440 72 L0 72 Z"
-        fill={bgColor}
-      />
-    </svg>
+    <div style={{ width:`calc(100% + ${inset * 2}px)`, height:72, marginTop:24, marginLeft:-inset, marginRight:-inset, overflow:"hidden", flexShrink:0 }}>
+      <div className="wave-drift" style={{ width:"200%", height:72 }}>
+        <svg viewBox="0 0 2880 72" preserveAspectRatio="none" style={{ display:"block", width:"100%", height:72 }}>
+          <path
+            d="M0 0 C160 48 320 8 480 40 C680 80 880 4 1080 44 C1240 76 1360 32 1440 0 C1600 48 1760 8 1920 40 C2120 80 2320 4 2520 44 C2680 76 2800 32 2880 0 L2880 72 L0 72 Z"
+            fill={bgColor}
+          />
+        </svg>
+      </div>
+    </div>
   );
 }
 
