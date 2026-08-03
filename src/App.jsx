@@ -441,10 +441,45 @@ function Onboarding({ onComplete }) {
   ];
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({ familySize:"", allergies:"", cookTime:"" });
-  const q = questions[step];
 
-  const next = () => { if (step<questions.length-1) setStep(s=>s+1); else onComplete(answers); };
-  const back = () => setStep(s=>Math.max(0,s-1));
+  // Drives a real exit-then-enter crossfade instead of Fade's fade-in-only
+  // behavior: `displayStep` lags one beat behind `step`, so the outgoing
+  // question's own content stays mounted (and fully live/controlled) while
+  // it animates out, and only swaps to the new question once that's done.
+  const [displayStep, setDisplayStep] = useState(0);
+  const [transitionPhase, setTransitionPhase] = useState("visible"); // visible | exiting | entering
+  // Two independent effects, deliberately not sharing a dependency: the exit
+  // effect only reacts to `step` (the real target), and the settle effect
+  // only reacts to `transitionPhase` reaching "entering". Driving both off
+  // the same [step, displayStep] pair caused the settle timer to get
+  // cancelled by the exit effect's own cleanup the instant displayStep
+  // caught up to step, permanently stranding the UI mid-transition with
+  // Continue/Back disabled.
+  useEffect(() => {
+    if (step === displayStep) return;
+    setTransitionPhase("exiting");
+    const exitTimer = setTimeout(() => {
+      setDisplayStep(step);
+      setTransitionPhase("entering");
+    }, 200);
+    return () => clearTimeout(exitTimer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+  useEffect(() => {
+    if (transitionPhase !== "entering") return;
+    const settleTimer = setTimeout(() => setTransitionPhase("visible"), 30);
+    return () => clearTimeout(settleTimer);
+  }, [transitionPhase]);
+  const q = questions[displayStep];
+  const isTransitioning = transitionPhase !== "visible";
+  const stepAnimStyle = {
+    opacity: isTransitioning ? 0 : 1,
+    transform: transitionPhase==="exiting" ? "translateY(-14px)" : transitionPhase==="entering" ? "translateY(14px)" : "translateY(0)",
+    transition: "opacity 0.2s ease, transform 0.2s ease",
+  };
+
+  const next = () => { if (isTransitioning) return; if (step<questions.length-1) setStep(s=>s+1); else onComplete(answers); };
+  const back = () => { if (isTransitioning) return; setStep(s=>Math.max(0,s-1)); };
 
   return (
     <div style={{ background:C.bg, minHeight:"100vh", fontFamily:FONT, display:"flex", flexDirection:"column" }}>
@@ -454,36 +489,37 @@ function Onboarding({ onComplete }) {
         <div style={{ display:"flex", gap:8, marginBottom:30 }}>
           {questions.map((_,i)=><div key={i} style={{ width:i===step?24:7, height:7, borderRadius:4, background:i<=step?"rgba(255,255,255,0.9)":"rgba(255,255,255,0.25)", transition:"all 0.3s cubic-bezier(0.4,0,0.2,1)" }}/>)}
         </div>
-        <Fade id={step}>
+        <div style={stepAnimStyle}>
           <div style={{ width:70, height:70, borderRadius:22, background:"rgba(255,255,255,0.15)", backdropFilter:"blur(8px)", border:"1px solid rgba(255,255,255,0.2)", boxShadow:"0 10px 28px rgba(0,0,0,0.16)", display:"flex", alignItems:"center", justifyContent:"center", margin:"0 auto 20px" }}>
             <Icon name={q.icon} size={32} color="#fff" />
           </div>
           <h2 style={{ color:"#fff", fontSize:22, fontWeight:800, margin:"0 0 10px", lineHeight:1.3, letterSpacing:"-0.4px", maxWidth:280 }}>{q.title}</h2>
           <p style={{ color:"rgba(255,255,255,0.65)", fontSize:13, margin:"0 0 0", lineHeight:1.5 }}>{q.sub}</p>
-        </Fade>
+        </div>
         <InlineWave bgColor={C.bg} inset={28} />
       </div>
 
       {/* Beige body — input + buttons */}
       <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"space-between", padding:"28px 28px 42px" }}>
-        <Fade id={step}>
+        <div style={stepAnimStyle}>
           <input
-            key={step}
+            key={displayStep}
             type={q.type} placeholder={q.placeholder} value={answers[q.key]}
             onChange={e=>setAnswers(a=>({...a,[q.key]:e.target.value}))}
+            disabled={transitionPhase==="exiting"}
             style={{ width:"100%", boxSizing:"border-box", padding:"18px 20px", borderRadius:R.md, border:`1.5px solid ${C.border}`, fontSize:16, color:C.walnut, background:C.card, outline:"none", fontFamily:"inherit", textAlign:"center", boxShadow:SHADOW.card, transition:"border-color 0.15s ease, box-shadow 0.15s ease" }}
             onFocus={e=>{e.target.style.borderColor=C.clay;e.target.style.boxShadow=`0 0 0 4px rgba(204,112,68,0.14), ${SHADOW.card}`;}}
             onBlur={e=>{e.target.style.borderColor=C.border;e.target.style.boxShadow=SHADOW.card;}}
             autoFocus
           />
-        </Fade>
+        </div>
 
         <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-          <button onClick={next} className="btn-press" style={{ width:"100%", padding:"17px 0", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:"pointer", fontFamily:"inherit", boxShadow:SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
-            {step===questions.length-1?t("onboarding.almostThere"):t("onboarding.continue")}
+          <button onClick={next} disabled={isTransitioning} className="btn-press" style={{ width:"100%", padding:"17px 0", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:isTransitioning?"default":"pointer", fontFamily:"inherit", boxShadow:SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+            {displayStep===questions.length-1?t("onboarding.almostThere"):t("onboarding.continue")}
             <Icon name="chevronRight" size={18} color="#fff" />
           </button>
-          {step>0&&<button onClick={back} className="btn-press" style={{ width:"100%", padding:"13px 0", background:"none", color:C.muted, border:`1.5px solid ${C.border}`, borderRadius:R.md, fontSize:14, fontWeight:600, cursor:"pointer", fontFamily:"inherit" }}>{t("onboarding.back")}</button>}
+          {displayStep>0&&<button onClick={back} disabled={isTransitioning} className="btn-press" style={{ width:"100%", padding:"13px 0", background:"none", color:C.muted, border:`1.5px solid ${C.border}`, borderRadius:R.md, fontSize:14, fontWeight:600, cursor:isTransitioning?"default":"pointer", fontFamily:"inherit" }}>{t("onboarding.back")}</button>}
         </div>
       </div>
     </div>
