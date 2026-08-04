@@ -464,6 +464,7 @@ function Onboarding({ onComplete }) {
   ];
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState({ familySize:"", allergies:"", cookTime:"" });
+  const [allergyConsent, setAllergyConsent] = useState(false);
 
   // Drives a real exit-then-enter crossfade instead of Fade's fade-in-only
   // behavior: `displayStep` lags one beat behind `step`, so the outgoing
@@ -501,7 +502,9 @@ function Onboarding({ onComplete }) {
     transition: "opacity 0.2s ease, transform 0.2s ease",
   };
 
-  const next = () => { if (isTransitioning) return; if (step<questions.length-1) setStep(s=>s+1); else onComplete(answers); };
+  const allergyConsentRequired = q.key==="allergies" && answers.allergies.trim().length>0;
+  const canContinue = !isTransitioning && !(allergyConsentRequired && !allergyConsent);
+  const next = () => { if (!canContinue) return; if (step<questions.length-1) setStep(s=>s+1); else onComplete(answers); };
   const back = () => { if (isTransitioning) return; setStep(s=>Math.max(0,s-1)); };
 
   return (
@@ -535,10 +538,18 @@ function Onboarding({ onComplete }) {
             onBlur={e=>{e.target.style.borderColor=C.border;e.target.style.boxShadow=SHADOW.card;}}
             autoFocus
           />
+          {q.key==="allergies"&&answers.allergies.trim().length>0&&(
+            <div onClick={()=>setAllergyConsent(v=>!v)} style={{ display:"flex", alignItems:"flex-start", gap:12, marginTop:16, padding:"14px 16px", background:C.card, border:`1.5px solid ${allergyConsent?C.clay:C.border}`, borderRadius:R.md, cursor:"pointer", transition:"border-color 0.15s ease" }}>
+              <div style={{ width:22, height:22, borderRadius:7, border:`2px solid ${allergyConsent?C.clay:C.border}`, background:allergyConsent?C.clay:"transparent", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, marginTop:1, transition:"all 0.15s" }}>
+                {allergyConsent&&<Icon name="check" size={12} color="#fff"/>}
+              </div>
+              <p style={{ fontSize:13, color:C.walnut, margin:0, lineHeight:1.5, textAlign:"left" }}>{t("onboarding.allergyConsent")}</p>
+            </div>
+          )}
         </div>
 
         <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-          <button onClick={next} disabled={isTransitioning} className="btn-press" style={{ width:"100%", padding:"17px 0", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:isTransitioning?"default":"pointer", fontFamily:"inherit", boxShadow:SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center", gap:8 }}>
+          <button onClick={next} disabled={!canContinue} className="btn-press" style={{ width:"100%", padding:"17px 0", background:btnBg(), color:"#fff", border:"none", borderRadius:R.md, fontSize:15, fontWeight:800, cursor:canContinue?"pointer":"default", fontFamily:"inherit", boxShadow:SHADOW.button, display:"flex", alignItems:"center", justifyContent:"center", gap:8, opacity:canContinue?1:0.55 }}>
             {displayStep===questions.length-1?t("onboarding.almostThere"):t("onboarding.continue")}
             <Icon name="chevronRight" size={18} color="#fff" />
           </button>

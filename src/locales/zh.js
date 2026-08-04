@@ -40,6 +40,7 @@ export const zh = {
     familySizeSub: "包括你自己和孩子们",
     allergiesTitle: "有没有过敏或特殊饮食需求？",
     allergiesSub: "我们会完全为你避开",
+    allergyConsent: "我同意 Nourishly 及其人工智能提供商处理这些与健康相关的信息，以便为我个性化定制膳食计划。",
     cookTimeTitle: "平日晚上你有多少时间做饭？",
     cookTimeSub: "我们会按这个时间为你匹配每一道菜",
     continue: "继续",

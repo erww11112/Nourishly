@@ -41,6 +41,7 @@ export const en = {
     familySizeSub: "Including yourself and any children",
     allergiesTitle: "Any allergies or dietary needs?",
     allergiesSub: "We'll work around them completely",
+    allergyConsent: "I consent to Nourishly and its AI provider processing this health-related information to personalize my meal plans.",
     cookTimeTitle: "How long to cook on a weeknight?",
     cookTimeSub: "We'll match every recipe to this",
     continue: "Continue",

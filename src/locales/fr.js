@@ -40,6 +40,7 @@ export const fr = {
     familySizeSub: "En te comptant toi et tes enfants",
     allergiesTitle: "Des allergies ou besoins alimentaires particuliers ?",
     allergiesSub: "On en tiendra compte à chaque fois",
+    allergyConsent: "J'accepte que Nourishly et son fournisseur d'IA traitent ces informations relatives à la santé pour personnaliser mes plans de repas.",
     cookTimeTitle: "Combien de temps as-tu pour cuisiner en semaine ?",
     cookTimeSub: "On adaptera chaque recette à ce temps",
     continue: "Continuer",
