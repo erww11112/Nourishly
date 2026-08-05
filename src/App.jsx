@@ -349,6 +349,155 @@ function assignWeekImages(days) {
   return result;
 }
 
+// ── Legal documents ────────────────────────────────────────────────────────
+// Verbatim content from the finalized legal draft — do not paraphrase or
+// shorten. Placeholders filled per Miguel's instructions: contact email is a
+// literal placeholder pending a real support address, "last updated" is the
+// date this was wired up, governing law is Portugal, and the operator name
+// is "Nourishly" pending a formal business registration decision.
+const LEGAL_CONTACT_EMAIL = "[replace with Miguel's actual support email once decided]";
+const LEGAL_LAST_UPDATED = "August 5, 2026";
+
+const LEGAL_DOCS = {
+  privacy: {
+    titleKey: "profile.legalPrivacyPolicy",
+    blocks: [
+      { type:"p", text:`Last updated: ${LEGAL_LAST_UPDATED}` },
+      { type:"h", text:"Who we are" },
+      { type:"p", text:`Nourishly is operated by Nourishly. For any privacy questions or requests, contact us at ${LEGAL_CONTACT_EMAIL}.` },
+      { type:"h", text:"What we collect" },
+      { type:"ul", items:[
+        "Account information: name, email address",
+        "Preferences: family size, allergies/dietary restrictions, cooking time preference",
+        "Usage data: meal plans generated, meals marked as cooked, subscription status",
+        "Payment information: handled entirely by Stripe — Nourishly does not store your card details",
+      ]},
+      { type:"h", text:"Allergy and health information (special category data)" },
+      { type:"p", text:`Allergy and dietary restriction information is treated as special category personal data under GDPR. We only collect and use this information with your explicit, separate consent, captured through a dedicated confirmation step when you provide this information — not bundled with your general acceptance of these Terms or Privacy Policy. You may withdraw this consent at any time by contacting us at ${LEGAL_CONTACT_EMAIL} or by deleting your account. If you withdraw consent, we will delete this specific data, though this may affect the app's ability to personalize your meal plans.` },
+      { type:"h", text:"How we use your data" },
+      { type:"ul", items:[
+        "To generate personalized meal plans",
+        "To send you weekly reminder emails (you can opt out at any time)",
+        "To manage your subscription, if you upgrade to Nourishly Plus",
+        "To improve the app and understand how it's used",
+      ]},
+      { type:"h", text:"AI processing — important" },
+      { type:"p", text:"To generate your meal plans, Nourishly sends relevant information (such as family size, allergies, dietary preferences, and cooking time) to Anthropic (the maker of Claude, the AI model we use) for processing. This data is used solely to generate your meal plan and is subject to Anthropic's own data handling practices. We do not send your name, email, or payment information to Anthropic." },
+      { type:"h", text:"Where your data is stored" },
+      { type:"ul", items:[
+        "Account and app data: Supabase",
+        "Payment processing: Stripe (Nourishly never sees or stores your card details)",
+        "Email delivery: Resend",
+        "Meal plan generation: Anthropic (Claude API)",
+      ]},
+      { type:"h", text:"Your rights (under GDPR and similar laws)" },
+      { type:"ul", items:[
+        "Access: you may request a copy of the personal data we hold about you",
+        "Correction: you may ask us to correct inaccurate data",
+        "Deletion: you may delete your account and all associated data at any time",
+        "Withdrawal of consent: you may withdraw consent for allergy/health data processing at any time, as described above",
+        "Data portability: you may request your data in a portable format",
+      ]},
+      { type:"p", text:`To exercise any of these rights, contact us at ${LEGAL_CONTACT_EMAIL}.` },
+      { type:"h", text:"Data retention" },
+      { type:"p", text:"We retain your data for as long as your account is active. If you delete your account, your personal data is removed from our systems, except where we are required to retain certain records by law (e.g. payment records for tax purposes)." },
+      { type:"h", text:"Cookies and tracking" },
+      { type:"p", text:"[To be completed based on actual analytics/tracking tools used, if any]" },
+      { type:"h", text:"Children's privacy" },
+      { type:"p", text:"Nourishly is not intended for use by children under 16. We do not knowingly collect data from children." },
+      { type:"p", text:"We do not sell your personal data to third parties." },
+      { type:"h", text:"Changes to this policy" },
+      { type:"p", text:"We may update this policy from time to time. We will notify you of significant changes via email or in-app notice." },
+    ],
+  },
+  terms: {
+    titleKey: "profile.legalTermsOfService",
+    blocks: [
+      { type:"p", text:`Last updated: ${LEGAL_LAST_UPDATED}` },
+      { type:"p", text:"By creating an account or using Nourishly, you agree to these Terms of Service. If you do not agree, please do not use the app." },
+      { type:"h", text:"What Nourishly is" },
+      { type:"p", text:"Nourishly is an AI-powered meal planning tool that generates dinner suggestions, recipes, and shopping lists based on information you provide. It is a convenience tool intended to help with everyday meal planning — it is not professional dietary, nutritional, or medical advice. See our Allergy & Health Disclaimer for more detail." },
+      { type:"h", text:"Accounts" },
+      { type:"ul", items:[
+        "You must provide accurate information when creating an account.",
+        "You are responsible for keeping your login credentials secure.",
+        "You must be at least 16 years old to use Nourishly.",
+      ]},
+      { type:"h", text:"Subscriptions and billing" },
+      { type:"ul", items:[
+        "Free tier: limited to 2 meal plan generations per month, with basic nutrition information. Shopping lists and full nutrition breakdowns are not included.",
+        "Nourishly Plus (paid subscription): currently €7.99/month, billed automatically on a recurring basis until cancelled.",
+        "You may cancel your subscription at any time through the app's Manage Subscription option. Your Plus access remains active until the end of your current billing period — cancelling does not result in an immediate loss of access or a partial refund for the current period.",
+        "We reserve the right to change subscription pricing with reasonable advance notice to existing subscribers.",
+      ]},
+      { type:"h", text:"Your responsibilities" },
+      { type:"ul", items:[
+        "You are responsible for the accuracy of the information you provide (family size, allergies, preferences).",
+        "You are responsible for reviewing all suggested meals and ingredients before preparing or consuming them, especially regarding allergies — see our Allergy & Health Disclaimer.",
+        "You agree not to misuse the app (e.g. attempting to access other users' data, disrupting the service, or using it for any unlawful purpose).",
+      ]},
+      { type:"h", text:"Limitation of liability" },
+      { type:"p", text:"To the fullest extent permitted by law, Nourishly and its operator are not liable for any indirect, incidental, or consequential damages arising from your use of the app, including but not limited to any harm resulting from AI-generated meal suggestions. See our Allergy & Health Disclaimer for specifics regarding food safety." },
+      { type:"h", text:"Changes to the service" },
+      { type:"p", text:"We may update, modify, or discontinue features of Nourishly at any time. We will make reasonable efforts to notify users of significant changes." },
+      { type:"h", text:"Termination" },
+      { type:"p", text:"We reserve the right to suspend or terminate accounts that violate these terms." },
+      { type:"h", text:"Governing law" },
+      { type:"p", text:"These Terms of Service are governed by the laws of Portugal." },
+      { type:"h", text:"Contact" },
+      { type:"p", text:`Questions about these terms can be sent to ${LEGAL_CONTACT_EMAIL}.` },
+    ],
+  },
+  disclaimer: {
+    titleKey: "profile.legalAllergyDisclaimer",
+    blocks: [
+      { type:"p", text:"Nourishly uses AI to generate meal suggestions based on the information you provide, including any allergies or dietary restrictions you tell us about." },
+      { type:"p", text:"Please read this carefully:" },
+      { type:"ul", items:[
+        "Nourishly is not a medical or dietary advice service. Meal suggestions are generated by AI and, while we instruct it to respect the allergies and preferences you provide, AI-generated content may occasionally contain inaccuracies.",
+        "It is your sole responsibility to review every ingredient and recipe yourself before cooking or eating any suggested meal — especially if you or a family member has a serious allergy or medical dietary requirement.",
+        "Nourishly is not liable for any allergic reaction, illness, or harm resulting from meals generated or suggested through the app.",
+        "If you or a family member has a severe or life-threatening allergy, please consult a doctor or registered dietitian for meal planning, rather than relying solely on this app.",
+        "You should always consult a licensed doctor, registered dietitian, or health professional before making significant changes to your or your family's diet.",
+      ]},
+      { type:"p", text:"By using Nourishly, you acknowledge and accept this disclaimer." },
+    ],
+  },
+};
+
+// ── Legal document screen — full text with a back button to Profile ────────
+function LegalDocScreen({ docId, onBack }) {
+  const t = useT();
+  const doc = LEGAL_DOCS[docId];
+  if (!doc) return null;
+  return (
+    <div style={{ background:C.bg, minHeight:"100vh", fontFamily:FONT }}>
+      <div style={{ background:C.clay, padding:"18px 20px" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:12, direction:"ltr" }}>
+          <button onClick={onBack} className="btn-press" style={{ background:"rgba(255,255,255,0.1)", border:"1px solid rgba(255,255,255,0.15)", borderRadius:R.sm, width:36, height:36, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, transform:"rotate(180deg)" }}>
+            <Icon name="chevronRight" size={18} color="#fff" />
+          </button>
+          <h1 style={{ color:"#fff", margin:0, fontSize:16, fontWeight:800, lineHeight:1.3 }}>{t(doc.titleKey)}</h1>
+        </div>
+      </div>
+      <div style={{ maxWidth:560, margin:"0 auto", padding:"24px 20px 56px", boxSizing:"border-box" }}>
+        <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, padding:"26px 24px" }}>
+          {doc.blocks.map((block, i) => {
+            if (block.type === "h") return <h2 key={i} style={{ color:C.walnut, fontSize:15, fontWeight:800, margin:i===0?"0 0 12px":"26px 0 12px" }}>{block.text}</h2>;
+            if (block.type === "ul") return (
+              <ul key={i} style={{ margin:"0 0 14px", padding:"0 0 0 20px", color:C.walnut }}>
+                {block.items.map((item, j) => <li key={j} style={{ fontSize:14, lineHeight:1.7, marginBottom:8 }}>{item}</li>)}
+              </ul>
+            );
+            return <p key={i} style={{ fontSize:14, lineHeight:1.7, color:C.walnut, margin:"0 0 14px" }}>{block.text}</p>;
+          })}
+        </div>
+        <button onClick={onBack} className="btn-press" style={{ width:"100%", padding:"14px 0", marginTop:20, background:"none", color:C.walnut, border:`1.5px solid ${C.border}`, borderRadius:R.md, fontSize:14, fontWeight:800, cursor:"pointer", fontFamily:"inherit" }}>{t("profile.legalBack")}</button>
+      </div>
+    </div>
+  );
+}
+
 // ── Fade transition wrapper ────────────────────────────────────────────────
 function Fade({ id, children }) {
   const [visible, setVisible] = useState(false);
@@ -740,6 +889,7 @@ function NourishlyApp() {
   const { lang, setLang } = useLang();
   const [screen, setScreen] = useState("splash");
   const [tab, setTab] = useState("home");
+  const [legalDoc, setLegalDoc] = useState(null);
   const [authMode, setAuthMode] = useState("signup");
   const [authForm, setAuthForm] = useState({ name:"", email:"", password:"" });
   const [session, setSession] = useState(()=>{ try{ return JSON.parse(localStorage.getItem("nourishly_session")||"null"); }catch{ return null; } });
@@ -1117,6 +1267,8 @@ function NourishlyApp() {
     </div>
   );
 
+  if(legalDoc) return <LegalDocScreen docId={legalDoc} onBack={()=>setLegalDoc(null)}/>;
+
   // ── Main app ──
   return (
     <div style={{ background:C.bg, minHeight:"100vh", fontFamily:FONT }}>
@@ -1365,6 +1517,17 @@ function NourishlyApp() {
               <button onClick={handleChangePassword} disabled={pwLoading} className="btn-press" style={{ width:"100%", padding:"13px 0", background:btnBg(pwLoading?C.muted:C.clay), color:"#fff", border:"none", borderRadius:R.md, fontSize:13, fontWeight:800, cursor:pwLoading?"not-allowed":"pointer", fontFamily:"inherit", boxShadow:pwLoading?"none":SHADOW.button }}>
                 {pwLoading ? t("profile.updating") : t("profile.updatePassword")}
               </button>
+            </div>
+
+            {/* ── Legal ── */}
+            <div style={{ background:C.card, borderRadius:R.xl, border:`1px solid ${C.border}`, boxShadow:SHADOW.card, marginBottom:20, overflow:"hidden" }}>
+              <p style={{ fontWeight:800, fontSize:12, color:C.muted, textTransform:"uppercase", letterSpacing:"0.08em", margin:0, padding:"22px 22px 12px" }}>{t("profile.legalTitle")}</p>
+              {[["privacy",t("profile.legalPrivacyPolicy")],["terms",t("profile.legalTermsOfService")],["disclaimer",t("profile.legalAllergyDisclaimer")]].map(([id,label])=>(
+                <button key={id} onClick={()=>setLegalDoc(id)} className="btn-press" style={{ width:"100%", boxSizing:"border-box", padding:"16px 22px", background:"none", border:"none", borderTop:`1px solid ${C.border}`, cursor:"pointer", fontFamily:"inherit", display:"flex", alignItems:"center", justifyContent:"space-between", textAlign:"start" }}>
+                  <span style={{ fontSize:14, fontWeight:700, color:C.walnut }}>{label}</span>
+                  <Icon name="chevronRight" size={16} color={C.muted}/>
+                </button>
+              ))}
             </div>
 
             {/* ── Logout ── */}

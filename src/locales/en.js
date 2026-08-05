@@ -205,6 +205,11 @@ export const en = {
     portalOpenFailedError: "Couldn't open the subscription portal: {error}",
     checkoutFailed: "Couldn't start checkout. Please try again.",
     checkoutFailedError: "Couldn't start checkout: {error}",
+    legalTitle: "Legal",
+    legalPrivacyPolicy: "Privacy Policy",
+    legalTermsOfService: "Terms of Service",
+    legalAllergyDisclaimer: "Allergy & Health Disclaimer",
+    legalBack: "Back to Profile",
   },
 
   // ── Meal card (used in the Plan tab) ─────────────────────────────────────
