@@ -202,8 +202,8 @@ const MEAL_IMAGES = {
     "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800&q=80",
   ],
   fish: [
-    "https://images.unsplash.com/photo-1580476262798-bddd9f4b7369?w=800&q=80",
-    "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=800&q=80",
+    "https://images.unsplash.com/photo-1697748836791-9ddf7e616ece?w=800&q=80",
+    "https://images.unsplash.com/photo-1785502108655-1ede493791bc?w=800&q=80",
   ],
   lamb: [
     "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=800&q=80",
